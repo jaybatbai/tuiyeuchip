@@ -14,10 +14,55 @@ const FIREBASE_CONFIG = {
 const FIRESTORE_DOC_PATH = "scrapbooks/main_scrapbook";
 
 // =========================================================================
+// HÀM TIỆN ÍCH XỬ LÝ NGÀY CHUẨN DD/MM/YYYY
+// =========================================================================
+function parseDateVN(dateStr) {
+  if (!dateStr) return null;
+  const clean = String(dateStr).trim();
+
+  // Định dạng dd/mm/yyyy hoặc dd-mm-yyyy
+  const vnMatch = clean.match(/^(\d{1,2})[\/\-](\d{1,2})[\/\-](\d{4})$/);
+  if (vnMatch) {
+    const day = parseInt(vnMatch[1], 10);
+    const month = parseInt(vnMatch[2], 10) - 1;
+    const year = parseInt(vnMatch[3], 10);
+    const d = new Date(year, month, day);
+    return isNaN(d.getTime()) ? null : d;
+  }
+
+  // Định dạng ISO yyyy-mm-dd (tương thích dữ liệu cũ đã lưu)
+  const isoMatch = clean.match(/^(\d{4})[\/\-](\d{1,2})[\/\-](\d{1,2})$/);
+  if (isoMatch) {
+    const year = parseInt(isoMatch[1], 10);
+    const month = parseInt(isoMatch[2], 10) - 1;
+    const day = parseInt(isoMatch[3], 10);
+    const d = new Date(year, month, day);
+    return isNaN(d.getTime()) ? null : d;
+  }
+
+  return null;
+}
+
+function formatDateVN(dateInput) {
+  if (!dateInput) return "";
+  const d = dateInput instanceof Date ? dateInput : parseDateVN(dateInput);
+  if (!d || isNaN(d.getTime())) return String(dateInput);
+  const dd = String(d.getDate()).padStart(2, "0");
+  const mm = String(d.getMonth() + 1).padStart(2, "0");
+  const yyyy = d.getFullYear();
+  return `${dd}/${mm}/${yyyy}`;
+}
+
+function getTodayVN() {
+  return formatDateVN(new Date());
+}
+
+// =========================================================================
 // DỮ LIỆU MẶC ĐỊNH BAN ĐẦU
 // =========================================================================
 const STICKERS = ["💖", "🥰", "🍓", "🧸", "🧋", "🌸", "✨", "🎀", "🐱", "🍰", "🌙", "💌"];
 const TOPIC_ICONS = ["🏷️", "🍜", "🧋", "🎮", "🎨", "🎵", "💤", "🚫", "🌸", "🧸", "✨", "💬"];
+const COUPON_ICONS = ["🧋", "🎟️", "💆‍♀️", "🛵", "🍦", "🎬", "🧸", "💐", "🫂", "👑"];
 
 const DEFAULT_TOPICS = [
   {
@@ -52,11 +97,48 @@ const DEFAULT_TOPICS = [
   }
 ];
 
+const DEFAULT_COUPONS = [
+  {
+    id: "cp_1",
+    icon: "🧋",
+    title: "1 Ly Trà Sữa Cấp Tốc",
+    desc: "Ship tận nơi bất kể nắng mưa hay giờ giấc",
+    used: false,
+    usedAt: ""
+  },
+  {
+    id: "cp_2",
+    icon: "👑",
+    title: "1 Phiếu Miễn Giận Dỗi",
+    desc: "Dùng để anh phải dỗ dành và chiều em vô điều kiện",
+    used: false,
+    usedAt: ""
+  },
+  {
+    id: "cp_3",
+    icon: "🛵",
+    title: "1 Chuyến Vi Vu Hóng Gió",
+    desc: "Anh làm tài xế đưa em đi bất cứ đâu em thích",
+    used: false,
+    usedAt: ""
+  },
+  {
+    id: "cp_4",
+    icon: "🫂",
+    title: "100 Cái Ôm Sạc Pin",
+    desc: "Kích hoạt ngay mỗi khi em thấy mệt mỏi hoặc áp lực",
+    used: false,
+    usedAt: ""
+  }
+];
+
 const DEFAULT_DATA = {
   profile: {
     title: "Góc Nhỏ Về Chip 💖",
     subtitle: "Nơi lưu giữ những điều đáng yêu nhất về em mỗi ngày",
-    startDate: "2025-01-01",
+    startDate: "01/01/2025",
+    eventName: "Kỷ niệm đặc biệt ✨",
+    eventDate: "01/01/2027",
     adminPassword: "1234"
   },
   letter: {
@@ -64,24 +146,29 @@ const DEFAULT_DATA = {
     sign: "— Thương em thật nhiều ❤️"
   },
   topics: DEFAULT_TOPICS,
+  coupons: DEFAULT_COUPONS,
   memories: [
     {
       id: "m1",
       title: "Nụ cười làm anh đổ gục từ lần đầu",
-      date: "2025-01-01",
+      date: "01/01/2025",
       tag: "Kỷ niệm của tụi mình",
       sticker: "💖",
       image: "",
-      note: "Hôm đó trời hơi se lạnh, nhưng chỉ cần nhìn thấy em cười là anh thấy ấm áp cả một ngày dài."
+      note: "Hôm đó trời hơi se lạnh, nhưng chỉ cần nhìn thấy em cười là anh thấy ấm áp cả một ngày dài.",
+      gfReaction: "",
+      gfReply: ""
     },
     {
       id: "m2",
       title: "Mỗi lần em tập trung ăn món ngon",
-      date: "2025-02-14",
+      date: "14/02/2025",
       tag: "Thói quen đáng yêu",
       sticker: "🍓",
       image: "",
-      note: "Mắt em sáng rực lên mỗi khi đồ ăn được bưng ra, nhìn cưng không chịu được!"
+      note: "Mắt em sáng rực lên mỗi khi đồ ăn được bưng ra, nhìn cưng không chịu được!",
+      gfReaction: "",
+      gfReply: ""
     }
   ]
 };
@@ -100,9 +187,10 @@ let currentRevealedId = null;
 let selectedSticker = "💖";
 let uploadedImageBase64 = "";
 
-// Topics state
+// Topics & Coupons state
 let activeTopicId = "topic_nicknames";
 let selectedTopicIcon = "🏷️";
+let selectedCouponIcon = "🧋";
 
 // =========================================================================
 // KHỞI TẠO & KẾT NỐI FIREBASE CLOUD
@@ -112,6 +200,7 @@ function initApp() {
   createFloatingHearts();
   renderStickerPicker();
   renderTopicIconPicker();
+  renderCouponIconPicker();
 
   try {
     if (FIREBASE_CONFIG && FIREBASE_CONFIG.apiKey && !FIREBASE_CONFIG.apiKey.includes("YOUR_")) {
@@ -149,6 +238,7 @@ function listenToCloudData() {
           profile: { ...DEFAULT_DATA.profile, ...(remote.profile || {}) },
           letter: { ...DEFAULT_DATA.letter, ...(remote.letter || {}) },
           topics: Array.isArray(remote.topics) ? remote.topics : DEFAULT_TOPICS,
+          coupons: Array.isArray(remote.coupons) ? remote.coupons : DEFAULT_COUPONS,
           memories: Array.isArray(remote.memories) ? remote.memories : DEFAULT_DATA.memories
         };
       } else {
@@ -172,7 +262,9 @@ function loadLocalFallback() {
       appData = {
         ...DEFAULT_DATA,
         ...parsed,
-        topics: Array.isArray(parsed.topics) ? parsed.topics : DEFAULT_TOPICS
+        profile: { ...DEFAULT_DATA.profile, ...(parsed.profile || {}) },
+        topics: Array.isArray(parsed.topics) ? parsed.topics : DEFAULT_TOPICS,
+        coupons: Array.isArray(parsed.coupons) ? parsed.coupons : DEFAULT_COUPONS
       };
     } catch (e) {}
   }
@@ -203,6 +295,7 @@ function refreshAllUI() {
   renderProfile();
   renderLetter();
   renderTopicsSection();
+  renderCouponsSection();
   updateMysteryDeckStats();
   renderAdminManageList();
   lucide.createIcons();
@@ -212,11 +305,39 @@ function renderProfile() {
   document.getElementById("display-title").textContent = appData.profile.title || "Góc Nhỏ Về Em 💖";
   document.getElementById("display-subtitle").textContent = appData.profile.subtitle || "";
 
-  const start = new Date(appData.profile.startDate || "2025-01-01");
   const now = new Date();
-  const diffTime = Math.max(0, now - start);
+  const todayStart = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+
+  // Số ngày yêu nhau (dd/mm/yyyy)
+  const start = parseDateVN(appData.profile.startDate) || new Date(2025, 0, 1);
+  const diffTime = Math.max(0, todayStart - start);
   const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
   document.getElementById("days-counter").textContent = diffDays.toLocaleString("vi-VN");
+  document.getElementById("start-date-display").textContent = `Từ ${formatDateVN(start)}`;
+
+  // Đếm ngược sự kiện đặc biệt (dd/mm/yyyy)
+  const eventLabelEl = document.getElementById("special-event-label");
+  const eventDaysEl = document.getElementById("special-event-days");
+  const eventDateDisplayEl = document.getElementById("special-event-date-display");
+
+  const eventName = appData.profile.eventName || "Ngày đặc biệt ✨";
+  const targetDate = parseDateVN(appData.profile.eventDate);
+
+  eventLabelEl.textContent = eventName;
+  if (targetDate) {
+    eventDateDisplayEl.textContent = `Ngày ${formatDateVN(targetDate)}`;
+    const remainDays = Math.round((targetDate - todayStart) / (1000 * 60 * 60 * 24));
+    if (remainDays > 0) {
+      eventDaysEl.textContent = `Còn ${remainDays} ngày nữa`;
+    } else if (remainDays === 0) {
+      eventDaysEl.textContent = "Chính là hôm nay! 🎉";
+    } else {
+      eventDaysEl.textContent = `Đã qua ${Math.abs(remainDays)} ngày`;
+    }
+  } else {
+    eventDateDisplayEl.textContent = "";
+    eventDaysEl.textContent = "Đang chờ bật mí";
+  }
 }
 
 function renderLetter() {
@@ -473,7 +594,157 @@ async function deleteTopic(topicId) {
 }
 
 // =========================================================================
-// SÂN KHẤU RÚT THẺ BÍ MẬT (MYSTERY DECK)
+// PHIẾU ĐỔI QUÀ TÌNH YÊU (LOVE COUPONS)
+// =========================================================================
+function renderCouponsSection() {
+  const grid = document.getElementById("coupons-grid");
+  const coupons = appData.coupons || [];
+  const isEdit = currentMode === "edit";
+
+  if (coupons.length === 0) {
+    grid.innerHTML = `<p class="col-span-full text-center text-xs text-gray-400 py-4">Chưa có phiếu đổi quà nào.</p>`;
+    return;
+  }
+
+  grid.innerHTML = coupons
+    .map((cp) => {
+      const isUsed = Boolean(cp.used);
+      return `
+        <div class="relative rounded-2xl p-4 border-2 border-dashed transition-all ${
+          isUsed
+            ? "bg-gray-50 border-gray-200 opacity-80"
+            : "bg-gradient-to-br from-pink-50/90 to-purple-50/80 border-pink-300 shadow-sm hover:shadow-md"
+        }">
+          <div class="flex items-start justify-between gap-2">
+            <div class="flex items-center gap-2.5">
+              <span class="text-2xl select-none">${cp.icon || "🎟️"}</span>
+              <div>
+                <h4 class="font-bold text-sm text-gray-800 ${isUsed ? "line-through text-gray-500" : ""}">
+                  ${escapeHtml(cp.title)}
+                </h4>
+                <p class="text-[11px] text-gray-500 mt-0.5">${escapeHtml(cp.desc || "")}</p>
+              </div>
+            </div>
+
+            ${
+              isEdit
+                ? `<button onclick="deleteCoupon('${cp.id}')" class="p-1 rounded-lg text-rose-400 hover:bg-rose-100" title="Xóa phiếu">
+                     <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
+                   </button>`
+                : ""
+            }
+          </div>
+
+          <div class="mt-3 pt-2.5 border-t border-pink-200/60 flex items-center justify-between gap-2">
+            ${
+              isUsed
+                ? `<span class="text-[11px] font-bold text-emerald-600 flex items-center gap-1">
+                     <i data-lucide="check-circle-2" class="w-3.5 h-3.5"></i> Đã dùng (${escapeHtml(formatDateVN(cp.usedAt) || "Vừa xong")})
+                   </span>
+                   ${
+                     isEdit
+                       ? `<button onclick="toggleCouponStatus('${cp.id}', false)" class="px-2.5 py-1 rounded-lg bg-white text-purple-600 border border-purple-200 text-[11px] font-bold hover:bg-purple-50">
+                            Tặng lại
+                          </button>`
+                       : ""
+                   }`
+                : `<span class="text-[11px] font-semibold text-pink-500">Chưa sử dụng</span>
+                   <button onclick="redeemCoupon('${cp.id}')" class="px-3 py-1 rounded-full bg-pink-500 text-white text-[11px] font-bold shadow-sm hover:bg-pink-600 transition">
+                     Sử Dụng Ngay ✨
+                   </button>`
+            }
+          </div>
+        </div>
+      `;
+    })
+    .join("");
+  lucide.createIcons();
+}
+
+async function redeemCoupon(couponId) {
+  const cp = appData.coupons.find((c) => c.id === couponId);
+  if (!cp || cp.used) return;
+
+  if (!confirm(`Em muốn kích hoạt phiếu "${cp.title}" ngay bây giờ chứ?`)) return;
+
+  cp.used = true;
+  cp.usedAt = getTodayVN();
+  triggerHeartConfetti();
+  await saveAppData();
+}
+
+async function toggleCouponStatus(couponId, usedState) {
+  const cp = appData.coupons.find((c) => c.id === couponId);
+  if (!cp) return;
+  cp.used = usedState;
+  cp.usedAt = usedState ? getTodayVN() : "";
+  await saveAppData();
+}
+
+function renderCouponIconPicker() {
+  const picker = document.getElementById("coupon-icon-picker");
+  picker.innerHTML = COUPON_ICONS.map(
+    (ic) => `
+    <button type="button" onclick="selectCouponIcon('${ic}')" data-cicon="${ic}" class="cicon-btn w-8 h-8 rounded-lg flex items-center justify-center text-lg hover:bg-white transition ${
+      ic === selectedCouponIcon ? "bg-white ring-2 ring-purple-400 shadow-sm" : ""
+    }">
+      ${ic}
+    </button>
+  `
+  ).join("");
+}
+
+function selectCouponIcon(ic) {
+  selectedCouponIcon = ic;
+  document.querySelectorAll(".cicon-btn").forEach((btn) => {
+    btn.className =
+      btn.dataset.cicon === ic
+        ? "cicon-btn w-8 h-8 rounded-lg flex items-center justify-center text-lg bg-white ring-2 ring-purple-400 shadow-sm"
+        : "cicon-btn w-8 h-8 rounded-lg flex items-center justify-center text-lg hover:bg-white transition";
+  });
+}
+
+function openCouponModal() {
+  document.getElementById("input-coupon-title").value = "";
+  document.getElementById("input-coupon-desc").value = "";
+  selectCouponIcon("🧋");
+  document.getElementById("modal-coupon").classList.remove("hidden");
+}
+
+function closeCouponModal() {
+  document.getElementById("modal-coupon").classList.add("hidden");
+}
+
+async function saveCoupon() {
+  const title = document.getElementById("input-coupon-title").value.trim();
+  const desc = document.getElementById("input-coupon-desc").value.trim();
+  if (!title) {
+    alert("Anh nhớ nhập tên phiếu quà tặng nhé!");
+    return;
+  }
+
+  appData.coupons = appData.coupons || [];
+  appData.coupons.push({
+    id: "cp_" + Date.now(),
+    icon: selectedCouponIcon,
+    title,
+    desc,
+    used: false,
+    usedAt: ""
+  });
+
+  closeCouponModal();
+  await saveAppData();
+}
+
+async function deleteCoupon(couponId) {
+  if (!confirm("Anh muốn xóa phiếu quà tặng này?")) return;
+  appData.coupons = appData.coupons.filter((c) => c.id !== couponId);
+  await saveAppData();
+}
+
+// =========================================================================
+// SÂN KHẤU RÚT THẺ BÍ MẬT & PHẢN HỒI CỦA EM (MYSTERY DECK)
 // =========================================================================
 function updateMysteryDeckStats() {
   const total = appData.memories.length;
@@ -539,13 +810,37 @@ function renderRevealedCard(mem, animate = true) {
   const slot = document.getElementById("revealed-card-slot");
   stage.classList.remove("hidden");
 
-  const formattedDate = mem.date
-    ? new Date(mem.date).toLocaleDateString("vi-VN", { day: "2-digit", month: "2-digit", year: "numeric" })
-    : "";
+  const formattedDate = formatDateVN(mem.date);
 
   const imageHtml = mem.image
     ? `<div class="mb-4 rounded-xl overflow-hidden bg-pink-50 border border-pink-100">
          <img src="${mem.image}" alt="${escapeHtml(mem.title)}" class="w-full max-h-80 object-cover mx-auto" />
+       </div>`
+    : "";
+
+  const reactions = ["🥰", "😂", "🥹", "💖"];
+  const reactionButtonsHtml = reactions
+    .map((emo) => {
+      const isSelected = mem.gfReaction === emo;
+      return `
+        <button
+          onclick="setMemoryReaction('${mem.id}', '${emo}')"
+          class="w-8 h-8 rounded-full flex items-center justify-center text-base transition ${
+            isSelected
+              ? "bg-pink-500 text-white scale-110 shadow-sm ring-2 ring-pink-200"
+              : "bg-pink-50 hover:bg-pink-100"
+          }"
+          title="Thả cảm xúc"
+        >
+          ${emo}
+        </button>
+      `;
+    })
+    .join("");
+
+  const replyDisplayHtml = mem.gfReply
+    ? `<div class="mt-2.5 p-2.5 rounded-xl bg-amber-50/80 border border-amber-100 text-xs text-amber-900 flex items-start justify-between gap-2">
+         <div><span class="font-bold text-pink-600">Lời nhắn của em:</span> ${escapeHtml(mem.gfReply)}</div>
        </div>`
     : "";
 
@@ -571,8 +866,44 @@ function renderRevealedCard(mem, animate = true) {
       <p class="font-note text-2xl sm:text-[26px] text-gray-700 mt-3 leading-relaxed whitespace-pre-line">
         "${escapeHtml(mem.note)}"
       </p>
+
+      <!-- Girlfriend Interactive Reaction & Note Box -->
+      <div class="mt-4 pt-3 border-t border-pink-100">
+        <div class="flex flex-wrap items-center justify-between gap-2">
+          <div class="flex items-center gap-1.5">
+            <span class="text-[11px] font-bold text-pink-400 mr-1">Cảm xúc của em:</span>
+            ${reactionButtonsHtml}
+          </div>
+          <button
+            onclick="replyToMemory('${mem.id}')"
+            class="text-xs font-bold text-pink-500 hover:text-pink-600 flex items-center gap-1 px-2.5 py-1 rounded-full bg-pink-50 hover:bg-pink-100 transition"
+          >
+            <i data-lucide="message-circle-heart" class="w-3.5 h-3.5"></i>
+            <span>${mem.gfReply ? "Sửa lời nhắn" : "Nhắn lại cho anh"}</span>
+          </button>
+        </div>
+        ${replyDisplayHtml}
+      </div>
     </div>
   `;
+  lucide.createIcons();
+}
+
+async function setMemoryReaction(memId, emoji) {
+  const mem = appData.memories.find((m) => m.id === memId);
+  if (!mem) return;
+  mem.gfReaction = mem.gfReaction === emoji ? "" : emoji;
+  if (mem.gfReaction) triggerHeartConfetti();
+  await saveAppData();
+}
+
+async function replyToMemory(memId) {
+  const mem = appData.memories.find((m) => m.id === memId);
+  if (!mem) return;
+  const text = prompt("Em muốn nhắn lại điều gì về kỷ niệm này cho anh biết không?", mem.gfReply || "");
+  if (text === null) return;
+  mem.gfReply = text.trim();
+  await saveAppData();
 }
 
 // =========================================================================
@@ -595,6 +926,7 @@ function switchMode(mode) {
     adminEls.forEach((el) => el.classList.remove("hidden"));
   }
   renderTopicsSection();
+  renderCouponsSection();
   lucide.createIcons();
 }
 
@@ -649,8 +981,11 @@ function renderAdminManageList() {
         <div class="flex items-center gap-2.5 min-w-0">
           <span class="text-xl shrink-0">${m.sticker || "💖"}</span>
           <div class="truncate">
-            <div class="text-xs font-bold text-gray-800 truncate">${escapeHtml(m.title)}</div>
+            <div class="text-xs font-bold text-gray-800 truncate">
+              ${escapeHtml(m.title)} ${m.gfReaction ? `<span class="ml-1">${m.gfReaction}</span>` : ""}
+            </div>
             <div class="text-[11px] text-gray-500 truncate">${escapeHtml(m.note)}</div>
+            ${m.gfReply ? `<div class="text-[11px] font-semibold text-amber-700 truncate mt-0.5">💌 Em nhắn: "${escapeHtml(m.gfReply)}"</div>` : ""}
           </div>
         </div>
         <div class="flex items-center gap-1.5 shrink-0">
@@ -700,7 +1035,7 @@ function openMemoryModal(id = null) {
     if (!mem) return;
     document.getElementById("memory-modal-title").innerHTML = `<i data-lucide="pencil" class="w-5 h-5"></i> Chỉnh Sửa Thẻ Bí Mật`;
     document.getElementById("mem-title").value = mem.title || "";
-    document.getElementById("mem-date").value = mem.date || "";
+    document.getElementById("mem-date").value = formatDateVN(mem.date) || "";
     document.getElementById("mem-tag").value = mem.tag || "Kỷ niệm của tụi mình";
     document.getElementById("mem-note").value = mem.note || "";
     selectSticker(mem.sticker || "💖");
@@ -708,7 +1043,7 @@ function openMemoryModal(id = null) {
   } else {
     document.getElementById("memory-modal-title").innerHTML = `<i data-lucide="camera" class="w-5 h-5"></i> Thêm Thẻ Bí Mật`;
     document.getElementById("mem-title").value = "";
-    document.getElementById("mem-date").value = new Date().toISOString().split("T")[0];
+    document.getElementById("mem-date").value = getTodayVN();
     document.getElementById("mem-tag").value = "Thói quen đáng yêu";
     document.getElementById("mem-note").value = "";
     selectSticker("💖");
@@ -771,7 +1106,7 @@ function clearUploadedImage() {
 async function saveMemory() {
   const title = document.getElementById("mem-title").value.trim();
   const note = document.getElementById("mem-note").value.trim();
-  const date = document.getElementById("mem-date").value;
+  const rawDate = document.getElementById("mem-date").value.trim();
   const tag = document.getElementById("mem-tag").value;
   const editId = document.getElementById("edit-memory-id").value;
 
@@ -780,13 +1115,15 @@ async function saveMemory() {
     return;
   }
 
+  const formattedDate = rawDate ? formatDateVN(rawDate) : getTodayVN();
+
   if (editId) {
     const idx = appData.memories.findIndex((m) => m.id === editId);
     if (idx !== -1) {
       appData.memories[idx] = {
         ...appData.memories[idx],
         title,
-        date,
+        date: formattedDate,
         tag,
         sticker: selectedSticker,
         image: uploadedImageBase64,
@@ -797,11 +1134,13 @@ async function saveMemory() {
     const newMem = {
       id: "mem_" + Date.now(),
       title,
-      date,
+      date: formattedDate,
       tag,
       sticker: selectedSticker,
       image: uploadedImageBase64,
-      note
+      note,
+      gfReaction: "",
+      gfReply: ""
     };
     appData.memories.unshift(newMem);
     unseenIds.push(newMem.id);
@@ -823,8 +1162,10 @@ async function deleteMemory(id) {
 function openProfileModal() {
   document.getElementById("input-title").value = appData.profile.title || "";
   document.getElementById("input-subtitle").value = appData.profile.subtitle || "";
-  document.getElementById("input-start-date").value = appData.profile.startDate || "2025-01-01";
-  document.getElementById("input-new-password").value = appData.profile.adminPassword || "1234";
+  document.getElementById("input-start-date").value = formatDateVN(appData.profile.startDate) || "01/01/2025";
+  document.getElementById("input-event-name").value = appData.profile.eventName || "";
+  document.getElementById("input-event-date").value = formatDateVN(appData.profile.eventDate) || "";
+  document.getElementById("input-new-password").value = appData.profile.adminPassword || "";
   document.getElementById("modal-profile").classList.remove("hidden");
 }
 
@@ -833,13 +1174,30 @@ function closeProfileModal() {
 }
 
 async function saveProfile() {
+  const rawStart = document.getElementById("input-start-date").value.trim();
+  const rawEvent = document.getElementById("input-event-date").value.trim();
+
+  if (rawStart && !parseDateVN(rawStart)) {
+    alert("Ngày bắt đầu yêu nhau chưa đúng định dạng dd/mm/yyyy (VD: 01/01/2025)");
+    return;
+  }
+
+  if (rawEvent && !parseDateVN(rawEvent)) {
+    alert("Ngày sự kiện đặc biệt chưa đúng định dạng dd/mm/yyyy (VD: 25/12/2026)");
+    return;
+  }
+
   appData.profile.title = document.getElementById("input-title").value.trim() || "Góc Nhỏ Về Em 💖";
   appData.profile.subtitle = document.getElementById("input-subtitle").value.trim();
-  appData.profile.startDate = document.getElementById("input-start-date").value || "2025-01-01";
+  appData.profile.startDate = rawStart ? formatDateVN(rawStart) : "01/01/2025";
+  appData.profile.eventName = document.getElementById("input-event-name").value.trim() || "Ngày đặc biệt ✨";
+  appData.profile.eventDate = rawEvent ? formatDateVN(rawEvent) : "";
+
   const newPass = document.getElementById("input-new-password").value.trim();
   if (newPass) {
     appData.profile.adminPassword = newPass;
   }
+
   closeProfileModal();
   await saveAppData();
 }
