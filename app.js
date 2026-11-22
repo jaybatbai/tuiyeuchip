@@ -152,7 +152,7 @@ const DEFAULT_DATA = {
     adminPassword: "1234"
   },
   letter: {
-    body: "Gửi em bé của anh,\n\nAnh làm góc nhỏ này để mỗi khi em thấy mệt mỏi hay buồn chán, em có thể mở ra và thấy mình được yêu thương nhiều đến nhường nào.\n\nCảm ơn em vì đã luôn ở bên cạnh và làm cho những ngày bình thường của anh trở nên đặc biệt hơn bao giờ hết!",
+    body: "Gửi Chip,\n\nAnh làm góc nhỏ này để mỗi khi em thấy mệt mỏi hay buồn chán, em có thể mở ra và thấy mình được yêu thương nhiều đến nhường nào.\n\nAnh không giỏi thể hiện tình cảm bằng lời nói, mong những thứ nhỏ bé này sẽ giúp em cảm nhận được tình cảm của anh.\n\nCảm ơn em vì đã luôn ở bên cạnh và làm cho những ngày bình thường của anh trở nên đặc biệt hơn bao giờ hết!",
     sign: "— Thương em thật nhiều ❤️"
   },
   topics: DEFAULT_TOPICS,
@@ -454,7 +454,7 @@ function renderLetter() {
 }
 
 // =========================================================================
-// CÁC MỤC CHỦ ĐỀ VỀ EM (TOPIC NOTEBOOK)
+// CÁC MỤC CHỦ ĐỀ VỀ EM (TOPIC NOTEBOOK) - HỖ TRỢ SẮP XẾP VỊ TRÍ
 // =========================================================================
 function renderTopicsSection() {
   const topics = appData.topics || [];
@@ -472,7 +472,9 @@ function renderTopicsSection() {
     return;
   }
 
-  if (!topics.some((t) => t.id === activeTopicId)) {
+  let activeIndex = topics.findIndex((t) => t.id === activeTopicId);
+  if (activeIndex === -1) {
+    activeIndex = 0;
     activeTopicId = topics[0].id;
   }
 
@@ -495,12 +497,38 @@ function renderTopicsSection() {
     })
     .join("");
 
-  const activeTopic = topics.find((t) => t.id === activeTopicId);
+  const activeTopic = topics[activeIndex];
   const items = activeTopic.items || [];
+  const canMoveTabLeft = activeIndex > 0;
+  const canMoveTabRight = activeIndex < topics.length - 1;
 
   const adminHeaderControls = isEdit
     ? `
-      <div class="flex items-center gap-1.5">
+      <div class="flex items-center gap-1">
+        <button
+          onclick="moveTopic(${activeIndex}, -1)"
+          ${!canMoveTabLeft ? "disabled" : ""}
+          class="p-1.5 rounded-lg border transition ${
+            canMoveTabLeft
+              ? "bg-white text-pink-600 hover:bg-pink-100 border-pink-200"
+              : "bg-gray-50 text-gray-300 border-gray-100 cursor-not-allowed"
+          }"
+          title="Di chuyển mục sang trái"
+        >
+          <i data-lucide="arrow-left" class="w-3.5 h-3.5"></i>
+        </button>
+        <button
+          onclick="moveTopic(${activeIndex}, 1)"
+          ${!canMoveTabRight ? "disabled" : ""}
+          class="p-1.5 rounded-lg border transition ${
+            canMoveTabRight
+              ? "bg-white text-pink-600 hover:bg-pink-100 border-pink-200"
+              : "bg-gray-50 text-gray-300 border-gray-100 cursor-not-allowed"
+          }"
+          title="Di chuyển mục sang phải"
+        >
+          <i data-lucide="arrow-right" class="w-3.5 h-3.5"></i>
+        </button>
         <button onclick="openTopicModal('${activeTopic.id}')" class="p-1.5 rounded-lg bg-pink-50 text-pink-600 hover:bg-pink-100 border border-pink-200" title="Đổi tên / icon mục">
           <i data-lucide="pencil" class="w-3.5 h-3.5"></i>
         </button>
@@ -514,9 +542,11 @@ function renderTopicsSection() {
   const itemsListHtml =
     items.length > 0
       ? items
-          .map(
-            (itemText, idx) => `
-          <li class="flex items-start justify-between gap-3 p-3 rounded-2xl bg-pink-50/50 border border-pink-100/80 hover:bg-pink-50 transition">
+          .map((itemText, idx) => {
+            const canMoveUp = idx > 0;
+            const canMoveDown = idx < items.length - 1;
+            return `
+          <li class="flex items-start justify-between gap-2 p-3 rounded-2xl bg-pink-50/50 border border-pink-100/80 hover:bg-pink-50 transition">
             <div class="flex items-start gap-2.5">
               <span class="text-pink-500 font-bold text-sm mt-0.5">✦</span>
               <span class="text-sm text-gray-700 font-medium leading-relaxed">${escapeHtml(itemText)}</span>
@@ -524,7 +554,27 @@ function renderTopicsSection() {
             ${
               isEdit
                 ? `
-              <div class="flex items-center gap-1 shrink-0">
+              <div class="flex items-center gap-0.5 shrink-0">
+                <button
+                  onclick="moveTopicItem('${activeTopic.id}', ${idx}, -1)"
+                  ${!canMoveUp ? "disabled" : ""}
+                  class="p-1 rounded-md transition ${
+                    canMoveUp ? "text-pink-500 hover:bg-pink-100" : "text-gray-300 cursor-not-allowed"
+                  }"
+                  title="Đưa dòng này lên trên"
+                >
+                  <i data-lucide="arrow-up" class="w-3.5 h-3.5"></i>
+                </button>
+                <button
+                  onclick="moveTopicItem('${activeTopic.id}', ${idx}, 1)"
+                  ${!canMoveDown ? "disabled" : ""}
+                  class="p-1 rounded-md transition ${
+                    canMoveDown ? "text-pink-500 hover:bg-pink-100" : "text-gray-300 cursor-not-allowed"
+                  }"
+                  title="Đưa dòng này xuống dưới"
+                >
+                  <i data-lucide="arrow-down" class="w-3.5 h-3.5"></i>
+                </button>
                 <button onclick="editTopicItem('${activeTopic.id}', ${idx})" class="p-1 rounded-md text-pink-500 hover:bg-pink-100" title="Sửa dòng này">
                   <i data-lucide="edit-2" class="w-3.5 h-3.5"></i>
                 </button>
@@ -536,8 +586,8 @@ function renderTopicsSection() {
                 : ""
             }
           </li>
-        `
-          )
+        `;
+          })
           .join("")
       : `<p class="text-xs text-gray-400 italic py-4 text-center">Mục này chưa có ghi chú nào...</p>`;
 
@@ -563,7 +613,7 @@ function renderTopicsSection() {
 
   panel.innerHTML = `
     <div class="animate-pop-in">
-      <div class="flex items-center justify-between gap-2 mb-3">
+      <div class="flex flex-wrap items-center justify-between gap-2 mb-3">
         <div class="flex items-center gap-2">
           <span class="text-2xl">${activeTopic.icon || "💖"}</span>
           <h4 class="font-bold text-base sm:text-lg text-gray-800">${escapeHtml(activeTopic.name)}</h4>
@@ -585,6 +635,32 @@ function renderTopicsSection() {
 function selectTopicTab(topicId) {
   activeTopicId = topicId;
   renderTopicsSection();
+}
+
+async function moveTopic(index, direction) {
+  const topics = appData.topics || [];
+  const targetIndex = index + direction;
+  if (targetIndex < 0 || targetIndex >= topics.length) return;
+
+  const temp = topics[index];
+  topics[index] = topics[targetIndex];
+  topics[targetIndex] = temp;
+
+  await saveAppData();
+}
+
+async function moveTopicItem(topicId, index, direction) {
+  const topic = appData.topics.find((t) => t.id === topicId);
+  if (!topic || !Array.isArray(topic.items)) return;
+
+  const targetIndex = index + direction;
+  if (targetIndex < 0 || targetIndex >= topic.items.length) return;
+
+  const temp = topic.items[index];
+  topic.items[index] = topic.items[targetIndex];
+  topic.items[targetIndex] = temp;
+
+  await saveAppData();
 }
 
 async function addTopicItem(topicId) {
@@ -736,9 +812,14 @@ function renderCouponsSection() {
 
             ${
               isEdit
-                ? `<button onclick="deleteCoupon('${cp.id}')" class="p-1 rounded-lg text-rose-400 hover:bg-rose-100" title="Xóa phiếu">
-                     <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
-                   </button>`
+                ? `<div class="flex items-center gap-1 shrink-0">
+                     <button onclick="openCouponModal('${cp.id}')" class="p-1.5 rounded-lg text-purple-600 hover:bg-purple-100 transition" title="Chỉnh sửa phiếu">
+                       <i data-lucide="pencil" class="w-3.5 h-3.5"></i>
+                     </button>
+                     <button onclick="deleteCoupon('${cp.id}')" class="p-1.5 rounded-lg text-rose-400 hover:bg-rose-100 transition" title="Xóa phiếu">
+                       <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
+                     </button>
+                   </div>`
                 : ""
             }
           </div>
@@ -812,11 +893,25 @@ function selectCouponIcon(ic) {
   });
 }
 
-function openCouponModal() {
-  document.getElementById("input-coupon-title").value = "";
-  document.getElementById("input-coupon-desc").value = "";
-  selectCouponIcon("🧋");
+function openCouponModal(couponId = null) {
+  document.getElementById("edit-coupon-id").value = couponId || "";
+
+  if (couponId) {
+    const cp = (appData.coupons || []).find((c) => c.id === couponId);
+    if (!cp) return;
+    document.getElementById("coupon-modal-title").innerHTML = `<i data-lucide="pencil" class="w-5 h-5"></i> Chỉnh Sửa Phiếu Đổi Quà`;
+    document.getElementById("input-coupon-title").value = cp.title || "";
+    document.getElementById("input-coupon-desc").value = cp.desc || "";
+    selectCouponIcon(cp.icon || "🧋");
+  } else {
+    document.getElementById("coupon-modal-title").innerHTML = `<i data-lucide="ticket" class="w-5 h-5"></i> Tạo Phiếu Đổi Quà Mới`;
+    document.getElementById("input-coupon-title").value = "";
+    document.getElementById("input-coupon-desc").value = "";
+    selectCouponIcon("🧋");
+  }
+
   document.getElementById("modal-coupon").classList.remove("hidden");
+  lucide.createIcons();
 }
 
 function closeCouponModal() {
@@ -826,20 +921,32 @@ function closeCouponModal() {
 async function saveCoupon() {
   const title = document.getElementById("input-coupon-title").value.trim();
   const desc = document.getElementById("input-coupon-desc").value.trim();
+  const editId = document.getElementById("edit-coupon-id").value;
+
   if (!title) {
     alert("Anh nhớ nhập tên phiếu quà tặng nhé!");
     return;
   }
 
   appData.coupons = appData.coupons || [];
-  appData.coupons.push({
-    id: "cp_" + Date.now(),
-    icon: selectedCouponIcon,
-    title,
-    desc,
-    used: false,
-    usedAt: ""
-  });
+
+  if (editId) {
+    const cp = appData.coupons.find((c) => c.id === editId);
+    if (cp) {
+      cp.title = title;
+      cp.desc = desc;
+      cp.icon = selectedCouponIcon;
+    }
+  } else {
+    appData.coupons.push({
+      id: "cp_" + Date.now(),
+      icon: selectedCouponIcon,
+      title,
+      desc,
+      used: false,
+      usedAt: ""
+    });
+  }
 
   closeCouponModal();
   await saveAppData();
