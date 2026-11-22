@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Góc Nhỏ Về Em ✨</title>
+  <title>Góc Nhỏ Bí Mật 💌</title>
   <!-- Tailwind CSS -->
   <script src="https://cdn.tailwindcss.com"></script>
   <!-- Google Fonts -->
@@ -22,259 +22,306 @@
   <!-- Floating Hearts Container -->
   <div id="hearts-container"></div>
 
-  <!-- Top Navigation / Status Bar -->
-  <nav class="sticky top-0 z-40 bg-white/80 backdrop-blur-md border-b border-pink-100 px-4 py-3">
-    <div class="max-w-3xl mx-auto flex flex-wrap items-center justify-between gap-2">
-      <!-- Cloud Status Badge -->
-      <div id="cloud-status" class="flex items-center gap-1.5 text-xs font-semibold px-3 py-1.5 rounded-full bg-pink-50 text-pink-600 border border-pink-200">
-        <span class="w-2 h-2 rounded-full bg-amber-400 animate-pulse" id="cloud-dot"></span>
-        <span id="cloud-text">Đang kết nối Cloud...</span>
-      </div>
+  <!-- ========================================== -->
+  <!-- MÀN HÌNH CHÀO: PHONG BÌ NIÊM PHONG         -->
+  <!-- ========================================== -->
+  <section id="gate-screen" class="relative z-20 min-h-screen flex items-center justify-center p-4">
+    <div class="max-w-md w-full animate-pop-in">
+      <!-- Sealed Envelope Card -->
+      <div class="bg-white/95 backdrop-blur-md rounded-[32px] p-7 sm:p-9 shadow-2xl border-2 border-pink-200 text-center relative overflow-hidden">
+        <!-- Decorative Top Flap Line -->
+        <div class="absolute top-0 left-0 right-0 h-2 bg-gradient-to-r from-pink-400 via-rose-400 to-pink-400"></div>
 
-      <!-- Mode Switcher & Admin Controls -->
-      <div class="flex items-center gap-2">
-        <button id="btn-mode-view" onclick="switchMode('view')" class="px-3.5 py-1.5 rounded-full text-xs font-bold transition-all bg-pink-500 text-white shadow-sm flex items-center gap-1.5">
-          <i data-lucide="gift" class="w-3.5 h-3.5"></i> Tặng Em
-        </button>
-        <button id="btn-mode-edit" onclick="requestEditMode()" class="px-3.5 py-1.5 rounded-full text-xs font-bold transition-all bg-pink-50 text-pink-600 hover:bg-pink-100 flex items-center gap-1.5">
-          <i data-lucide="lock" id="edit-lock-icon" class="w-3.5 h-3.5"></i> Của Anh
-        </button>
+        <!-- Wax Seal Icon -->
+        <div class="w-20 h-20 mx-auto mb-4 rounded-full bg-gradient-to-br from-rose-400 to-pink-600 text-white flex items-center justify-center shadow-lg ring-4 ring-pink-100">
+          <i data-lucide="mail-heart" class="w-10 h-10"></i>
+        </div>
+
+        <span class="inline-block px-3.5 py-1 rounded-full bg-pink-50 text-pink-500 text-[11px] font-bold uppercase tracking-wider mb-2 border border-pink-100">
+          Bức Thư Được Niêm Phong
+        </span>
+
+        <h1 class="font-handwriting text-4xl sm:text-5xl font-bold text-pink-600 mb-2">
+          Gửi Riêng Cho Em ✨
+        </h1>
+
+        <p class="text-xs sm:text-sm text-gray-500 leading-relaxed mb-6">
+          Có một góc nhỏ bí mật đang chờ em bên trong.<br />
+          Hãy nhập <strong class="text-pink-600">ngày đầu tiên tụi mình yêu nhau</strong> (dd/mm/yyyy) để mở phong bì nhé!
+        </p>
+
+        <!-- Passcode Input -->
+        <div class="space-y-3">
+          <input
+            type="password"
+            id="gate-password-input"
+            placeholder="Nhập mật khẩu mở thư..."
+            class="w-full px-4 py-3.5 rounded-2xl border-2 border-pink-200 focus:outline-none focus:border-pink-500 text-center text-base font-bold tracking-widest text-pink-700 bg-pink-50/40"
+            onkeydown="if(event.key==='Enter') unlockGate()"
+          />
+
+          <p id="gate-error-msg" class="hidden text-xs text-rose-500 font-semibold">
+            Mật khẩu chưa chính xác rồi, thử nhớ lại xem nào! 🥺
+          </p>
+
+          <button
+            onclick="unlockGate()"
+            class="w-full py-3.5 rounded-2xl bg-gradient-to-r from-pink-500 to-rose-500 text-white text-sm font-bold shadow-lg hover:shadow-xl hover:opacity-95 transition flex items-center justify-center gap-2"
+          >
+            <i data-lucide="sparkles" class="w-4 h-4"></i>
+            <span>Mở Phong Bì</span>
+          </button>
+        </div>
+
+        <div class="mt-6 pt-4 border-t border-pink-100/80 text-[11px] text-pink-400 font-medium">
+          Made with ❤️ just for you
+        </div>
       </div>
     </div>
-  </nav>
+  </section>
 
-  <!-- Main Content Wrapper -->
-  <main class="relative z-10 max-w-2xl mx-auto px-4 pt-8">
+  <!-- ========================================== -->
+  <!-- NỘI DUNG CHÍNH (ẨN CHO ĐẾN KHI MỞ KHÓA)    -->
+  <!-- ========================================== -->
+  <div id="main-app-wrapper" class="hidden">
 
-    <!-- Header Profile Section -->
-    <header class="text-center mb-8">
-      <div class="inline-flex items-center gap-2 px-4 py-1 rounded-full bg-pink-100/80 text-pink-600 text-xs font-bold mb-3 shadow-sm">
-        <span>✨ Sổ Tay Bí Mật Dành Riêng Cho Em ✨</span>
-      </div>
-
-      <div class="flex items-center justify-center gap-2">
-        <h1 id="display-title" class="font-handwriting text-4xl sm:text-5xl font-bold text-pink-600 drop-shadow-sm">
-          Góc Nhỏ Về Chip 💖
-        </h1>
-        <button onclick="openProfileModal()" class="admin-only hidden p-2 rounded-full bg-white text-pink-500 hover:bg-pink-50 shadow-sm border border-pink-100 transition" title="Chỉnh sửa thông tin & mật khẩu">
-          <i data-lucide="pencil" class="w-4 h-4"></i>
-        </button>
-      </div>
-
-      <p id="display-subtitle" class="text-sm sm:text-base text-pink-800/75 mt-2 font-medium">
-        Nơi lưu giữ những điều đáng yêu nhất về em mỗi ngày
-      </p>
-
-      <!-- Counters Row: Love Day Counter + Special Event Countdown -->
-      <div class="mt-5 flex flex-wrap items-center justify-center gap-3">
-        <!-- Love Day Counter Pill -->
-        <div class="inline-flex items-center gap-3 bg-white px-5 py-2.5 rounded-2xl shadow-sm border border-pink-100">
-          <div class="w-9 h-9 rounded-full bg-pink-100 flex items-center justify-center text-pink-500">
-            <i data-lucide="heart" class="w-5 h-5 fill-pink-500"></i>
-          </div>
-          <div class="text-left">
-            <div class="text-[11px] uppercase tracking-wider text-pink-400 font-bold">Bên nhau được</div>
-            <div class="text-base sm:text-lg font-bold text-pink-600">
-              <span id="days-counter">0</span> ngày ngọt ngào
-            </div>
-            <div id="start-date-display" class="text-[10px] text-gray-400 font-semibold">Từ 01/01/2025</div>
-          </div>
+    <!-- Top Navigation Bar (CHỈ HIỆN KHI ĐĂNG NHẬP BẰNG MẬT KHẨU CỦA ANH) -->
+    <nav id="admin-top-nav" class="admin-only hidden sticky top-0 z-40 bg-white/85 backdrop-blur-md border-b border-pink-100 px-4 py-3">
+      <div class="max-w-3xl mx-auto flex flex-wrap items-center justify-between gap-2">
+        <!-- Cloud Status Badge -->
+        <div id="cloud-status" class="flex items-center gap-1.5 text-xs font-semibold px-3 py-1.5 rounded-full bg-pink-50 text-pink-600 border border-pink-200">
+          <span class="w-2 h-2 rounded-full bg-amber-400 animate-pulse" id="cloud-dot"></span>
+          <span id="cloud-text">Đang kết nối Cloud...</span>
         </div>
 
-        <!-- Special Event Countdown Pill -->
-        <div id="special-countdown-pill" class="inline-flex items-center gap-3 bg-white px-5 py-2.5 rounded-2xl shadow-sm border border-amber-100">
-          <div class="w-9 h-9 rounded-full bg-amber-100 flex items-center justify-center text-amber-500">
-            <i data-lucide="calendar-heart" class="w-5 h-5"></i>
-          </div>
-          <div class="text-left">
-            <div id="special-event-label" class="text-[11px] uppercase tracking-wider text-amber-500 font-bold">Ngày đặc biệt ✨</div>
-            <div id="special-event-days" class="text-base sm:text-lg font-bold text-amber-600">
-              Còn 0 ngày
-            </div>
-            <div id="special-event-date-display" class="text-[10px] text-gray-400 font-semibold"></div>
-          </div>
-        </div>
-      </div>
-    </header>
-
-    <!-- ADMIN TOOLBAR (CHỈ HIỆN Ở CHẾ ĐỘ CỦA ANH) -->
-    <section class="admin-only hidden mb-8 bg-white/95 rounded-3xl p-5 shadow-md border-2 border-pink-200">
-      <div class="flex flex-wrap items-center justify-between gap-3 mb-3 pb-3 border-b border-pink-100">
-        <div>
-          <h2 class="font-bold text-pink-700 text-base flex items-center gap-2">
-            <i data-lucide="sparkles" class="w-4 h-4 text-pink-500"></i> Bảng Điều Khiển Của Anh
-          </h2>
-          <p class="text-xs text-gray-500">Mọi thay đổi tự động lưu lên Cloud để em xem bất cứ lúc nào.</p>
-        </div>
-        <div class="flex flex-wrap items-center gap-2">
-          <button onclick="openMemoryModal()" class="px-3.5 py-2 rounded-xl bg-gradient-to-r from-pink-500 to-rose-500 text-white text-xs font-bold shadow hover:opacity-95 transition flex items-center gap-1.5">
-            <i data-lucide="plus-circle" class="w-4 h-4"></i> Thêm Thẻ Bí Mật
+        <!-- Admin Preview / Lock Controls -->
+        <div class="flex items-center gap-2">
+          <button id="btn-preview-gf" onclick="toggleAdminPreview()" class="px-3.5 py-1.5 rounded-full text-xs font-bold transition-all bg-pink-100 text-pink-700 hover:bg-pink-200 flex items-center gap-1.5">
+            <i data-lucide="eye" class="w-3.5 h-3.5"></i> Xem Thử Giao Diện Của Em
           </button>
-          <button onclick="openTopicModal()" class="px-3.5 py-2 rounded-xl bg-amber-50 text-amber-700 border border-amber-200 text-xs font-bold hover:bg-amber-100 transition flex items-center gap-1.5">
-            <i data-lucide="folder-plus" class="w-4 h-4"></i> Thêm Mục Ghi Chép
-          </button>
-          <button onclick="openCouponModal()" class="px-3.5 py-2 rounded-xl bg-purple-50 text-purple-700 border border-purple-200 text-xs font-bold hover:bg-purple-100 transition flex items-center gap-1.5">
-            <i data-lucide="ticket" class="w-4 h-4"></i> Tạo Phiếu Đổi Quà
-          </button>
-          <button onclick="toggleManageDrawer()" class="px-3.5 py-2 rounded-xl bg-pink-100 text-pink-700 text-xs font-bold hover:bg-pink-200 transition flex items-center gap-1.5">
-            <i data-lucide="list" class="w-4 h-4"></i> Quản Lý Thẻ (<span id="admin-count">0</span>)
+          <button onclick="lockGate()" class="px-3.5 py-1.5 rounded-full text-xs font-bold transition-all bg-gray-100 text-gray-600 hover:bg-gray-200 flex items-center gap-1.5" title="Đóng lại phong bì">
+            <i data-lucide="lock" class="w-3.5 h-3.5"></i> Khóa Lại
           </button>
         </div>
       </div>
+    </nav>
 
-      <!-- Private Drawer: Manage All Memories (Hidden in View Mode) -->
-      <div id="admin-manage-drawer" class="hidden space-y-3 mt-3 max-h-96 overflow-y-auto pr-1">
-        <div class="text-xs font-bold text-pink-500 uppercase tracking-wider">Danh sách toàn bộ thẻ bí mật & phản hồi của em:</div>
-        <div id="admin-memories-list" class="space-y-2.5"></div>
-      </div>
-    </section>
+    <!-- Main Content Wrapper -->
+    <main class="relative z-10 max-w-2xl mx-auto px-4 pt-8">
 
-    <!-- ========================================== -->
-    <!-- 1. SECRET LOVE LETTER ENVELOPE (ĐẦU TIÊN)  -->
-    <!-- ========================================== -->
-    <section class="mb-10">
-      <div class="envelope-box p-6 text-center">
-        <div class="w-12 h-12 mx-auto mb-2 rounded-full bg-pink-100 text-pink-500 flex items-center justify-center">
-          <i data-lucide="mail-heart" class="w-6 h-6"></i>
+      <!-- Header Profile Section -->
+      <header class="text-center mb-8">
+        <div class="inline-flex items-center gap-2 px-4 py-1 rounded-full bg-pink-100/80 text-pink-600 text-xs font-bold mb-3 shadow-sm">
+          <span>✨ Sổ Tay Bí Mật Dành Riêng Cho Em ✨</span>
         </div>
-        <h3 class="font-handwriting text-3xl font-bold text-pink-600 mb-1">
-          Bức Thư Nhỏ Gửi Em 💌
-        </h3>
-        <p class="text-xs text-pink-700/70 mb-4">
-          Một vài lời nhắn nhủ anh viết riêng cho em trước khi khám phá góc nhỏ này...
-        </p>
 
         <div class="flex items-center justify-center gap-2">
-          <button id="btn-toggle-letter" onclick="toggleSecretLetter()" class="px-5 py-2 rounded-full bg-white text-pink-600 border border-pink-200 text-xs sm:text-sm font-bold shadow-sm hover:bg-pink-50 transition">
-            Mở Phong Bì
-          </button>
-          <button onclick="openLetterModal()" class="admin-only hidden px-4 py-2 rounded-full bg-pink-500 text-white text-xs font-bold shadow-sm hover:bg-pink-600 transition flex items-center gap-1">
-            <i data-lucide="edit-3" class="w-3.5 h-3.5"></i> Sửa Thư
-          </button>
-        </div>
-
-        <!-- Letter Content -->
-        <div id="secret-letter-content" class="hidden mt-5 bg-white/95 rounded-2xl p-6 text-left shadow-inner border border-pink-100 animate-pop-in">
-          <p id="letter-body-text" class="font-note text-2xl sm:text-[26px] leading-relaxed text-gray-700 whitespace-pre-line"></p>
-          <div class="mt-4 text-right font-handwriting text-2xl text-pink-500 font-bold" id="letter-sign-text">
-            — Thương em thật nhiều ❤️
-          </div>
-        </div>
-      </div>
-    </section>
-
-    <!-- ========================================== -->
-    <!-- 2. TOPIC NOTEBOOK SECTION (THỨ HAI)        -->
-    <!-- ========================================== -->
-    <section class="mb-10">
-      <div class="bg-white/95 rounded-3xl p-5 sm:p-6 shadow-md border-2 border-pink-100 relative">
-        <div class="flex flex-wrap items-center justify-between gap-2 mb-4">
-          <div>
-            <h3 class="font-handwriting text-3xl font-bold text-pink-600 flex items-center gap-2">
-              Tất Tần Tật Về Em 📖
-            </h3>
-            <p class="text-xs text-pink-800/70">Những mảnh ghép nhỏ tạo nên cô gái của anh</p>
-          </div>
-          <button onclick="openTopicModal()" class="admin-only hidden px-3.5 py-1.5 rounded-full bg-pink-500 text-white text-xs font-bold shadow-sm hover:bg-pink-600 transition flex items-center gap-1">
-            <i data-lucide="plus" class="w-3.5 h-3.5"></i> Thêm Mục Mới
+          <h1 id="display-title" class="font-handwriting text-4xl sm:text-5xl font-bold text-pink-600 drop-shadow-sm">
+            Góc Nhỏ Về Chip 💖
+          </h1>
+          <button onclick="openProfileModal()" class="admin-control hidden p-2 rounded-full bg-white text-pink-500 hover:bg-pink-50 shadow-sm border border-pink-100 transition" title="Chỉnh sửa thông tin & mật khẩu">
+            <i data-lucide="pencil" class="w-4 h-4"></i>
           </button>
         </div>
 
-        <!-- Topic Tabs Bar -->
-        <div id="topic-tabs-bar" class="flex items-center gap-2 overflow-x-auto no-scrollbar pb-2 mb-4 border-b border-pink-100"></div>
-
-        <!-- Active Topic Content Card -->
-        <div id="active-topic-panel" class="min-h-[160px]"></div>
-      </div>
-    </section>
-
-    <!-- ========================================== -->
-    <!-- 3. LOVE COUPONS SECTION (THỨ BA)           -->
-    <!-- ========================================== -->
-    <section class="mb-10">
-      <div class="bg-white/95 rounded-3xl p-5 sm:p-6 shadow-md border-2 border-pink-100 relative">
-        <div class="flex flex-wrap items-center justify-between gap-2 mb-4">
-          <div>
-            <h3 class="font-handwriting text-3xl font-bold text-pink-600 flex items-center gap-2">
-              Phiếu Đổi Quà Độc Quyền 🎟️
-            </h3>
-            <p class="text-xs text-pink-800/70">Bấm sử dụng bất cứ khi nào em muốn nhé (có hiệu lực vô thời hạn)</p>
-          </div>
-          <button onclick="openCouponModal()" class="admin-only hidden px-3.5 py-1.5 rounded-full bg-purple-500 text-white text-xs font-bold shadow-sm hover:bg-purple-600 transition flex items-center gap-1">
-            <i data-lucide="plus" class="w-3.5 h-3.5"></i> Thêm Phiếu Mới
-          </button>
-        </div>
-
-        <div id="coupons-grid" class="grid grid-cols-1 sm:grid-cols-2 gap-3">
-          <!-- Coupons rendered via JS -->
-        </div>
-      </div>
-    </section>
-
-    <!-- ========================================== -->
-    <!-- 4. MYSTERY CARD STAGE (CUỐI CÙNG)          -->
-    <!-- ========================================== -->
-    <section class="mb-8">
-      <div id="mystery-box-container" class="mystery-card p-7 text-center text-white relative overflow-hidden" onclick="drawRandomMemory()">
-        <div class="absolute -right-6 -top-6 w-28 h-28 bg-white/10 rounded-full blur-xl"></div>
-        <div class="absolute -left-6 -bottom-6 w-28 h-28 bg-white/10 rounded-full blur-xl"></div>
-
-        <div class="w-16 h-16 mx-auto mb-3 rounded-2xl bg-white/20 backdrop-blur-sm flex items-center justify-center shadow-inner">
-          <i data-lucide="sparkles" class="w-8 h-8 text-white"></i>
-        </div>
-        <h2 class="font-handwriting text-3xl sm:text-4xl font-bold mb-1">
-          Hộp Kỷ Niệm Bí Mật ✨
-        </h2>
-        <p class="text-xs sm:text-sm text-pink-50 max-w-md mx-auto mb-4">
-          Có <strong id="mystery-total-count" class="underline decoration-wavy">0</strong> điều thú vị về em được giấu ở đây. Chạm để mở ngẫu nhiên từng thẻ nhé!
+        <p id="display-subtitle" class="text-sm sm:text-base text-pink-800/75 mt-2 font-medium">
+          Nơi lưu giữ những điều đáng yêu nhất về em mỗi ngày
         </p>
-        <div class="inline-flex items-center gap-2 bg-white text-pink-600 px-5 py-2 rounded-full text-xs sm:text-sm font-bold shadow-md">
-          <i data-lucide="shuffle" class="w-4 h-4"></i>
-          <span id="draw-btn-label">Mở Một Điều Bất Ngờ</span>
+
+        <!-- Counters Row: Love Day Counter + Special Event Countdown -->
+        <div class="mt-5 flex flex-wrap items-center justify-center gap-3">
+          <!-- Love Day Counter Pill -->
+          <div class="inline-flex items-center gap-3 bg-white px-5 py-2.5 rounded-2xl shadow-sm border border-pink-100">
+            <div class="w-9 h-9 rounded-full bg-pink-100 flex items-center justify-center text-pink-500">
+              <i data-lucide="heart" class="w-5 h-5 fill-pink-500"></i>
+            </div>
+            <div class="text-left">
+              <div class="text-[11px] uppercase tracking-wider text-pink-400 font-bold">Bên nhau được</div>
+              <div class="text-base sm:text-lg font-bold text-pink-600">
+                <span id="days-counter">0</span> ngày ngọt ngào
+              </div>
+              <div id="start-date-display" class="text-[10px] text-gray-400 font-semibold">Từ 01/01/2025</div>
+            </div>
+          </div>
+
+          <!-- Special Event Countdown Pill -->
+          <div id="special-countdown-pill" class="inline-flex items-center gap-3 bg-white px-5 py-2.5 rounded-2xl shadow-sm border border-amber-100">
+            <div class="w-9 h-9 rounded-full bg-amber-100 flex items-center justify-center text-amber-500">
+              <i data-lucide="calendar-heart" class="w-5 h-5"></i>
+            </div>
+            <div class="text-left">
+              <div id="special-event-label" class="text-[11px] uppercase tracking-wider text-amber-500 font-bold">Ngày đặc biệt ✨</div>
+              <div id="special-event-days" class="text-base sm:text-lg font-bold text-amber-600">
+                Còn 0 ngày
+              </div>
+              <div id="special-event-date-display" class="text-[10px] text-gray-400 font-semibold"></div>
+            </div>
+          </div>
         </div>
-      </div>
+      </header>
 
-      <!-- Revealed Polaroid Stage -->
-      <div id="revealed-stage" class="hidden mt-6">
-        <div id="revealed-card-slot"></div>
-
-        <div class="mt-5 flex items-center justify-center gap-3">
-          <button onclick="drawRandomMemory()" class="px-5 py-2.5 rounded-full bg-gradient-to-r from-pink-500 to-rose-500 text-white text-xs sm:text-sm font-bold shadow-md hover:shadow-lg transition flex items-center gap-2">
-            <i data-lucide="sparkles" class="w-4 h-4"></i> Mở Thẻ Tiếp Theo
-          </button>
-          <button onclick="triggerHeartConfetti()" class="p-2.5 rounded-full bg-white text-pink-500 border border-pink-200 shadow-sm hover:bg-pink-50 transition" title="Thả tim">
-            <i data-lucide="heart" class="w-4 h-4 fill-pink-500"></i>
-          </button>
+      <!-- ADMIN TOOLBAR (CHỈ HIỆN Ở CHẾ ĐỘ CỦA ANH) -->
+      <section id="admin-dashboard-panel" class="admin-control hidden mb-8 bg-white/95 rounded-3xl p-5 shadow-md border-2 border-pink-200">
+        <div class="flex flex-wrap items-center justify-between gap-3 mb-3 pb-3 border-b border-pink-100">
+          <div>
+            <h2 class="font-bold text-pink-700 text-base flex items-center gap-2">
+              <i data-lucide="sparkles" class="w-4 h-4 text-pink-500"></i> Bảng Điều Khiển Của Anh
+            </h2>
+            <p class="text-xs text-gray-500">Mọi thay đổi tự động lưu lên Cloud để em xem bất cứ lúc nào.</p>
+          </div>
+          <div class="flex flex-wrap items-center gap-2">
+            <button onclick="openMemoryModal()" class="px-3.5 py-2 rounded-xl bg-gradient-to-r from-pink-500 to-rose-500 text-white text-xs font-bold shadow hover:opacity-95 transition flex items-center gap-1.5">
+              <i data-lucide="plus-circle" class="w-4 h-4"></i> Thêm Thẻ Bí Mật
+            </button>
+            <button onclick="openTopicModal()" class="px-3.5 py-2 rounded-xl bg-amber-50 text-amber-700 border border-amber-200 text-xs font-bold hover:bg-amber-100 transition flex items-center gap-1.5">
+              <i data-lucide="folder-plus" class="w-4 h-4"></i> Thêm Mục Ghi Chép
+            </button>
+            <button onclick="openCouponModal()" class="px-3.5 py-2 rounded-xl bg-purple-50 text-purple-700 border border-purple-200 text-xs font-bold hover:bg-purple-100 transition flex items-center gap-1.5">
+              <i data-lucide="ticket" class="w-4 h-4"></i> Tạo Phiếu Đổi Quà
+            </button>
+            <button onclick="toggleManageDrawer()" class="px-3.5 py-2 rounded-xl bg-pink-100 text-pink-700 text-xs font-bold hover:bg-pink-200 transition flex items-center gap-1.5">
+              <i data-lucide="list" class="w-4 h-4"></i> Quản Lý Thẻ (<span id="admin-count">0</span>)
+            </button>
+          </div>
         </div>
-        <p id="seen-progress-text" class="text-center text-xs text-pink-500/80 font-semibold mt-2.5"></p>
-      </div>
-    </section>
 
-  </main>
+        <!-- Private Drawer: Manage All Memories (Hidden in View Mode) -->
+        <div id="admin-manage-drawer" class="hidden space-y-3 mt-3 max-h-96 overflow-y-auto pr-1">
+          <div class="text-xs font-bold text-pink-500 uppercase tracking-wider">Danh sách toàn bộ thẻ bí mật & phản hồi của em:</div>
+          <div id="admin-memories-list" class="space-y-2.5"></div>
+        </div>
+      </section>
 
-  <!-- MODALS -->
-  <!-- 1. Password Unlock Modal -->
-  <div id="modal-password" class="fixed inset-0 z-50 hidden bg-black/40 backdrop-blur-sm flex items-center justify-center p-4">
-    <div class="bg-white rounded-3xl max-w-sm w-full p-6 shadow-2xl border-2 border-pink-100 animate-pop-in">
-      <div class="w-12 h-12 rounded-2xl bg-pink-100 text-pink-600 flex items-center justify-center mx-auto mb-3">
-        <i data-lucide="key-round" class="w-6 h-6"></i>
-      </div>
-      <h3 class="text-lg font-bold text-center text-gray-800">Mở Khóa Chế Độ Của Anh</h3>
-      <p class="text-xs text-center text-gray-500 mt-1 mb-4">Nhập mật khẩu để thêm hoặc chỉnh sửa nội dung</p>
-      <input type="password" id="input-admin-password" placeholder="Nhập mật khẩu của anh..." class="w-full px-4 py-2.5 rounded-xl border border-pink-200 focus:outline-none focus:border-pink-500 text-center text-sm font-bold tracking-widest mb-2" onkeydown="if(event.key==='Enter') verifyPassword()" />
-      <p id="password-error" class="hidden text-xs text-rose-500 text-center font-semibold mb-3">Mật khẩu chưa đúng rồi!</p>
-      <div class="flex gap-2 mt-3">
-        <button onclick="closePasswordModal()" class="flex-1 py-2.5 rounded-xl bg-gray-100 text-gray-600 text-xs font-bold hover:bg-gray-200">Hủy</button>
-        <button onclick="verifyPassword()" class="flex-1 py-2.5 rounded-xl bg-pink-500 text-white text-xs font-bold hover:bg-pink-600">Mở Khóa</button>
-      </div>
-    </div>
+      <!-- ========================================== -->
+      <!-- 1. SECRET LOVE LETTER ENVELOPE (ĐẦU TIÊN)  -->
+      <!-- ========================================== -->
+      <section class="mb-10">
+        <div class="envelope-box p-6 text-center">
+          <div class="w-12 h-12 mx-auto mb-2 rounded-full bg-pink-100 text-pink-500 flex items-center justify-center">
+            <i data-lucide="mail-heart" class="w-6 h-6"></i>
+          </div>
+          <h3 class="font-handwriting text-3xl font-bold text-pink-600 mb-1">
+            Bức Thư Nhỏ Gửi Em 💌
+          </h3>
+          <p class="text-xs text-pink-700/70 mb-4">
+            Một vài lời nhắn nhủ anh viết riêng cho em trước khi khám phá góc nhỏ này...
+          </p>
+
+          <div class="flex items-center justify-center gap-2">
+            <button id="btn-toggle-letter" onclick="toggleSecretLetter()" class="px-5 py-2 rounded-full bg-white text-pink-600 border border-pink-200 text-xs sm:text-sm font-bold shadow-sm hover:bg-pink-50 transition">
+              Mở Phong Bì
+            </button>
+            <button onclick="openLetterModal()" class="admin-control hidden px-4 py-2 rounded-full bg-pink-500 text-white text-xs font-bold shadow-sm hover:bg-pink-600 transition flex items-center gap-1">
+              <i data-lucide="edit-3" class="w-3.5 h-3.5"></i> Sửa Thư
+            </button>
+          </div>
+
+          <!-- Letter Content -->
+          <div id="secret-letter-content" class="hidden mt-5 bg-white/95 rounded-2xl p-6 text-left shadow-inner border border-pink-100 animate-pop-in">
+            <p id="letter-body-text" class="font-note text-2xl sm:text-[26px] leading-relaxed text-gray-700 whitespace-pre-line"></p>
+            <div class="mt-4 text-right font-handwriting text-2xl text-pink-500 font-bold" id="letter-sign-text">
+              — Thương em thật nhiều ❤️
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ========================================== -->
+      <!-- 2. TOPIC NOTEBOOK SECTION (THỨ HAI)        -->
+      <!-- ========================================== -->
+      <section class="mb-10">
+        <div class="bg-white/95 rounded-3xl p-5 sm:p-6 shadow-md border-2 border-pink-100 relative">
+          <div class="flex flex-wrap items-center justify-between gap-2 mb-4">
+            <div>
+              <h3 class="font-handwriting text-3xl font-bold text-pink-600 flex items-center gap-2">
+                Tất Tần Tật Về Em 📖
+              </h3>
+              <p class="text-xs text-pink-800/70">Những mảnh ghép nhỏ tạo nên cô gái của anh</p>
+            </div>
+            <button onclick="openTopicModal()" class="admin-control hidden px-3.5 py-1.5 rounded-full bg-pink-500 text-white text-xs font-bold shadow-sm hover:bg-pink-600 transition flex items-center gap-1">
+              <i data-lucide="plus" class="w-3.5 h-3.5"></i> Thêm Mục Mới
+            </button>
+          </div>
+
+          <!-- Topic Tabs Bar -->
+          <div id="topic-tabs-bar" class="flex items-center gap-2 overflow-x-auto no-scrollbar pb-2 mb-4 border-b border-pink-100"></div>
+
+          <!-- Active Topic Content Card -->
+          <div id="active-topic-panel" class="min-h-[160px]"></div>
+        </div>
+      </section>
+
+      <!-- ========================================== -->
+      <!-- 3. LOVE COUPONS SECTION (THỨ BA)           -->
+      <!-- ========================================== -->
+      <section class="mb-10">
+        <div class="bg-white/95 rounded-3xl p-5 sm:p-6 shadow-md border-2 border-pink-100 relative">
+          <div class="flex flex-wrap items-center justify-between gap-2 mb-4">
+            <div>
+              <h3 class="font-handwriting text-3xl font-bold text-pink-600 flex items-center gap-2">
+                Phiếu Đổi Quà Độc Quyền 🎟️
+              </h3>
+              <p class="text-xs text-pink-800/70">Bấm sử dụng bất cứ khi nào em muốn nhé (có hiệu lực vô thời hạn)</p>
+            </div>
+            <button onclick="openCouponModal()" class="admin-control hidden px-3.5 py-1.5 rounded-full bg-purple-500 text-white text-xs font-bold shadow-sm hover:bg-purple-600 transition flex items-center gap-1">
+              <i data-lucide="plus" class="w-3.5 h-3.5"></i> Thêm Phiếu Mới
+            </button>
+          </div>
+
+          <div id="coupons-grid" class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <!-- Coupons rendered via JS -->
+          </div>
+        </div>
+      </section>
+
+      <!-- ========================================== -->
+      <!-- 4. MYSTERY CARD STAGE (CUỐI CÙNG)          -->
+      <!-- ========================================== -->
+      <section class="mb-8">
+        <div id="mystery-box-container" class="mystery-card p-7 text-center text-white relative overflow-hidden" onclick="drawRandomMemory()">
+          <div class="absolute -right-6 -top-6 w-28 h-28 bg-white/10 rounded-full blur-xl"></div>
+          <div class="absolute -left-6 -bottom-6 w-28 h-28 bg-white/10 rounded-full blur-xl"></div>
+
+          <div class="w-16 h-16 mx-auto mb-3 rounded-2xl bg-white/20 backdrop-blur-sm flex items-center justify-center shadow-inner">
+            <i data-lucide="sparkles" class="w-8 h-8 text-white"></i>
+          </div>
+          <h2 class="font-handwriting text-3xl sm:text-4xl font-bold mb-1">
+            Hộp Kỷ Niệm Bí Mật ✨
+          </h2>
+          <p class="text-xs sm:text-sm text-pink-50 max-w-md mx-auto mb-4">
+            Có <strong id="mystery-total-count" class="underline decoration-wavy">0</strong> điều thú vị về em được giấu ở đây. Chạm để mở ngẫu nhiên từng thẻ nhé!
+          </p>
+          <div class="inline-flex items-center gap-2 bg-white text-pink-600 px-5 py-2 rounded-full text-xs sm:text-sm font-bold shadow-md">
+            <i data-lucide="shuffle" class="w-4 h-4"></i>
+            <span id="draw-btn-label">Mở Một Điều Bất Ngờ</span>
+          </div>
+        </div>
+
+        <!-- Revealed Polaroid Stage -->
+        <div id="revealed-stage" class="hidden mt-6">
+          <div id="revealed-card-slot"></div>
+
+          <div class="mt-5 flex items-center justify-center gap-3">
+            <button onclick="drawRandomMemory()" class="px-5 py-2.5 rounded-full bg-gradient-to-r from-pink-500 to-rose-500 text-white text-xs sm:text-sm font-bold shadow-md hover:shadow-lg transition flex items-center gap-2">
+              <i data-lucide="sparkles" class="w-4 h-4"></i> Mở Thẻ Tiếp Theo
+            </button>
+            <button onclick="triggerHeartConfetti()" class="p-2.5 rounded-full bg-white text-pink-500 border border-pink-200 shadow-sm hover:bg-pink-50 transition" title="Thả tim">
+              <i data-lucide="heart" class="w-4 h-4 fill-pink-500"></i>
+            </button>
+          </div>
+          <p id="seen-progress-text" class="text-center text-xs text-pink-500/80 font-semibold mt-2.5"></p>
+        </div>
+      </section>
+
+    </main>
   </div>
 
-  <!-- 2. Profile, Countdown & Password Settings Modal -->
+  <!-- MODALS -->
+  <!-- 1. Profile, Countdown & Password Settings Modal -->
   <div id="modal-profile" class="fixed inset-0 z-50 hidden bg-black/40 backdrop-blur-sm flex items-center justify-center p-4 overflow-y-auto">
     <div class="bg-white rounded-3xl max-w-md w-full p-6 shadow-2xl border-2 border-pink-100 my-8 animate-pop-in">
       <h3 class="text-lg font-bold text-pink-600 mb-4 flex items-center gap-2">
-        <i data-lucide="settings" class="w-5 h-5"></i> Cài Đặt Sổ Tay
+        <i data-lucide="settings" class="w-5 h-5"></i> Cài Đặt Sổ Tay & Mật Khẩu
       </h3>
       <div class="space-y-3 text-left">
         <div>
@@ -286,7 +333,7 @@
           <input type="text" id="input-subtitle" class="w-full px-3.5 py-2 rounded-xl border border-pink-200 text-sm focus:outline-none focus:border-pink-500" />
         </div>
         <div>
-          <label class="block text-xs font-bold text-gray-600 mb-1">Ngày bắt đầu yêu nhau (dd/mm/yyyy)</label>
+          <label class="block text-xs font-bold text-pink-600 mb-1">Ngày bắt đầu yêu nhau (Mật khẩu mở thư của em - dd/mm/yyyy)</label>
           <input type="text" id="input-start-date" placeholder="VD: 01/01/2025" class="w-full px-3.5 py-2 rounded-xl border border-pink-200 text-sm focus:outline-none focus:border-pink-500" />
         </div>
         <div class="p-3 rounded-2xl bg-amber-50/70 border border-amber-100 space-y-2">
@@ -295,8 +342,8 @@
           <input type="text" id="input-event-date" placeholder="Nhập ngày theo dạng dd/mm/yyyy (VD: 25/12/2026)" class="w-full px-3 py-1.5 rounded-xl border border-amber-200 text-xs focus:outline-none focus:border-amber-500 bg-white" />
         </div>
         <div>
-          <label class="block text-xs font-bold text-gray-600 mb-1">Đổi mật khẩu mở khóa chế độ "Của Anh"</label>
-          <input type="text" id="input-new-password" placeholder="Nhập mật khẩu mới..." class="w-full px-3.5 py-2 rounded-xl border border-pink-200 text-sm focus:outline-none focus:border-pink-500" />
+          <label class="block text-xs font-bold text-gray-600 mb-1">Mật khẩu riêng của anh (Mở Bảng Điều Khiển)</label>
+          <input type="text" id="input-new-password" placeholder="Nhập mật khẩu riêng của anh..." class="w-full px-3.5 py-2 rounded-xl border border-pink-200 text-sm focus:outline-none focus:border-pink-500" />
         </div>
       </div>
       <div class="flex gap-2 mt-5">
@@ -306,7 +353,7 @@
     </div>
   </div>
 
-  <!-- 3. Add / Edit Memory Modal -->
+  <!-- 2. Add / Edit Memory Modal -->
   <div id="modal-memory" class="fixed inset-0 z-50 hidden bg-black/40 backdrop-blur-sm flex items-center justify-center p-4 overflow-y-auto">
     <div class="bg-white rounded-3xl max-w-md w-full p-6 shadow-2xl border-2 border-pink-100 my-8 animate-pop-in">
       <h3 id="memory-modal-title" class="text-lg font-bold text-pink-600 mb-4 flex items-center gap-2">
@@ -364,7 +411,7 @@
     </div>
   </div>
 
-  <!-- 4. Add / Edit Topic Category Modal -->
+  <!-- 3. Add / Edit Topic Category Modal -->
   <div id="modal-topic" class="fixed inset-0 z-50 hidden bg-black/40 backdrop-blur-sm flex items-center justify-center p-4">
     <div class="bg-white rounded-3xl max-w-md w-full p-6 shadow-2xl border-2 border-pink-100 animate-pop-in">
       <h3 id="topic-modal-title" class="text-lg font-bold text-pink-600 mb-4 flex items-center gap-2">
@@ -391,7 +438,7 @@
     </div>
   </div>
 
-  <!-- 5. Add Coupon Modal -->
+  <!-- 4. Add Coupon Modal -->
   <div id="modal-coupon" class="fixed inset-0 z-50 hidden bg-black/40 backdrop-blur-sm flex items-center justify-center p-4">
     <div class="bg-white rounded-3xl max-w-md w-full p-6 shadow-2xl border-2 border-pink-100 animate-pop-in">
       <h3 class="text-lg font-bold text-purple-600 mb-4 flex items-center gap-2">
@@ -418,7 +465,7 @@
     </div>
   </div>
 
-  <!-- 6. Edit Secret Letter Modal -->
+  <!-- 5. Edit Secret Letter Modal -->
   <div id="modal-letter" class="fixed inset-0 z-50 hidden bg-black/40 backdrop-blur-sm flex items-center justify-center p-4">
     <div class="bg-white rounded-3xl max-w-md w-full p-6 shadow-2xl border-2 border-pink-100 animate-pop-in">
       <h3 class="text-lg font-bold text-pink-600 mb-3 flex items-center gap-2">
