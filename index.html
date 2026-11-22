@@ -3,1617 +3,1113 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Góc Nhỏ Về Em ✨ | Sổ Tay Kỷ Niệm</title>
-  
+  <title>Góc Nhỏ Về Em ✨</title>
   <!-- Tailwind CSS -->
   <script src="https://cdn.tailwindcss.com"></script>
-  
-  <!-- Google Fonts: Mali (nét chữ viết tay dễ thương) & Quicksand (mềm mại, hiện đại) -->
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Mali:ital,wght@0,400;0,500;0,600;0,700;1,400&family=Quicksand:wght@400;500;600;700&display=swap" rel="stylesheet">
-  
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Caveat:wght@600;700&family=Dancing+Script:wght@600;700&family=Quicksand:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <!-- Canvas Confetti -->
+  <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.2/dist/confetti.browser.min.js"></script>
   <!-- Lucide Icons -->
   <script src="https://unpkg.com/lucide@latest"></script>
-  
-  <!-- Canvas Confetti cho hiệu ứng bất ngờ -->
-  <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
-
-  <script>
-    tailwind.config = {
-      theme: {
-        extend: {
-          fontFamily: {
-            sans: ['Quicksand', 'sans-serif'],
-            hand: ['Mali', 'cursive'],
-          },
-          colors: {
-            cream: '#FFFDF9',
-            blush: '#FFEBF0',
-            roseSoft: '#FF8FA3',
-            roseDeep: '#E05780',
-            lavender: '#F3E8FF',
-            lavenderDeep: '#9D4EDD',
-            peach: '#FFF0E5',
-            mint: '#E6F8F3',
-            cocoa: '#5C4742',
-          }
-        }
-      }
-    }
-  </script>
 
   <style>
-    /* Nền chấm bi scrapbook ấm áp */
+    :root {
+      --bg-cream: #fff9fb;
+      --pink-soft: #ffe4ec;
+      --pink-accent: #ff6b9d;
+      --pink-deep: #e0487b;
+      --text-main: #4a3b42;
+      --text-muted: #8c7580;
+    }
+
     body {
-      background-color: #FFFDF9;
-      background-image: radial-gradient(#F8C8DC 1.2px, transparent 1.2px), radial-gradient(#E5D4FF 1.2px, #FFFDF9 1.2px);
-      background-size: 40px 40px;
-      background-position: 0 0, 20px 20px;
-      color: #5C4742;
+      font-family: 'Quicksand', sans-serif;
+      background-color: var(--bg-cream);
+      background-image: 
+        radial-gradient(#ffc2d6 1px, transparent 1px),
+        radial-gradient(#ffe0ea 1px, #fff9fb 1px);
+      background-size: 32px 32px;
+      background-position: 0 0, 16px 16px;
+      color: var(--text-main);
       overflow-x: hidden;
     }
 
-    /* Thanh cuộn mềm mại */
-    ::-webkit-scrollbar {
-      width: 8px;
-    }
-    ::-webkit-scrollbar-track {
-      background: #FFF5F7;
-    }
-    ::-webkit-scrollbar-thumb {
-      background: #FFB3C6;
-      border-radius: 999px;
-    }
-    ::-webkit-scrollbar-thumb:hover {
-      background: #FF8FA3;
+    .font-handwriting {
+      font-family: 'Dancing Script', cursive;
     }
 
-    /* Hiệu ứng băng dính Washi Tape trên đầu thẻ Polaroid */
-    .washi-tape {
-      position: absolute;
-      top: -12px;
-      left: 50%;
-      transform: translateX(-50%) rotate(-2deg);
-      width: 105px;
-      height: 26px;
-      background-color: rgba(255, 179, 198, 0.72);
-      background-image: repeating-linear-gradient(
-        45deg,
-        transparent,
-        transparent 6px,
-        rgba(255, 255, 255, 0.45) 6px,
-        rgba(255, 255, 255, 0.45) 12px
-      );
-      box-shadow: 0 2px 5px rgba(92, 71, 66, 0.08);
-      backdrop-filter: blur(2px);
-      z-index: 10;
-      border-left: 2px dotted rgba(255,255,255,0.6);
-      border-right: 2px dotted rgba(255,255,255,0.6);
+    .font-note {
+      font-family: 'Caveat', cursive;
     }
 
-    .washi-lavender {
-      background-color: rgba(216, 180, 254, 0.72);
-      transform: translateX(-50%) rotate(2.5deg);
-    }
-    .washi-mint {
-      background-color: rgba(167, 243, 208, 0.75);
-      transform: translateX(-50%) rotate(-1.5deg);
-    }
-    .washi-peach {
-      background-color: rgba(253, 186, 116, 0.65);
-      transform: translateX(-50%) rotate(1.8deg);
-    }
-
-    /* Hiệu ứng thẻ Scrapbook Polaroid */
-    .scrapbook-card {
-      transition: all 0.35s cubic-bezier(0.22, 1, 0.36, 1);
-    }
-    .scrapbook-card:hover {
-      transform: translateY(-6px) rotate(0deg) !important;
-      box-shadow: 0 18px 35px -10px rgba(224, 87, 128, 0.18);
-    }
-
-    /* Hiệu ứng lật/bung mở thẻ bí mật */
-    @keyframes revealCard {
-      0% {
-        opacity: 0;
-        transform: scale(0.86) rotateY(16deg) translateY(14px);
-      }
-      100% {
-        opacity: 1;
-        transform: scale(1) rotateY(0deg) translateY(0);
-      }
-    }
-    .animate-reveal-card {
-      animation: revealCard 0.55s cubic-bezier(0.22, 1, 0.36, 1) forwards;
-    }
-
-    @keyframes gentleFloat {
-      0%, 100% { transform: translateY(0px) rotate(-1deg); }
-      50% { transform: translateY(-6px) rotate(1deg); }
-    }
-    .animate-gentle-float {
-      animation: gentleFloat 3.6s ease-in-out infinite;
-    }
-
-    /* Hiệu ứng tim bay nền */
-    @keyframes floatUp {
-      0% {
-        transform: translateY(105vh) scale(0.6) rotate(0deg);
-        opacity: 0;
-      }
-      15% {
-        opacity: 0.55;
-      }
-      85% {
-        opacity: 0.45;
-      }
-      100% {
-        transform: translateY(-10vh) scale(1.15) rotate(25deg);
-        opacity: 0;
-      }
-    }
-
+    /* Floating Hearts Background */
     .floating-heart {
       position: fixed;
+      bottom: -30px;
+      color: rgba(255, 107, 157, 0.25);
       pointer-events: none;
       z-index: 0;
       animation: floatUp linear infinite;
     }
 
-    /* Hiệu ứng nhịp đập trái tim */
-    @keyframes heartbeat {
-      0%, 100% { transform: scale(1); }
-      25% { transform: scale(1.16); }
-      50% { transform: scale(0.96); }
-      75% { transform: scale(1.12); }
-    }
-    .animate-heartbeat {
-      animation: heartbeat 2.2s infinite ease-in-out;
-    }
-
-    /* Hiệu ứng phong bì thư 3D mở ra */
-    .envelope-wrapper {
-      perspective: 1200px;
-    }
-    .envelope-flap {
-      transform-origin: top center;
-      transition: transform 0.7s cubic-bezier(0.4, 0, 0.2, 1), z-index 0.3s;
-    }
-    .envelope-open .envelope-flap {
-      transform: rotateX(180deg);
-      z-index: 1;
-    }
-    .letter-paper {
-      transition: transform 0.8s cubic-bezier(0.22, 1, 0.36, 1), opacity 0.5s ease;
+    @keyframes floatUp {
+      0% {
+        transform: translateY(0) rotate(0deg) scale(0.8);
+        opacity: 0;
+      }
+      15% {
+        opacity: 0.7;
+      }
+      85% {
+        opacity: 0.5;
+      }
+      100% {
+        transform: translateY(-110vh) rotate(360deg) scale(1.2);
+        opacity: 0;
+      }
     }
 
-    /* Chế độ Tặng Em (Gift Mode) hiệu ứng ánh sáng ấm */
-    body.gift-mode {
-      background-color: #FFF6F9;
-      background-image: radial-gradient(#FF9EBB 1.4px, transparent 1.4px), radial-gradient(#D8B4FE 1.4px, #FFF6F9 1.4px);
+    /* Polaroid Card Styling */
+    .polaroid-card {
+      background: #ffffff;
+      padding: 16px 16px 24px 16px;
+      border-radius: 16px;
+      box-shadow: 0 12px 30px rgba(255, 107, 157, 0.14), 0 4px 10px rgba(0, 0, 0, 0.04);
+      border: 2px solid #fff0f5;
+      position: relative;
+      transition: transform 0.35s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.35s ease;
+    }
+
+    .polaroid-card:hover {
+      transform: translateY(-4px) rotate(0deg) !important;
+      box-shadow: 0 18px 38px rgba(255, 107, 157, 0.22);
+    }
+
+    /* Washi Tape */
+    .washi-tape {
+      position: absolute;
+      top: -12px;
+      left: 50%;
+      transform: translateX(-50%) rotate(-2deg);
+      width: 110px;
+      height: 26px;
+      background: rgba(255, 182, 206, 0.75);
+      backdrop-filter: blur(2px);
+      border-left: 2px dashed rgba(255, 255, 255, 0.7);
+      border-right: 2px dashed rgba(255, 255, 255, 0.7);
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.06);
+      z-index: 10;
+    }
+
+    /* Mystery Deck Card */
+    .mystery-card {
+      background: linear-gradient(135deg, #ff7eb3 0%, #ff758c 100%);
+      border-radius: 24px;
+      box-shadow: 0 15px 35px rgba(255, 117, 140, 0.32);
+      transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+      cursor: pointer;
+    }
+
+    .mystery-card:hover {
+      transform: translateY(-6px) scale(1.02);
+      box-shadow: 0 20px 42px rgba(255, 117, 140, 0.42);
+    }
+
+    .mystery-card:active {
+      transform: scale(0.97);
+    }
+
+    /* Card Reveal Animation */
+    @keyframes popIn {
+      0% {
+        opacity: 0;
+        transform: scale(0.85) translateY(20px) rotate(-3deg);
+      }
+      70% {
+        transform: scale(1.02) translateY(-4px) rotate(1deg);
+      }
+      100% {
+        opacity: 1;
+        transform: scale(1) translateY(0) rotate(0deg);
+      }
+    }
+
+    .animate-pop-in {
+      animation: popIn 0.55s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+    }
+
+    /* Envelope Styling */
+    .envelope-box {
+      background: linear-gradient(145deg, #fff0f5, #ffe3ec);
+      border: 2px dashed #ff9ebb;
+      border-radius: 20px;
+      transition: all 0.3s ease;
+    }
+
+    .envelope-box:hover {
+      border-color: #ff6b9d;
+      box-shadow: 0 10px 25px rgba(255, 107, 157, 0.18);
+    }
+
+    /* Custom Scrollbar */
+    ::-webkit-scrollbar {
+      width: 8px;
+    }
+    ::-webkit-scrollbar-track {
+      background: #fff5f8;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: #ffb3cc;
+      border-radius: 99px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: #ff85ad;
     }
   </style>
 </head>
-<body class="min-h-screen relative selection:bg-pink-200 selection:text-rose-900">
+<body class="min-h-screen relative pb-20">
 
-  <!-- Container cho hiệu ứng tim bay nền -->
-  <div id="floating-hearts-container" aria-hidden="true"></div>
+  <!-- Floating Hearts Container -->
+  <div id="hearts-container"></div>
 
-  <!-- Thanh điều hướng trên cùng (Mode Switcher & Data Actions) -->
-  <nav class="sticky top-0 z-40 backdrop-blur-md bg-white/75 border-b border-pink-100 shadow-sm">
-    <div class="max-w-6xl mx-auto px-4 py-3 flex flex-wrap items-center justify-between gap-3">
-      <!-- Logo nhỏ -->
+  <!-- Top Navigation / Status Bar -->
+  <nav class="sticky top-0 z-40 bg-white/80 backdrop-blur-md border-b border-pink-100 px-4 py-3">
+    <div class="max-w-3xl mx-auto flex flex-wrap items-center justify-between gap-2">
+      <!-- Cloud Status Badge -->
+      <div id="cloud-status" class="flex items-center gap-1.5 text-xs font-semibold px-3 py-1.5 rounded-full bg-pink-50 text-pink-600 border border-pink-200">
+        <span class="w-2 h-2 rounded-full bg-amber-400 animate-pulse" id="cloud-dot"></span>
+        <span id="cloud-text">Đang kết nối Cloud...</span>
+      </div>
+
+      <!-- Mode Switcher & Admin Controls -->
       <div class="flex items-center gap-2">
-        <span class="text-2xl animate-heartbeat inline-block">🧸</span>
-        <span id="nav-brand-title" class="font-hand font-bold text-lg sm:text-xl text-roseDeep tracking-wide">
-          Góc Nhỏ Về Em
-        </span>
-      </div>
-
-      <!-- Công tắc chuyển đổi chế độ: Ghi Chép vs Tặng Em -->
-      <div class="flex items-center bg-pink-50/90 p-1 rounded-full border border-pink-200/80 shadow-inner">
-        <button id="btn-mode-edit" onclick="setAppMode('edit')" 
-          class="flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-xs sm:text-sm font-semibold transition-all duration-300 bg-roseDeep text-white shadow-sm">
-          <i data-lucide="pen-tool" class="w-3.5 h-3.5"></i>
-          <span>Ghi Chép (Của Anh)</span>
+        <button id="btn-mode-view" onclick="switchMode('view')" class="px-3.5 py-1.5 rounded-full text-xs font-bold transition-all bg-pink-500 text-white shadow-sm flex items-center gap-1.5">
+          <i data-lucide="gift" class="w-3.5 h-3.5"></i> Tặng Em
         </button>
-        <button id="btn-mode-gift" onclick="setAppMode('gift')" 
-          class="flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-xs sm:text-sm font-semibold transition-all duration-300 text-cocoa/75 hover:text-roseDeep">
-          <i data-lucide="gift" class="w-3.5 h-3.5"></i>
-          <span>Ngắm Nhìn (Tặng Em) ✨</span>
+        <button id="btn-mode-edit" onclick="requestEditMode()" class="px-3.5 py-1.5 rounded-full text-xs font-bold transition-all bg-pink-50 text-pink-600 hover:bg-pink-100 flex items-center gap-1.5">
+          <i data-lucide="lock" id="edit-lock-icon" class="w-3.5 h-3.5"></i> Của Anh
         </button>
-      </div>
-
-      <!-- Công cụ Backup / Restore (Chỉ hiện ở chế độ Ghi Chép hoặc thu gọn) -->
-      <div id="backup-controls" class="flex items-center gap-1.5">
-        <button onclick="exportData()" title="Xuất file sao lưu JSON"
-          class="p-2 rounded-full bg-lavender/70 hover:bg-lavender text-lavenderDeep transition flex items-center gap-1 text-xs font-semibold px-3">
-          <i data-lucide="download" class="w-3.5 h-3.5"></i>
-          <span class="hidden md:inline">Lưu Backup</span>
-        </button>
-        <label title="Nhập file sao lưu JSON"
-          class="cursor-pointer p-2 rounded-full bg-mint hover:bg-emerald-100 text-emerald-700 transition flex items-center gap-1 text-xs font-semibold px-3">
-          <i data-lucide="upload" class="w-3.5 h-3.5"></i>
-          <span class="hidden md:inline">Khôi phục</span>
-          <input type="file" id="import-file-input" accept=".json" class="hidden" onchange="importData(event)" />
-        </label>
       </div>
     </div>
   </nav>
 
-  <!-- MAIN CONTENT -->
-  <main class="relative z-10 max-w-6xl mx-auto px-4 pt-6 pb-20">
-    <!-- 1. HERO HEADER & BỘ ĐẾM NGÀY YÊU -->
-    <header class="relative bg-white/85 backdrop-blur-md rounded-3xl p-6 sm:p-8 mb-7 border-2 border-white shadow-[0_14px_40px_-10px_rgba(224,87,128,0.16)] text-center overflow-hidden">
-      <div class="washi-tape washi-lavender"></div>
+  <!-- Main Content Wrapper -->
+  <main class="relative z-10 max-w-2xl mx-auto px-4 pt-8">
 
-      <div class="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-blush text-roseDeep text-xs font-bold mb-3">
-        <span>✨ Góc bí mật dành riêng cho <strong id="hero-nickname">Em Bé</strong></span>
-        <button id="btn-edit-profile" onclick="openProfileModal()" title="Chỉnh sửa thông tin"
-          class="p-1 rounded-full bg-white hover:bg-pink-100 text-roseDeep shadow-sm transition">
-          <i data-lucide="pencil" class="w-3 h-3"></i>
+    <!-- Header Profile Section -->
+    <header class="text-center mb-8">
+      <div class="inline-flex items-center gap-2 px-4 py-1 rounded-full bg-pink-100/80 text-pink-600 text-xs font-bold mb-3 shadow-sm">
+        <span>✨ Sổ Tay Bí Mật Dành Riêng Cho Em ✨</span>
+      </div>
+
+      <div class="flex items-center justify-center gap-2">
+        <h1 id="display-title" class="font-handwriting text-4xl sm:text-5xl font-bold text-pink-600 drop-shadow-sm">
+          Góc Nhỏ Về Chip 💖
+        </h1>
+        <button onclick="openProfileModal()" class="admin-only hidden p-2 rounded-full bg-white text-pink-500 hover:bg-pink-50 shadow-sm border border-pink-100 transition" title="Chỉnh sửa thông tin & mật khẩu">
+          <i data-lucide="pencil" class="w-4 h-4"></i>
         </button>
       </div>
 
-      <h1 id="hero-title" class="font-hand text-3xl sm:text-4xl font-bold text-cocoa mb-2">
-        Góc Nhỏ Về Em ✨
-      </h1>
-      <p id="hero-subtitle" class="text-xs sm:text-sm text-cocoa/75 max-w-lg mx-auto leading-relaxed">
-        Nơi anh lén ghi lại những điều nhỏ bé, đáng yêu và thú vị nhất về em mỗi ngày.
+      <p id="display-subtitle" class="text-sm sm:text-base text-pink-800/75 mt-2 font-medium">
+        Nơi lưu giữ những điều đáng yêu nhất về em mỗi ngày
       </p>
 
-      <!-- Bộ đếm ngày bên nhau -->
-      <div class="mt-5 inline-flex items-center gap-3 px-5 py-2.5 rounded-2xl bg-gradient-to-r from-blush via-lavender/60 to-peach border border-pink-100 shadow-inner">
-        <span class="text-xl animate-heartbeat">💖</span>
+      <!-- Love Day Counter Pill -->
+      <div class="mt-5 inline-flex items-center gap-3 bg-white px-5 py-2.5 rounded-2xl shadow-sm border border-pink-100">
+        <div class="w-9 h-9 rounded-full bg-pink-100 flex items-center justify-center text-pink-500">
+          <i data-lucide="heart" class="w-5 h-5 fill-pink-500"></i>
+        </div>
         <div class="text-left">
-          <div class="text-[11px] font-bold uppercase tracking-wider text-cocoa/60">Chúng mình đã bên nhau</div>
-          <div class="font-hand text-lg sm:text-xl font-bold text-roseDeep">
-            <span id="days-together-count">0</span> ngày ngọt ngào
+          <div class="text-[11px] uppercase tracking-wider text-pink-400 font-bold">Bên nhau được</div>
+          <div class="text-base sm:text-lg font-bold text-pink-600">
+            <span id="days-counter">0</span> ngày ngọt ngào
           </div>
         </div>
-      </div>
-
-      <!-- Nút đặc biệt chỉ hiện ở Chế độ Tặng Em -->
-      <div id="gift-mode-actions" class="hidden mt-5 flex flex-wrap items-center justify-center gap-3">
-        <button onclick="triggerSurprise()"
-          class="inline-flex items-center gap-2 px-5 py-2.5 rounded-full bg-gradient-to-r from-roseSoft to-roseDeep text-white font-bold text-xs sm:text-sm shadow-md hover:scale-105 transition">
-          <span>Mở Điều Bất Ngờ 💝</span>
-        </button>
-        <button onclick="startSlideshow()"
-          class="inline-flex items-center gap-2 px-5 py-2.5 rounded-full bg-white hover:bg-pink-50 text-roseDeep border border-pink-200 font-bold text-xs sm:text-sm shadow-sm transition">
-          <span>Trình Chiếu Kỷ Niệm ✨</span>
-        </button>
       </div>
     </header>
 
-    <!-- 2. THANH LỌC CHỦ ĐỀ & CÔNG CỤ QUẢN LÝ RIÊNG TƯ (CHỈ HIỆN Ở CHẾ ĐỘ CỦA ANH) -->
-    <section class="mb-7">
-      <div class="flex flex-col md:flex-row items-stretch md:items-center justify-between gap-4">
-        <!-- Bộ lọc chủ đề muốn rút bí mật -->
-        <div id="category-filters" class="flex items-center gap-2 overflow-x-auto pb-2 md:pb-0 no-scrollbar">
-          <!-- Render bằng JS -->
-        </div>
-
-        <!-- Nhóm nút quản lý riêng tư (Tự động ẩn khi sang Chế độ Tặng Em) -->
-        <div id="edit-mode-toolbar" class="flex flex-wrap items-center gap-2.5 shrink-0">
-          <button onclick="openManageDrawer()"
-            class="inline-flex items-center justify-center gap-2 px-4 py-3 rounded-2xl bg-white hover:bg-lavender/50 text-lavenderDeep border border-purple-200 font-bold text-sm shadow-sm transition">
-            <i data-lucide="lock" class="w-4 h-4"></i>
-            <span>Quản lý danh sách (<span id="manage-count-badge">0</span>)</span>
-          </button>
-
-          <button id="btn-add-note" onclick="openNoteModal()"
-            class="inline-flex items-center justify-center gap-2 px-5 py-3 rounded-2xl bg-gradient-to-r from-roseSoft to-roseDeep text-white font-bold text-sm shadow-md shadow-pink-200 hover:shadow-lg hover:-translate-y-0.5 transition-all">
-            <i data-lucide="plus-circle" class="w-4 h-4"></i>
-            <span>Ghi Thêm Bí Mật</span>
-          </button>
-        </div>
-      </div>
-    </section>
-
-    <!-- 3. SÂN KHẤU KHÁM PHÁ BÍ MẬT (THAY THẾ HOÀN TOÀN LƯỚI TẤT CẢ KỶ NIỆM) -->
-    <section aria-label="Sân khấu khám phá từng bí mật về em" class="mb-12">
-      <div class="max-w-2xl mx-auto">
-        
-        <!-- Thanh tiến độ khám phá nhỏ xinh -->
-        <div class="flex items-center justify-between bg-white/85 backdrop-blur-sm px-5 py-2.5 rounded-full border border-pink-100 shadow-sm mb-6">
-          <div class="flex items-center gap-2 text-xs sm:text-sm font-bold text-cocoa/80">
-            <span class="text-base">🔮</span>
-            <span>Đã khám phá <strong id="discovered-count" class="text-roseDeep">0</strong> / <strong id="total-pool-count">0</strong> điều bí mật</span>
-          </div>
-          <button onclick="resetDiscoveryDeck()" title="Úp lại toàn bộ thẻ để rút lại từ đầu"
-            class="text-xs font-bold text-lavenderDeep hover:underline flex items-center gap-1">
-            <i data-lucide="rotate-ccw" class="w-3.5 h-3.5"></i>
-            <span>Xào lại thẻ</span>
-          </button>
-        </div>
-
-        <!-- TRẠNG THÁI 1: HỘP QUÀ / BỘ THẺ BÍ MẬT ĐANG ÚP (CHƯA LẬT) -->
-        <div id="mystery-box-stage" class="relative bg-gradient-to-b from-white via-blush/50 to-lavender/40 rounded-3xl p-8 sm:p-11 border-2 border-white shadow-[0_18px_45px_-12px_rgba(224,87,128,0.22)] text-center overflow-hidden">
-          <div class="washi-tape"></div>
-
-          <!-- Minh họa bộ bài úp ngược / hộp bí mật -->
-          <div class="relative w-32 h-36 mx-auto mb-5 flex items-center justify-center">
-            <div class="absolute inset-0 bg-pink-200/70 rounded-2xl -rotate-6 border-2 border-white shadow-md"></div>
-            <div class="absolute inset-0 bg-purple-200/70 rounded-2xl rotate-6 border-2 border-white shadow-md"></div>
-            <div class="relative w-full h-full bg-gradient-to-br from-roseSoft to-roseDeep rounded-2xl border-4 border-white shadow-xl flex flex-col items-center justify-center text-white animate-gentle-float cursor-pointer"
-                 onclick="drawRandomSecret()">
-              <span class="text-4xl mb-1">🎁</span>
-              <span class="font-hand text-xs font-bold tracking-wider uppercase opacity-95">Chạm Để Mở</span>
-            </div>
-          </div>
-
-          <h2 id="mystery-stage-title" class="font-hand text-2xl sm:text-3xl font-bold text-cocoa mb-2">
-            Có 5 điều thú vị về em đang được cất giấu ở đây...
+    <!-- ========================================== -->
+    <!-- ADMIN TOOLBAR (CHỈ HIỆN Ở CHẾ ĐỘ CỦA ANH)  -->
+    <!-- ========================================== -->
+    <section class="admin-only hidden mb-8 bg-white/95 rounded-3xl p-5 shadow-md border-2 border-pink-200">
+      <div class="flex flex-wrap items-center justify-between gap-3 mb-4 pb-3 border-b border-pink-100">
+        <div>
+          <h2 class="font-bold text-pink-700 text-base flex items-center gap-2">
+            <i data-lucide="sparkles" class="w-4 h-4 text-pink-500"></i> Bảng Điều Khiển Của Anh
           </h2>
-          <p class="text-sm text-cocoa/75 max-w-md mx-auto leading-relaxed mb-7">
-            Mỗi tấm thẻ là một bí mật nhỏ anh lén ghi lại. Em hãy bấm rút ngẫu nhiên hoặc đi theo hành trình từng bước để mở từng trang nhé!
-          </p>
-
-          <!-- 2 Nút hành động chính nổi bật -->
-          <div class="flex flex-col sm:flex-row items-center justify-center gap-3.5">
-            <button onclick="drawRandomSecret()"
-              class="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-6 py-3.5 rounded-2xl bg-gradient-to-r from-roseSoft to-roseDeep text-white font-bold text-sm sm:text-base shadow-lg shadow-pink-300/50 hover:shadow-xl hover:scale-105 transition-all">
-              <span>Rút Ngẫu Nhiên 1 Bí Mật ✨</span>
-            </button>
-
-            <button onclick="startJourneyMode()"
-              class="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-6 py-3.5 rounded-2xl bg-white hover:bg-pink-50 text-roseDeep border-2 border-pink-200 font-bold text-sm sm:text-base shadow-sm hover:scale-[1.02] transition-all">
-              <span>Xem Hành Trình Từng Bước 🎬</span>
-            </button>
-          </div>
+          <p class="text-xs text-gray-500">Mọi thay đổi tự động lưu lên Cloud để em xem bất cứ lúc nào.</p>
         </div>
-
-        <!-- TRẠNG THÁI 2: TẤM THẺ BÍ MẬT ĐANG ĐƯỢC LẬT MỞ -->
-        <div id="revealed-card-stage" class="hidden">
-          <div id="revealed-card-container" class="animate-reveal-card">
-            <!-- Nội dung tấm thẻ Polaroid được render động tại đây -->
-          </div>
-
-          <!-- Thanh điều hướng dưới thẻ đang mở -->
-          <div id="revealed-card-controls" class="mt-6 flex flex-wrap items-center justify-center gap-3">
-            <!-- Nút điều khiển render động tùy theo chế độ Ngẫu nhiên hay Hành trình từng bước -->
-          </div>
+        <div class="flex items-center gap-2">
+          <button onclick="openMemoryModal()" class="px-4 py-2 rounded-xl bg-gradient-to-r from-pink-500 to-rose-500 text-white text-xs font-bold shadow hover:opacity-95 transition flex items-center gap-1.5">
+            <i data-lucide="plus-circle" class="w-4 h-4"></i> Thêm Kỷ Niệm Mới
+          </button>
+          <button onclick="toggleManageDrawer()" class="px-3.5 py-2 rounded-xl bg-pink-100 text-pink-700 text-xs font-bold hover:bg-pink-200 transition flex items-center gap-1.5">
+            <i data-lucide="list" class="w-4 h-4"></i> Quản Lý (<span id="admin-count">0</span>)
+          </button>
         </div>
+      </div>
 
-        <!-- Trạng thái trống nếu chủ đề đang lọc chưa có bí mật nào -->
-        <div id="empty-state" class="hidden text-center py-14 bg-white/80 rounded-3xl border-2 border-dashed border-pink-200">
-          <div class="text-5xl mb-3">🐰</div>
-          <h3 class="font-hand text-xl font-bold text-cocoa">Chưa có bí mật nào ở chủ đề này</h3>
-          <p class="text-sm text-cocoa/65 mt-1">Hãy chọn "Tất cả chủ đề" hoặc ghi thêm điều thú vị mới nhé!</p>
-        </div>
-
+      <!-- Private Drawer: Manage All Memories (Hidden in View Mode) -->
+      <div id="admin-manage-drawer" class="hidden space-y-3 mt-3 max-h-96 overflow-y-auto pr-1">
+        <div class="text-xs font-bold text-pink-500 uppercase tracking-wider">Danh sách toàn bộ kỷ niệm (Chỉ mình anh thấy):</div>
+        <div id="admin-memories-list" class="space-y-2.5"></div>
       </div>
     </section>
 
-    <!-- 4. GÓC HỘP BÍ MẬT / BỨC THƯ TƯƠNG LAI -->
-    <section class="mt-16">
-      <div class="text-center mb-6">
-        <span class="inline-block px-3.5 py-1 rounded-full bg-lavender text-lavenderDeep text-xs font-bold mb-2">
-          💌 Góc Bí Mật Dành Riêng Cho Ngày Em Xem Trang Này
-        </span>
-        <h2 class="font-hand text-2xl sm:text-3xl font-bold text-cocoa">
-          Bức Thư Gửi Em Trong Tương Lai
+    <!-- ========================================== -->
+    <!-- MYSTERY CARD STAGE (SÂN KHẤU RÚT THẺ BÍ MẬT) -->
+    <!-- ========================================== -->
+    <section class="mb-10">
+      <!-- Mystery Box Trigger -->
+      <div id="mystery-box-container" class="mystery-card p-7 text-center text-white relative overflow-hidden" onclick="drawRandomMemory()">
+        <div class="absolute -right-6 -top-6 w-28 h-28 bg-white/10 rounded-full blur-xl"></div>
+        <div class="absolute -left-6 -bottom-6 w-28 h-28 bg-white/10 rounded-full blur-xl"></div>
+
+        <div class="w-16 h-16 mx-auto mb-3 rounded-2xl bg-white/20 backdrop-blur-sm flex items-center justify-center shadow-inner">
+          <i data-lucide="sparkles" class="w-8 h-8 text-white"></i>
+        </div>
+        <h2 class="font-handwriting text-3xl sm:text-4xl font-bold mb-1">
+          Hộp Kỷ Niệm Bí Mật ✨
         </h2>
-        <p class="text-xs sm:text-sm text-cocoa/70 mt-1">
-          Nhấn vào phong bì bên dưới để mở lá thư anh đã bí mật viết sẵn cho em ✨
+        <p class="text-xs sm:text-sm text-pink-50 max-w-md mx-auto mb-4">
+          Có <strong id="mystery-total-count" class="underline decoration-wavy">0</strong> điều thú vị về em được giấu ở đây. Chạm để mở ngẫu nhiên từng thẻ nhé!
         </p>
+        <div class="inline-flex items-center gap-2 bg-white text-pink-600 px-5 py-2 rounded-full text-xs sm:text-sm font-bold shadow-md">
+          <i data-lucide="shuffle" class="w-4 h-4"></i>
+          <span id="draw-btn-label">Mở Một Điều Bất Ngờ</span>
+        </div>
       </div>
 
-      <div class="max-w-2xl mx-auto">
-        <!-- Phong bì tương tác -->
-        <div id="envelope-container" class="envelope-wrapper relative bg-gradient-to-b from-pink-100 to-rose-200/80 rounded-3xl p-4 sm:p-6 shadow-xl border-2 border-white">
-          
-          <!-- Nắp phong bì -->
-          <div id="envelope-header-bar" onclick="toggleEnvelope()" 
-            class="cursor-pointer flex items-center justify-between bg-white/90 hover:bg-white px-5 py-4 rounded-2xl shadow-sm border border-pink-100 transition group">
-            <div class="flex items-center gap-3">
-              <div class="w-11 h-11 rounded-full bg-blush flex items-center justify-center text-2xl group-hover:scale-110 transition-transform">
-                💌
-              </div>
-              <div>
-                <h3 id="letter-envelope-title" class="font-hand font-bold text-base sm:text-lg text-roseDeep">
-                  Gửi Em Yêu Của Anh...
-                </h3>
-                <p id="envelope-hint-text" class="text-xs text-cocoa/65">
-                  Chạm để mở phong bì thư bí mật ✨
-                </p>
-              </div>
-            </div>
+      <!-- Revealed Polaroid Stage -->
+      <div id="revealed-stage" class="hidden mt-6">
+        <div id="revealed-card-slot"></div>
 
-            <div class="flex items-center gap-2">
-              <button id="btn-edit-letter" onclick="event.stopPropagation(); openLetterModal()"
-                class="px-3 py-1.5 rounded-xl bg-lavender/80 hover:bg-lavender text-lavenderDeep text-xs font-bold flex items-center gap-1 transition">
-                <i data-lucide="pen" class="w-3.5 h-3.5"></i>
-                <span>Viết thư</span>
-              </button>
-              <span id="envelope-chevron" class="p-2 rounded-full bg-pink-50 text-roseDeep transition-transform duration-300">
-                <i data-lucide="chevron-down" class="w-5 h-5"></i>
-              </span>
-            </div>
+        <!-- Stage Navigation Controls -->
+        <div class="mt-5 flex items-center justify-center gap-3">
+          <button onclick="drawRandomMemory()" class="px-5 py-2.5 rounded-full bg-gradient-to-r from-pink-500 to-rose-500 text-white text-xs sm:text-sm font-bold shadow-md hover:shadow-lg transition flex items-center gap-2">
+            <i data-lucide="sparkles" class="w-4 h-4"></i> Mở Thẻ Tiếp Theo
+          </button>
+          <button onclick="triggerHeartConfetti()" class="p-2.5 rounded-full bg-white text-pink-500 border border-pink-200 shadow-sm hover:bg-pink-50 transition" title="Thả tim">
+            <i data-lucide="heart" class="w-4 h-4 fill-pink-500"></i>
+          </button>
+        </div>
+        <p id="seen-progress-text" class="text-center text-xs text-pink-500/80 font-semibold mt-2.5"></p>
+      </div>
+    </section>
+
+    <!-- ========================================== -->
+    <!-- SECRET LOVE LETTER ENVELOPE                -->
+    <!-- ========================================== -->
+    <section class="mb-8">
+      <div class="envelope-box p-6 text-center">
+        <div class="w-12 h-12 mx-auto mb-2 rounded-full bg-pink-100 text-pink-500 flex items-center justify-center">
+          <i data-lucide="mail-heart" class="w-6 h-6"></i>
+        </div>
+        <h3 class="font-handwriting text-3xl font-bold text-pink-600 mb-1">
+          Bức Thư Nhỏ Gửi Em 💌
+        </h3>
+        <p class="text-xs text-pink-700/70 mb-4">
+          Một vài lời nhắn nhủ anh viết riêng cho em...
+        </p>
+
+        <div class="flex items-center justify-center gap-2">
+          <button id="btn-toggle-letter" onclick="toggleSecretLetter()" class="px-5 py-2 rounded-full bg-white text-pink-600 border border-pink-200 text-xs sm:text-sm font-bold shadow-sm hover:bg-pink-50 transition">
+            Mở Phong Bì
+          </button>
+          <button onclick="openLetterModal()" class="admin-only hidden px-4 py-2 rounded-full bg-pink-500 text-white text-xs font-bold shadow-sm hover:bg-pink-600 transition flex items-center gap-1">
+            <i data-lucide="edit-3" class="w-3.5 h-3.5"></i> Sửa Thư
+          </button>
+        </div>
+
+        <!-- Letter Content -->
+        <div id="secret-letter-content" class="hidden mt-5 bg-white/95 rounded-2xl p-6 text-left shadow-inner border border-pink-100 animate-pop-in">
+          <p id="letter-body-text" class="font-note text-2xl sm:text-[26px] leading-relaxed text-gray-700 whitespace-pre-line"></p>
+          <div class="mt-4 text-right font-handwriting text-2xl text-pink-500 font-bold" id="letter-sign-text">
+            — Thương em thật nhiều ❤️
           </div>
-
-          <!-- Nội dung lá thư bên trong (Mở ra mượt mà) -->
-          <div id="letter-body-wrapper" class="hidden mt-4">
-            <div class="letter-paper relative bg-[#FFFDF7] rounded-2xl p-6 sm:p-8 shadow-inner border border-amber-100/80"
-                 style="background-image: repeating-linear-gradient(transparent, transparent 31px, #F6E6EA 32px); line-height: 32px;">
-              
-              <!-- Tem thư trang trí -->
-              <div class="float-right ml-4 mb-2 w-16 h-20 bg-blush border-2 border-dashed border-roseSoft rounded-lg flex flex-col items-center justify-center rotate-3 shadow-sm select-none">
-                <span class="text-2xl">🌸</span>
-                <span class="text-[9px] font-bold text-roseDeep uppercase tracking-tighter mt-1">Love Mail</span>
-              </div>
-
-              <div id="letter-content-display" class="font-hand text-base sm:text-lg text-cocoa whitespace-pre-line">
-                <!-- Nội dung thư render từ JS -->
-              </div>
-
-              <div class="mt-6 pt-2 flex items-center justify-between text-xs text-cocoa/60 font-sans">
-                <span id="letter-date-display">Viết vào một ngày nhớ em 💕</span>
-                <span class="font-hand font-bold text-roseDeep text-sm">— Người luôn thương em</span>
-              </div>
-            </div>
-          </div>
-
         </div>
       </div>
     </section>
 
   </main>
 
-  <!-- ==================== MODALS ==================== -->
+  <!-- ========================================== -->
+  <!-- MODALS                                     -->
+  <!-- ========================================== -->
 
-  <!-- MODAL 1: THÊM / SỬA GHI CHÚ SCRAPBOOK -->
-  <div id="note-modal" class="fixed inset-0 z-50 hidden items-center justify-center p-4 bg-cocoa/40 backdrop-blur-sm">
-    <div class="bg-cream w-full max-w-lg rounded-3xl p-6 sm:p-7 shadow-2xl border-2 border-white max-h-[92vh] overflow-y-auto relative">
-      <button onclick="closeNoteModal()" class="absolute top-5 right-5 p-2 rounded-full bg-pink-50 hover:bg-pink-100 text-cocoa/70 transition">
-        <i data-lucide="x" class="w-5 h-5"></i>
-      </button>
-
-      <div class="flex items-center gap-2.5 mb-5">
-        <span class="text-2xl">📝</span>
-        <h3 id="note-modal-title" class="font-hand text-2xl font-bold text-roseDeep">Ghi Lại Điều Thú Vị Mới</h3>
+  <!-- 1. Password Unlock Modal -->
+  <div id="modal-password" class="fixed inset-0 z-50 hidden bg-black/40 backdrop-blur-sm flex items-center justify-center p-4">
+    <div class="bg-white rounded-3xl max-w-sm w-full p-6 shadow-2xl border-2 border-pink-100 animate-pop-in">
+      <div class="w-12 h-12 rounded-2xl bg-pink-100 text-pink-600 flex items-center justify-center mx-auto mb-3">
+        <i data-lucide="key-round" class="w-6 h-6"></i>
       </div>
+      <h3 class="text-lg font-bold text-center text-gray-800">Mở Khóa Chế Độ Của Anh</h3>
+      <p class="text-xs text-center text-gray-500 mt-1 mb-4">Nhập mật khẩu để thêm hoặc chỉnh sửa kỷ niệm</p>
+      <input type="password" id="input-admin-password" placeholder="Nhập mật khẩu (mặc định: 1234)" class="w-full px-4 py-2.5 rounded-xl border border-pink-200 focus:outline-none focus:border-pink-500 text-center text-sm font-bold tracking-widest mb-2" onkeydown="if(event.key==='Enter') verifyPassword()" />
+      <p id="password-error" class="hidden text-xs text-rose-500 text-center font-semibold mb-3">Mật khẩu chưa đúng rồi!</p>
+      <div class="flex gap-2 mt-3">
+        <button onclick="closePasswordModal()" class="flex-1 py-2.5 rounded-xl bg-gray-100 text-gray-600 text-xs font-bold hover:bg-gray-200">Hủy</button>
+        <button onclick="verifyPassword()" class="flex-1 py-2.5 rounded-xl bg-pink-500 text-white text-xs font-bold hover:bg-pink-600">Mở Khóa</button>
+      </div>
+    </div>
+  </div>
 
-      <form id="note-form" onsubmit="saveNote(event)" class="space-y-4">
-        <input type="hidden" id="note-id" />
-
-        <!-- Chọn Danh mục -->
+  <!-- 2. Profile & Password Settings Modal -->
+  <div id="modal-profile" class="fixed inset-0 z-50 hidden bg-black/40 backdrop-blur-sm flex items-center justify-center p-4">
+    <div class="bg-white rounded-3xl max-w-md w-full p-6 shadow-2xl border-2 border-pink-100 animate-pop-in">
+      <h3 class="text-lg font-bold text-pink-600 mb-4 flex items-center gap-2">
+        <i data-lucide="settings" class="w-5 h-5"></i> Cài Đặt Sổ Tay
+      </h3>
+      <div class="space-y-3 text-left">
         <div>
-          <label class="block text-xs font-bold text-cocoa/80 mb-1.5">Danh mục kỷ niệm</label>
-          <select id="note-category" required
-            class="w-full px-4 py-2.5 rounded-2xl bg-white border border-pink-200 focus:border-roseSoft outline-none text-sm font-semibold text-cocoa">
-            <option value="food">🧋 Món khoái khẩu & Sở thích</option>
-            <option value="habit">🌷 Thói quen đáng yêu</option>
-            <option value="quote">💌 Câu nói & Khoảnh khắc buồn cười</option>
-            <option value="wish">🎁 Quà muốn tặng / Điều muốn làm cùng nhau</option>
-            <option value="reason">✨ Lý do anh thích em</option>
-          </select>
+          <label class="block text-xs font-bold text-gray-600 mb-1">Tiêu đề trang web</label>
+          <input type="text" id="input-title" class="w-full px-3.5 py-2 rounded-xl border border-pink-200 text-sm focus:outline-none focus:border-pink-500" />
+        </div>
+        <div>
+          <label class="block text-xs font-bold text-gray-600 mb-1">Dòng mô tả nhỏ</label>
+          <input type="text" id="input-subtitle" class="w-full px-3.5 py-2 rounded-xl border border-pink-200 text-sm focus:outline-none focus:border-pink-500" />
+        </div>
+        <div>
+          <label class="block text-xs font-bold text-gray-600 mb-1">Ngày bắt đầu yêu nhau</label>
+          <input type="date" id="input-start-date" class="w-full px-3.5 py-2 rounded-xl border border-pink-200 text-sm focus:outline-none focus:border-pink-500" />
+        </div>
+        <div>
+          <label class="block text-xs font-bold text-gray-600 mb-1">Đổi mật khẩu mở khóa chế độ "Của Anh"</label>
+          <input type="text" id="input-new-password" placeholder="Nhập mật khẩu mới..." class="w-full px-3.5 py-2 rounded-xl border border-pink-200 text-sm focus:outline-none focus:border-pink-500" />
+        </div>
+      </div>
+      <div class="flex gap-2 mt-5">
+        <button onclick="closeProfileModal()" class="flex-1 py-2.5 rounded-xl bg-gray-100 text-gray-600 text-xs font-bold">Đóng</button>
+        <button onclick="saveProfile()" class="flex-1 py-2.5 rounded-xl bg-pink-500 text-white text-xs font-bold hover:bg-pink-600">Lưu Thay Đổi</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 3. Add / Edit Memory Modal -->
+  <div id="modal-memory" class="fixed inset-0 z-50 hidden bg-black/40 backdrop-blur-sm flex items-center justify-center p-4 overflow-y-auto">
+    <div class="bg-white rounded-3xl max-w-md w-full p-6 shadow-2xl border-2 border-pink-100 my-8 animate-pop-in">
+      <h3 id="memory-modal-title" class="text-lg font-bold text-pink-600 mb-4 flex items-center gap-2">
+        <i data-lucide="camera" class="w-5 h-5"></i> Thêm Kỷ Niệm Mới
+      </h3>
+      <input type="hidden" id="edit-memory-id" />
+
+      <div class="space-y-3 text-left">
+        <div>
+          <label class="block text-xs font-bold text-gray-600 mb-1">Tiêu đề / Điều thú vị về em *</label>
+          <input type="text" id="mem-title" placeholder="VD: Lúc em ngủ gật trên xe..." class="w-full px-3.5 py-2 rounded-xl border border-pink-200 text-sm focus:outline-none focus:border-pink-500" />
         </div>
 
-        <!-- Tiêu đề & Ngày -->
-        <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
-          <div class="sm:col-span-2">
-            <label class="block text-xs font-bold text-cocoa/80 mb-1.5">Tiêu đề ngắn gọn *</label>
-            <input type="text" id="note-title" required placeholder="VD: Trà sữa ô long kem cheese..."
-              class="w-full px-4 py-2.5 rounded-2xl bg-white border border-pink-200 focus:border-roseSoft outline-none text-sm text-cocoa" />
+        <div class="grid grid-cols-2 gap-2">
+          <div>
+            <label class="block text-xs font-bold text-gray-600 mb-1">Ngày ghi nhớ</label>
+            <input type="date" id="mem-date" class="w-full px-3 py-2 rounded-xl border border-pink-200 text-sm focus:outline-none focus:border-pink-500" />
           </div>
           <div>
-            <label class="block text-xs font-bold text-cocoa/80 mb-1.5">Ngày ghi chú</label>
-            <input type="date" id="note-date"
-              class="w-full px-3 py-2.5 rounded-2xl bg-white border border-pink-200 focus:border-roseSoft outline-none text-sm text-cocoa" />
+            <label class="block text-xs font-bold text-gray-600 mb-1">Nhãn phân loại</label>
+            <select id="mem-tag" class="w-full px-3 py-2 rounded-xl border border-pink-200 text-sm focus:outline-none focus:border-pink-500 bg-white">
+              <option value="Thói quen đáng yêu">🥰 Thói quen đáng yêu</option>
+              <option value="Món em thích">🧋 Món em thích</option>
+              <option value="Kỷ niệm của tụi mình">📸 Kỷ niệm của tụi mình</option>
+              <option value="Câu nói bất hủ">💬 Câu nói bất hủ</option>
+              <option value="Điều anh thương">💖 Điều anh thương</option>
+            </select>
           </div>
         </div>
 
-        <!-- Chọn Sticker đại diện -->
         <div>
-          <label class="block text-xs font-bold text-cocoa/80 mb-1.5">Chọn Sticker trang trí</label>
-          <div id="sticker-picker" class="flex flex-wrap gap-2 bg-white p-2.5 rounded-2xl border border-pink-100">
-            <!-- Render nút emoji bằng JS -->
-          </div>
-          <input type="hidden" id="note-sticker" value="🧸" />
+          <label class="block text-xs font-bold text-gray-600 mb-1">Chọn Sticker trang trí</label>
+          <div id="sticker-picker" class="flex flex-wrap gap-1.5 bg-pink-50/70 p-2 rounded-xl border border-pink-100"></div>
         </div>
 
-        <!-- Nội dung chi tiết -->
         <div>
-          <label class="block text-xs font-bold text-cocoa/80 mb-1.5">Chi tiết đáng yêu *</label>
-          <textarea id="note-content" rows="3" required placeholder="Ghi lại chi tiết để sau này hai đứa đọc lại cùng cười nhé..."
-            class="w-full px-4 py-2.5 rounded-2xl bg-white border border-pink-200 focus:border-roseSoft outline-none text-sm text-cocoa resize-none"></textarea>
-        </div>
-
-        <!-- Đính kèm ảnh Polaroid (Upload file hoặc dán link) -->
-        <div class="bg-blush/40 p-3.5 rounded-2xl border border-pink-100">
-          <label class="block text-xs font-bold text-roseDeep mb-2 flex items-center gap-1.5">
-            <i data-lucide="image" class="w-4 h-4"></i>
-            <span>Ảnh Polaroid đính kèm (Không bắt buộc)</span>
-          </label>
-          
-          <div class="flex flex-col sm:flex-row gap-2">
-            <label class="cursor-pointer shrink-0 inline-flex items-center justify-center gap-1.5 px-3.5 py-2 rounded-xl bg-white hover:bg-pink-50 text-roseDeep border border-pink-200 text-xs font-bold transition">
-              <i data-lucide="camera" class="w-3.5 h-3.5"></i>
-              <span>Tải ảnh từ máy</span>
-              <input type="file" id="note-image-file" accept="image/*" class="hidden" onchange="handleImageUpload(event)" />
-            </label>
-            <input type="url" id="note-image-url" oninput="previewImageUrl(this.value)" placeholder="Hoặc dán đường link ảnh tại đây..."
-              class="flex-1 px-3 py-2 rounded-xl bg-white border border-pink-200 text-xs text-cocoa outline-none" />
-          </div>
-
-          <!-- Xem trước ảnh -->
-          <div id="image-preview-box" class="hidden mt-3 relative w-32 h-32 mx-auto bg-white p-1.5 pb-5 rounded-lg shadow border border-pink-100">
-            <img id="image-preview-img" src="" alt="Preview" class="w-full h-full object-cover rounded" />
-            <button type="button" onclick="clearNoteImage()" title="Xóa ảnh"
-              class="absolute -top-2 -right-2 w-6 h-6 rounded-full bg-roseDeep text-white flex items-center justify-center shadow text-xs">
-              ✕
-            </button>
+          <label class="block text-xs font-bold text-gray-600 mb-1">Ảnh Polaroid (Tùy chọn)</label>
+          <input type="file" id="mem-image-file" accept="image/*" onchange="handleImageUpload(event)" class="w-full text-xs text-gray-500 file:mr-3 file:py-1.5 file:px-3 file:rounded-full file:border-0 file:text-xs file:font-bold file:bg-pink-100 file:text-pink-600 hover:file:bg-pink-200" />
+          <div id="mem-image-preview-box" class="hidden mt-2 relative inline-block">
+            <img id="mem-image-preview" src="" class="h-28 w-auto rounded-xl object-cover border border-pink-200" />
+            <button type="button" onclick="clearUploadedImage()" class="absolute -top-2 -right-2 w-6 h-6 rounded-full bg-rose-500 text-white text-xs flex items-center justify-center shadow">✕</button>
           </div>
         </div>
 
-        <div class="pt-2 flex items-center justify-end gap-2.5">
-          <button type="button" onclick="closeNoteModal()"
-            class="px-5 py-2.5 rounded-2xl bg-gray-100 hover:bg-gray-200 text-cocoa text-sm font-bold transition">
-            Hủy
-          </button>
-          <button type="submit"
-            class="px-6 py-2.5 rounded-2xl bg-gradient-to-r from-roseSoft to-roseDeep text-white text-sm font-bold shadow-md hover:shadow-lg transition">
-            Lưu Vào Sổ Tay 💖
-          </button>
+        <div>
+          <label class="block text-xs font-bold text-gray-600 mb-1">Lời nhắn / Ghi chú chi tiết *</label>
+          <textarea id="mem-note" rows="3" placeholder="Kể lại khoảnh khắc đó hoặc điều anh muốn nhắn cho em..." class="w-full px-3.5 py-2 rounded-xl border border-pink-200 text-sm focus:outline-none focus:border-pink-500"></textarea>
         </div>
-      </form>
+      </div>
+
+      <div class="flex gap-2 mt-5">
+        <button onclick="closeMemoryModal()" class="flex-1 py-2.5 rounded-xl bg-gray-100 text-gray-600 text-xs font-bold">Hủy</button>
+        <button onclick="saveMemory()" class="flex-1 py-2.5 rounded-xl bg-pink-500 text-white text-xs font-bold hover:bg-pink-600">Lưu Kỷ Niệm</button>
+      </div>
     </div>
   </div>
 
-  <!-- MODAL 2: CHỈNH SỬA THÔNG TIN BẠN GÁI & NGÀY KỶ NIỆM -->
-  <div id="profile-modal" class="fixed inset-0 z-50 hidden items-center justify-center p-4 bg-cocoa/40 backdrop-blur-sm">
-    <div class="bg-cream w-full max-w-md rounded-3xl p-6 shadow-2xl border-2 border-white relative">
-      <button onclick="closeProfileModal()" class="absolute top-5 right-5 p-2 rounded-full bg-pink-50 text-cocoa/70">
-        <i data-lucide="x" class="w-5 h-5"></i>
-      </button>
-      <h3 class="font-hand text-2xl font-bold text-roseDeep mb-4">Cài Đặt Góc Nhỏ ✨</h3>
-      <form onsubmit="saveProfile(event)" class="space-y-4">
-        <div>
-          <label class="block text-xs font-bold text-cocoa/80 mb-1">Tiêu đề sổ tay</label>
-          <input type="text" id="input-book-title" required
-            class="w-full px-4 py-2.5 rounded-2xl bg-white border border-pink-200 text-sm text-cocoa outline-none" />
-        </div>
-        <div>
-          <label class="block text-xs font-bold text-cocoa/80 mb-1">Biệt danh dễ thương của bạn gái</label>
-          <input type="text" id="input-nickname" required
-            class="w-full px-4 py-2.5 rounded-2xl bg-white border border-pink-200 text-sm text-cocoa outline-none" />
-        </div>
-        <div>
-          <label class="block text-xs font-bold text-cocoa/80 mb-1">Ngày bắt đầu yêu nhau</label>
-          <input type="date" id="input-start-date" required
-            class="w-full px-4 py-2.5 rounded-2xl bg-white border border-pink-200 text-sm text-cocoa outline-none" />
-        </div>
-        <div>
-          <label class="block text-xs font-bold text-cocoa/80 mb-1">Lời đề tựa ngắn</label>
-          <textarea id="input-subtitle" rows="2"
-            class="w-full px-4 py-2.5 rounded-2xl bg-white border border-pink-200 text-sm text-cocoa outline-none resize-none"></textarea>
-        </div>
-        <div class="flex justify-end gap-2 pt-2">
-          <button type="button" onclick="closeProfileModal()" class="px-4 py-2 rounded-xl bg-gray-100 text-sm font-bold">Đóng</button>
-          <button type="submit" class="px-5 py-2 rounded-xl bg-roseDeep text-white text-sm font-bold shadow">Cập nhật 💕</button>
-        </div>
-      </form>
-    </div>
-  </div>
-
-  <!-- MODAL 3: VIẾT BỨC THƯ TƯƠNG LAI -->
-  <div id="letter-modal" class="fixed inset-0 z-50 hidden items-center justify-center p-4 bg-cocoa/40 backdrop-blur-sm">
-    <div class="bg-cream w-full max-w-lg rounded-3xl p-6 shadow-2xl border-2 border-white relative">
-      <button onclick="closeLetterModal()" class="absolute top-5 right-5 p-2 rounded-full bg-pink-50 text-cocoa/70">
-        <i data-lucide="x" class="w-5 h-5"></i>
-      </button>
-      <h3 class="font-hand text-2xl font-bold text-roseDeep mb-1">Viết Thư Gửi Em 💌</h3>
-      <p class="text-xs text-cocoa/65 mb-4">Những lời nhắn nhủ chân thành để ngày em mở trang web này sẽ mỉm cười thật tươi.</p>
-      
-      <form onsubmit="saveLetter(event)" class="space-y-4">
-        <div>
-          <label class="block text-xs font-bold text-cocoa/80 mb-1">Tiêu đề ngoài phong bì</label>
-          <input type="text" id="input-letter-title" required
-            class="w-full px-4 py-2.5 rounded-2xl bg-white border border-pink-200 text-sm text-cocoa outline-none" />
-        </div>
-        <div>
-          <label class="block text-xs font-bold text-cocoa/80 mb-1">Nội dung bức thư</label>
-          <textarea id="input-letter-content" rows="7" required
-            class="w-full px-4 py-3 rounded-2xl bg-white border border-pink-200 font-hand text-base text-cocoa outline-none leading-relaxed"></textarea>
-        </div>
-        <div class="flex justify-end gap-2">
-          <button type="button" onclick="closeLetterModal()" class="px-4 py-2 rounded-xl bg-gray-100 text-sm font-bold">Hủy</button>
-          <button type="submit" class="px-5 py-2 rounded-xl bg-roseDeep text-white text-sm font-bold shadow">Niêm Phong Thư 💌</button>
-        </div>
-      </form>
-    </div>
-  </div>
-
-  <!-- MODAL 4: ĐIỀU BẤT NGỜ / TRÌNH CHIẾU KỶ NIỆM (CHẾ ĐỘ TẶNG EM) -->
-  <div id="surprise-modal" class="fixed inset-0 z-50 hidden items-center justify-center p-4 bg-rose-950/50 backdrop-blur-md">
-    <div class="bg-gradient-to-b from-white via-blush/80 to-lavender/80 w-full max-w-lg rounded-3xl p-7 sm:p-9 shadow-2xl border-4 border-white text-center relative overflow-hidden">
-      <button onclick="closeSurpriseModal()" class="absolute top-4 right-4 p-2 rounded-full bg-white/80 hover:bg-white text-roseDeep shadow-sm">
-        <i data-lucide="x" class="w-5 h-5"></i>
-      </button>
-
-      <div id="surprise-emoji" class="text-6xl mb-4 animate-bounce">💝</div>
-      <h3 id="surprise-heading" class="font-hand text-2xl sm:text-3xl font-bold text-roseDeep mb-3">
-        Gửi Công Chúa Nhỏ Của Anh!
+  <!-- 4. Edit Secret Letter Modal -->
+  <div id="modal-letter" class="fixed inset-0 z-50 hidden bg-black/40 backdrop-blur-sm flex items-center justify-center p-4">
+    <div class="bg-white rounded-3xl max-w-md w-full p-6 shadow-2xl border-2 border-pink-100 animate-pop-in">
+      <h3 class="text-lg font-bold text-pink-600 mb-3 flex items-center gap-2">
+        <i data-lucide="mail-heart" class="w-5 h-5"></i> Viết Bức Thư Bí Mật
       </h3>
-      <div id="surprise-body" class="bg-white/90 rounded-2xl p-5 shadow-inner border border-pink-100 text-cocoa font-hand text-lg leading-relaxed mb-6">
-        <!-- Nội dung bất ngờ hoặc slide thẻ kỷ niệm -->
-      </div>
-
-      <div id="surprise-controls" class="flex items-center justify-center gap-3">
-        <button onclick="triggerConfettiBurst()" class="px-5 py-2.5 rounded-full bg-roseDeep text-white font-bold text-sm shadow-md hover:scale-105 transition">
-          Bắn Thêm Tim Nhé 💖
-        </button>
+      <textarea id="input-letter-body" rows="6" class="w-full px-3.5 py-2.5 rounded-xl border border-pink-200 text-sm focus:outline-none focus:border-pink-500 mb-3" placeholder="Viết tâm tư gửi em..."></textarea>
+      <input type="text" id="input-letter-sign" class="w-full px-3.5 py-2 rounded-xl border border-pink-200 text-sm focus:outline-none focus:border-pink-500" placeholder="Chữ ký cuối thư..." />
+      <div class="flex gap-2 mt-4">
+        <button onclick="closeLetterModal()" class="flex-1 py-2.5 rounded-xl bg-gray-100 text-gray-600 text-xs font-bold">Hủy</button>
+        <button onclick="saveLetter()" class="flex-1 py-2.5 rounded-xl bg-pink-500 text-white text-xs font-bold hover:bg-pink-600">Lưu Thư</button>
       </div>
     </div>
   </div>
 
-  <!-- MODAL 5: XÁC NHẬN XÓA THẺ (THAY CHO CONFIRM() THÔ CỨNG) -->
-  <div id="confirm-delete-modal" class="fixed inset-0 z-50 hidden items-center justify-center p-4 bg-cocoa/40 backdrop-blur-sm">
-    <div class="bg-white w-full max-w-sm rounded-3xl p-6 shadow-xl border-2 border-pink-100 text-center">
-      <div class="text-4xl mb-2">🥺</div>
-      <h4 class="font-hand text-xl font-bold text-cocoa">Xóa mảnh ghi chú này?</h4>
-      <p class="text-xs text-cocoa/70 mt-1 mb-5">Mảnh ký ức này sẽ biến mất khỏi sổ tay đó nha.</p>
-      <div class="flex justify-center gap-3">
-        <button onclick="closeDeleteModal()" class="px-5 py-2 rounded-xl bg-gray-100 hover:bg-gray-200 text-sm font-bold text-cocoa">Giữ lại</button>
-        <button id="btn-confirm-delete-action" class="px-5 py-2 rounded-xl bg-roseDeep hover:bg-rose-600 text-sm font-bold text-white shadow">Xóa luôn</button>
-      </div>
-    </div>
-  </div>
-
-  <!-- MODAL 6: NGĂN KÉO QUẢN LÝ DANH SÁCH RIÊNG TƯ (CHỈ DÀNH CHO CHẾ ĐỘ CỦA ANH) -->
-  <div id="manage-drawer-modal" class="fixed inset-0 z-50 hidden justify-end bg-cocoa/45 backdrop-blur-sm">
-    <div class="bg-cream w-full max-w-xl h-full shadow-2xl border-l-2 border-white flex flex-col">
-      <!-- Header ngăn kéo -->
-      <div class="p-5 sm:p-6 bg-white border-b border-pink-100 flex items-center justify-between">
-        <div>
-          <div class="inline-flex items-center gap-1.5 text-xs font-bold text-lavenderDeep bg-lavender/70 px-2.5 py-0.5 rounded-full mb-1">
-            <i data-lucide="shield-check" class="w-3.5 h-3.5"></i>
-            <span>Khu vực riêng tư của anh</span>
-          </div>
-          <h3 class="font-hand text-2xl font-bold text-cocoa">Danh Sách Bí Mật Đã Ghi</h3>
-        </div>
-        <button onclick="closeManageDrawer()" class="p-2 rounded-full bg-pink-50 hover:bg-pink-100 text-cocoa/70 transition">
-          <i data-lucide="x" class="w-5 h-5"></i>
-        </button>
-      </div>
-
-      <!-- Thanh tìm kiếm & thêm nhanh trong ngăn kéo -->
-      <div class="p-4 bg-blush/30 border-b border-pink-100 flex items-center gap-2.5">
-        <div class="relative flex-1">
-          <i data-lucide="search" class="w-4 h-4 text-roseSoft absolute left-3.5 top-1/2 -translate-y-1/2"></i>
-          <input type="text" id="drawer-search-input" oninput="renderManageDrawerList()" placeholder="Tìm nhanh trong danh sách bí mật..."
-            class="w-full pl-9 pr-3 py-2 rounded-xl bg-white border border-pink-200 text-sm text-cocoa outline-none" />
-        </div>
-        <button onclick="closeManageDrawer(); openNoteModal();"
-          class="shrink-0 px-3.5 py-2 rounded-xl bg-roseDeep text-white text-xs font-bold flex items-center gap-1 shadow-sm hover:bg-rose-600 transition">
-          <i data-lucide="plus" class="w-4 h-4"></i>
-          <span>Thêm mới</span>
-        </button>
-      </div>
-
-      <!-- Danh sách các ghi chú để sửa / xóa -->
-      <div id="manage-drawer-list" class="flex-1 overflow-y-auto p-4 sm:p-5 space-y-3">
-        <!-- Render bằng JS -->
-      </div>
-    </div>
-  </div>
-
-  <!-- TOAST THÔNG BÁO MỀM MẠI -->
-  <div id="toast-container" class="fixed bottom-5 right-5 z-50 flex flex-col gap-2 pointer-events-none"></div>
+  <!-- Firebase SDK (Compat v10 for single-file HTML) -->
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
 
   <script>
-    // ==================== CẤU HÌNH DANH MỤC & DỮ LIỆU MẪU ====================
-    const CATEGORIES = [
-      { id: 'all', label: 'Tất cả chủ đề', icon: '🌸', badgeBg: 'bg-pink-100 text-roseDeep', washi: '' },
-      { id: 'food', label: 'Món khoái khẩu & Sở thích', icon: '🧋', badgeBg: 'bg-amber-100 text-amber-800', washi: 'washi-peach' },
-      { id: 'habit', label: 'Thói quen đáng yêu', icon: '🌷', badgeBg: 'bg-pink-100 text-roseDeep', washi: '' },
-      { id: 'quote', label: 'Câu nói & Khoảnh khắc vui', icon: '💌', badgeBg: 'bg-purple-100 text-purple-800', washi: 'washi-lavender' },
-      { id: 'wish', label: 'Quà muốn tặng & Dự định', icon: '🎁', badgeBg: 'bg-emerald-100 text-emerald-800', washi: 'washi-mint' },
-      { id: 'reason', label: 'Lý do anh thích em', icon: '✨', badgeBg: 'bg-rose-100 text-rose-700', washi: '' },
-    ];
+    // =========================================================================
+    // CẤU HÌNH FIREBASE CỦA BẠN (ĐÃ GẮN SẴN)
+    // =========================================================================
+    const FIREBASE_CONFIG = {
+      apiKey: "AIzaSyDhUJrWUKBCX7FRyfdmcnfc8uZ5SYGN5o4",
+      authDomain: "tuiyeuchip-b8f34.firebaseapp.com",
+      projectId: "tuiyeuchip-b8f34",
+      storageBucket: "tuiyeuchip-b8f34.firebasestorage.app",
+      messagingSenderId: "284496897502",
+      appId: "1:284496897502:web:27386811c0cb947a35294f",
+      measurementId: "G-T145CVEHQC"
+    };
 
-    const STICKERS = ['🧸', '🌸', '🧋', '🍓', '🐰', '💌', '✨', '🎀', '🍰', '🌙', '🌷', '🥰'];
+    const FIRESTORE_DOC_PATH = "scrapbooks/main_scrapbook";
+
+    // =========================================================================
+    // DỮ LIỆU MẶC ĐỊNH BAN ĐẦU
+    // =========================================================================
+    const STICKERS = ["💖", "🥰", "🍓", "🧸", "🧋", "🌸", "✨", "🎀", "🐱", "🍰", "🌙", "💌"];
 
     const DEFAULT_DATA = {
       profile: {
-        title: 'Góc Nhỏ Về Em ✨',
-        nickname: 'Công Chúa Nhỏ',
-        startDate: new Date(Date.now() - 100 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
-        subtitle: 'Nơi anh lén ghi lại từng điều dễ thương, thói quen nhỏ và những khoảnh khắc bên em.'
+        title: "Góc Nhỏ Về Chip 💖",
+        subtitle: "Nơi lưu giữ những điều đáng yêu nhất về em mỗi ngày",
+        startDate: "2025-01-01",
+        adminPassword: "1234"
       },
-      notes: [
-        {
-          id: 'note-1',
-          category: 'food',
-          title: 'Trà sữa ô long kem cheese ít đường',
-          date: new Date().toISOString().split('T')[0],
-          sticker: '🧋',
-          content: 'Mỗi lần hơi buồn ngủ hoặc dỗi nhẹ là chỉ cần một ly trà sữa ô long kem cheese 50% đường, nhiều trân châu trắng là mắt sáng rực lên ngay.',
-          image: ''
-        },
-        {
-          id: 'note-2',
-          category: 'habit',
-          title: 'Hay chu môi khi tập trung suy nghĩ',
-          date: new Date().toISOString().split('T')[0],
-          sticker: '🐰',
-          content: 'Lúc chọn món ăn hoặc đọc tin nhắn dài là em hay vô thức chu môi nhẹ và nghiêng đầu sang bên trái, nhìn cưng xỉu luôn.',
-          image: ''
-        },
-        {
-          id: 'note-3',
-          category: 'quote',
-          title: 'Câu cửa miệng: "Anh đoán xem~"',
-          date: new Date().toISOString().split('T')[0],
-          sticker: '💌',
-          content: 'Mỗi khi muốn kể chuyện gì vui hay muốn đi ăn món gì đó là y như rằng bắt anh đoán 3 lần mới chịu bật mí.',
-          image: ''
-        },
-        {
-          id: 'note-4',
-          category: 'wish',
-          title: 'Chuyến đi Đà Lạt săn mây cùng nhau',
-          date: new Date().toISOString().split('T')[0],
-          sticker: '🎀',
-          content: 'Em từng bảo thích mặc áo len ấm, uống sữa đậu nành nóng ở chợ đêm Đà Lạt và chụp thật nhiều ảnh phim.',
-          image: ''
-        },
-        {
-          id: 'note-5',
-          category: 'reason',
-          title: 'Nụ cười làm tan biến mọi mệt mỏi',
-          date: new Date().toISOString().split('T')[0],
-          sticker: '✨',
-          content: 'Dù cả ngày có bận rộn thế nào, chỉ cần thấy em cười tít mắt là anh thấy mọi thứ đều nhẹ nhàng và đáng yêu trở lại.',
-          image: ''
-        }
-      ],
       letter: {
-        title: 'Gửi Em Yêu Của Anh...',
-        content: 'Cảm ơn em đã bước vào cuộc sống của anh và biến những ngày bình thường trở nên thật rực rỡ.\n\nAnh làm góc nhỏ này để lưu giữ từng thói quen, từng sở thích và mọi điều đáng yêu về em — để sau này mỗi lần hai đứa mở lại, mình đều nhớ rằng anh đã thương em nhiều đến nhường nào 💕',
-        updatedAt: 'Viết dành riêng cho em 💕'
-      }
+        body: "Gửi em bé của anh,\n\nAnh làm góc nhỏ này để mỗi khi em thấy mệt mỏi hay buồn chán, em có thể mở ra và thấy mình được yêu thương nhiều đến nhường nào.\n\nCảm ơn em vì đã luôn ở bên cạnh và làm cho những ngày bình thường của anh trở nên đặc biệt hơn bao giờ hết!",
+        sign: "— Thương em thật nhiều ❤️"
+      },
+      memories: [
+        {
+          id: "m1",
+          title: "Nụ cười làm anh đổ gục từ lần đầu",
+          date: "2025-01-01",
+          tag: "Kỷ niệm của tụi mình",
+          sticker: "💖",
+          image: "",
+          note: "Hôm đó trời hơi se lạnh, nhưng chỉ cần nhìn thấy em cười là anh thấy ấm áp cả một ngày dài."
+        },
+        {
+          id: "m2",
+          title: "Mỗi lần em tập trung ăn món ngon",
+          date: "2025-02-14",
+          tag: "Thói quen đáng yêu",
+          sticker: "🍓",
+          image: "",
+          note: "Mắt em sáng rực lên mỗi khi đồ ăn được bưng ra, nhìn cưng không chịu được!"
+        },
+        {
+          id: "m3",
+          title: "Trà sữa ít đường nhiều trân châu",
+          date: "2025-03-08",
+          tag: "Món em thích",
+          sticker: "🧋",
+          image: "",
+          note: "Ghi chú lại để lần nào đi đón em anh cũng nhớ mua đúng vị em thích nhất."
+        }
+      ]
     };
 
-    function loadAppData() {
+    // =========================================================================
+    // TRẠNG THÁI ỨNG DỤNG
+    // =========================================================================
+    let appData = JSON.parse(JSON.stringify(DEFAULT_DATA));
+    let currentMode = "view"; // Mặc định luôn là 'view' (Tặng Em)
+    let isUnlocked = false;
+    let db = null;
+    let isCloudConnected = false;
+
+    // Mystery deck state
+    let unseenIds = [];
+    let currentRevealedId = null;
+    let selectedSticker = "💖";
+    let uploadedImageBase64 = "";
+
+    // =========================================================================
+    // KHỞI TẠO & KẾT NỐI FIREBASE CLOUD
+    // =========================================================================
+    function initApp() {
+      lucide.createIcons();
+      createFloatingHearts();
+      renderStickerPicker();
+
+      // Khởi tạo Firebase
       try {
-        const raw = localStorage.getItem(STORAGE_KEY);
-        if (raw) {
-          const parsed = JSON.parse(raw);
-          return {
-            profile: { ...DEFAULT_DATA.profile, ...(parsed.profile || {}) },
-            notes: Array.isArray(parsed.notes) ? parsed.notes : DEFAULT_DATA.notes,
-            letter: { ...DEFAULT_DATA.letter, ...(parsed.letter || {}) }
-          };
+        if (FIREBASE_CONFIG && FIREBASE_CONFIG.apiKey && !FIREBASE_CONFIG.apiKey.includes("YOUR_")) {
+          firebase.initializeApp(FIREBASE_CONFIG);
+          db = firebase.firestore();
+          listenToCloudData();
+        } else {
+          setCloudStatus(false, "Chế độ Offline (Local)");
+          loadLocalFallback();
         }
-      } catch (e) {
-        console.warn('Không thể đọc dữ liệu từ localStorage:', e);
-      }
-      return JSON.parse(JSON.stringify(DEFAULT_DATA));
-    }
-
-    function saveAppData() {
-      try {
-        localStorage.setItem(STORAGE_KEY, JSON.stringify(appData));
-      } catch (e) {
-        showToast('Bộ nhớ trình duyệt đã đầy, hãy xuất file Backup nhé!', 'error');
+      } catch (err) {
+        console.error("Firebase init error:", err);
+        setCloudStatus(false, "Lỗi kết nối Cloud");
+        loadLocalFallback();
       }
     }
 
-    function createFloatingHearts() {
-      const container = document.getElementById('floating-hearts-container');
-      if (!container) return;
-      const icons = ['💗', '🌸', '✨', '💕', '🧸'];
-      container.innerHTML = '';
-      for (let i = 0; i < 14; i++) {
-        const el = document.createElement('span');
-        el.className = 'floating-heart text-sm sm:text-base select-none';
-        el.textContent = icons[i % icons.length];
-        el.style.left = `${Math.random() * 100}%`;
-        el.style.animationDuration = `${12 + Math.random() * 14}s`;
-        el.style.animationDelay = `${-Math.random() * 15}s`;
-        container.appendChild(el);
+    function setCloudStatus(connected, text) {
+      isCloudConnected = connected;
+      const dot = document.getElementById("cloud-dot");
+      const label = document.getElementById("cloud-text");
+      label.textContent = text;
+      if (connected) {
+        dot.className = "w-2 h-2 rounded-full bg-emerald-500";
+      } else {
+        dot.className = "w-2 h-2 rounded-full bg-amber-400";
       }
+    }
+
+    function listenToCloudData() {
+      const docRef = db.doc(FIRESTORE_DOC_PATH);
+      docRef.onSnapshot(
+        (docSnap) => {
+          setCloudStatus(true, "Đã kết nối Cloud ✨");
+          if (docSnap.exists) {
+            const remote = docSnap.data();
+            appData = {
+              profile: { ...DEFAULT_DATA.profile, ...(remote.profile || {}) },
+              letter: { ...DEFAULT_DATA.letter, ...(remote.letter || {}) },
+              memories: Array.isArray(remote.memories) ? remote.memories : DEFAULT_DATA.memories
+            };
+          } else {
+            // Lần đầu tiên chạy trên Cloud -> đẩy dữ liệu mẫu lên Firestore
+            saveAppData();
+          }
+          refreshAllUI();
+        },
+        (error) => {
+          console.error("Firestore read error:", error);
+          setCloudStatus(false, "Chưa bật Firestore Rules");
+          loadLocalFallback();
+        }
+      );
+    }
+
+    function loadLocalFallback() {
+      const saved = localStorage.getItem("love_scrapbook_fallback");
+      if (saved) {
+        try {
+          appData = JSON.parse(saved);
+        } catch (e) {}
+      }
+      refreshAllUI();
+    }
+
+    async function saveAppData() {
+      // Lưu dự phòng local
+      localStorage.setItem("love_scrapbook_fallback", JSON.stringify(appData));
+
+      if (db) {
+        try {
+          setCloudStatus(true, "Đang đồng bộ...");
+          await db.doc(FIRESTORE_DOC_PATH).set(appData);
+          setCloudStatus(true, "Đã lưu lên Cloud ✨");
+        } catch (err) {
+          console.error("Save error:", err);
+          alert("Không thể lưu lên Cloud! Hãy kiểm tra lại tab Rules trong Firestore Database của bạn.");
+          setCloudStatus(false, "Lỗi lưu Cloud");
+        }
+      }
+      refreshAllUI();
+    }
+
+    // =========================================================================
+    // CẬP NHẬT GIAO DIỆN (RENDER)
+    // =========================================================================
+    function refreshAllUI() {
+      renderProfile();
+      renderLetter();
+      updateMysteryDeckStats();
+      renderAdminManageList();
+      lucide.createIcons();
     }
 
     function renderProfile() {
-      const { title, nickname, startDate, subtitle } = appData.profile;
-      document.getElementById('nav-brand-title').textContent = title;
-      document.getElementById('hero-title').textContent = title;
-      document.getElementById('hero-nickname').textContent = nickname;
-      document.getElementById('hero-subtitle').textContent = subtitle;
+      document.getElementById("display-title").textContent = appData.profile.title || "Góc Nhỏ Về Em 💖";
+      document.getElementById("display-subtitle").textContent = appData.profile.subtitle || "";
 
-      const start = new Date(startDate);
+      // Tính số ngày yêu
+      const start = new Date(appData.profile.startDate || "2025-01-01");
       const now = new Date();
-      const diffDays = Math.max(1, Math.floor((now - start) / (1000 * 60 * 60 * 24)));
-      document.getElementById('days-together-count').textContent = isNaN(diffDays) ? 1 : diffDays;
+      const diffTime = Math.max(0, now - start);
+      const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
+      document.getElementById("days-counter").textContent = diffDays.toLocaleString("vi-VN");
     }
 
-    function openProfileModal() {
-      document.getElementById('input-book-title').value = appData.profile.title;
-      document.getElementById('input-nickname').value = appData.profile.nickname;
-      document.getElementById('input-start-date').value = appData.profile.startDate;
-      document.getElementById('input-subtitle').value = appData.profile.subtitle;
-      toggleModal('profile-modal', true);
+    function renderLetter() {
+      document.getElementById("letter-body-text").textContent = appData.letter.body || "";
+      document.getElementById("letter-sign-text").textContent = appData.letter.sign || "";
     }
 
-    function closeProfileModal() {
-      toggleModal('profile-modal', false);
-    }
+    // =========================================================================
+    // SÂN KHẤU RÚT THẺ BÍ MẬT (MYSTERY DECK)
+    // =========================================================================
+    function updateMysteryDeckStats() {
+      const total = appData.memories.length;
+      document.getElementById("mystery-total-count").textContent = total;
+      document.getElementById("admin-count").textContent = total;
 
-    function saveProfile(e) {
-      e.preventDefault();
-      appData.profile.title = document.getElementById('input-book-title').value.trim();
-      appData.profile.nickname = document.getElementById('input-nickname').value.trim();
-      appData.profile.startDate = document.getElementById('input-start-date').value;
-      appData.profile.subtitle = document.getElementById('input-subtitle').value.trim();
-      saveAppData();
-      renderProfile();
-      closeProfileModal();
-      showToast('Đã cập nhật thông tin góc nhỏ ✨');
-    }
+      // Đồng bộ danh sách thẻ chưa mở
+      const validIds = new Set(appData.memories.map((m) => m.id));
+      unseenIds = unseenIds.filter((id) => validIds.has(id));
 
-    // ==================== TRẠNG THÁI ỨNG DỤNG ====================
-    const STORAGE_KEY = 'love_scrapbook_data_v1';
-    let appData = loadAppData();
-    let currentCategory = 'all';
-    let currentMode = 'edit'; // 'edit' | 'gift'
-    let currentNoteImageBase64 = '';
-    let noteIdToDelete = null;
-    let slideshowIndex = 0;
-
-    // Trạng thái sân khấu khám phá bí mật
-    let discoveredIds = new Set();
-    let lovedIds = new Set();
-    let activeRevealNote = null;
-    let revealFlowType = 'random'; // 'random' | 'journey'
-    let journeyIndex = 0;
-
-    // ==================== KHỞI TẠO ====================
-    window.addEventListener('DOMContentLoaded', () => {
-      createFloatingHearts();
-      renderStickerPicker();
-      renderProfile();
-      renderCategoryFilters();
-      updateMysteryStageSummary();
-      renderLetter();
-      lucide.createIcons();
-    });
-// ... existing code ... -->
-    // ==================== CHUYỂN ĐỔI CHẾ ĐỘ (GHI CHÉP VS TẶNG EM) ====================
-    function setAppMode(mode) {
-      currentMode = mode;
-      const btnEdit = document.getElementById('btn-mode-edit');
-      const btnGift = document.getElementById('btn-mode-gift');
-      const editToolbar = document.getElementById('edit-mode-toolbar');
-      const btnEditProfile = document.getElementById('btn-edit-profile');
-      const btnEditLetter = document.getElementById('btn-edit-letter');
-      const backupControls = document.getElementById('backup-controls');
-      const giftActions = document.getElementById('gift-mode-actions');
-
-      if (mode === 'gift') {
-        document.body.classList.add('gift-mode');
-        btnGift.className = 'flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-xs sm:text-sm font-semibold transition-all duration-300 bg-gradient-to-r from-roseSoft to-roseDeep text-white shadow-sm';
-        btnEdit.className = 'flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-xs sm:text-sm font-semibold transition-all duration-300 text-cocoa/75 hover:text-roseDeep';
-        
-        editToolbar.classList.add('hidden');
-        btnEditProfile.classList.add('hidden');
-        btnEditLetter.classList.add('hidden');
-        backupControls.classList.add('hidden');
-        giftActions.classList.remove('hidden');
-        closeManageDrawer();
-        
-        // Đóng thẻ đang mở nếu có để tạo bất ngờ từ đầu cho bạn gái
-        closeRevealedCard();
-        triggerConfettiBurst();
-        showToast(`Chào mừng ${appData.profile.nickname} đến với góc bí mật dành riêng cho em ✨`);
-      } else {
-        document.body.classList.remove('gift-mode');
-        btnEdit.className = 'flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-xs sm:text-sm font-semibold transition-all duration-300 bg-roseDeep text-white shadow-sm';
-        btnGift.className = 'flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-xs sm:text-sm font-semibold transition-all duration-300 text-cocoa/75 hover:text-roseDeep';
-
-        editToolbar.classList.remove('hidden');
-        btnEditProfile.classList.remove('hidden');
-        btnEditLetter.classList.remove('hidden');
-        backupControls.classList.remove('hidden');
-        giftActions.classList.add('hidden');
+      if (unseenIds.length === 0 && total > 0) {
+        unseenIds = appData.memories.map((m) => m.id);
       }
 
-      updateMysteryStageSummary();
-      lucide.createIcons();
-    }
-    // ==================== DANH MỤC & SÂN KHẤU KHÁM PHÁ BÍ MẬT ====================
-    function renderCategoryFilters() {
-      const container = document.getElementById('category-filters');
-      container.innerHTML = CATEGORIES.map(cat => {
-        const isActive = currentCategory === cat.id;
-        return `
-          <button onclick="selectCategory('${cat.id}')"
-            class="shrink-0 inline-flex items-center gap-1.5 px-4 py-2 rounded-2xl text-xs sm:text-sm font-bold transition-all ${
-              isActive 
-                ? 'bg-cocoa text-white shadow-md scale-[1.02]' 
-                : 'bg-white/90 hover:bg-pink-50 text-cocoa/80 border border-pink-100'
-            }">
-            <span>${cat.icon}</span>
-            <span>${cat.label}</span>
-          </button>
-        `;
-      }).join('');
+      // Nếu đang hiển thị 1 thẻ mà thẻ đó vừa bị sửa nội dung -> render lại thẻ đó
+      if (currentRevealedId && validIds.has(currentRevealedId)) {
+        const mem = appData.memories.find((m) => m.id === currentRevealedId);
+        renderRevealedCard(mem, false);
+      } else if (currentRevealedId && !validIds.has(currentRevealedId)) {
+        document.getElementById("revealed-stage").classList.add("hidden");
+        currentRevealedId = null;
+      }
     }
 
-    function getFilteredNotesPool() {
-      if (currentCategory === 'all') return appData.notes;
-      return appData.notes.filter(n => n.category === currentCategory);
-    }
-
-    function selectCategory(catId) {
-      currentCategory = catId;
-      renderCategoryFilters();
-      closeRevealedCard();
-      updateMysteryStageSummary();
-    }
-
-    function updateMysteryStageSummary() {
-      const pool = getFilteredNotesPool();
-      const boxStage = document.getElementById('mystery-box-stage');
-      const revealedStage = document.getElementById('revealed-card-stage');
-      const emptyState = document.getElementById('empty-state');
-
-      // Cập nhật badge số lượng ở nút Quản lý danh sách
-      const manageBadge = document.getElementById('manage-count-badge');
-      if (manageBadge) manageBadge.textContent = appData.notes.length;
-
-      // Cập nhật tiến độ đã khám phá trong chủ đề hiện tại
-      const discoveredInPool = pool.filter(n => discoveredIds.has(n.id)).length;
-      document.getElementById('discovered-count').textContent = discoveredInPool;
-      document.getElementById('total-pool-count').textContent = pool.length;
-
-      if (pool.length === 0) {
-        boxStage.classList.add('hidden');
-        revealedStage.classList.add('hidden');
-        emptyState.classList.remove('hidden');
+    function drawRandomMemory() {
+      const total = appData.memories.length;
+      if (total === 0) {
+        alert("Chưa có kỷ niệm nào trong hộp. Hãy chuyển sang chế độ 'Của Anh' để thêm nhé!");
         return;
       }
 
-      emptyState.classList.add('hidden');
-      const catObj = CATEGORIES.find(c => c.id === currentCategory);
-      const catText = currentCategory === 'all' ? 'về em' : `thuộc mục "${catObj.label}"`;
-      document.getElementById('mystery-stage-title').textContent =
-        `Có ${pool.length} điều thú vị ${catText} đang được cất giấu ở đây...`;
+      if (unseenIds.length === 0) {
+        unseenIds = appData.memories.map((m) => m.id);
+      }
 
-      if (activeRevealNote) {
-        boxStage.classList.add('hidden');
-        revealedStage.classList.remove('hidden');
+      // Tránh rút trùng thẻ vừa xem ngay trước đó nếu có nhiều hơn 1 thẻ
+      let candidates = unseenIds;
+      if (candidates.length > 1 && currentRevealedId) {
+        candidates = candidates.filter((id) => id !== currentRevealedId);
+      }
+
+      const randomIndex = Math.floor(Math.random() * candidates.length);
+      const chosenId = candidates[randomIndex];
+
+      // Xóa khỏi danh sách chưa mở
+      unseenIds = unseenIds.filter((id) => id !== chosenId);
+      currentRevealedId = chosenId;
+
+      const memory = appData.memories.find((m) => m.id === chosenId);
+      renderRevealedCard(memory, true);
+      triggerHeartConfetti();
+
+      // Cập nhật tiến độ
+      const seenCount = total - unseenIds.length;
+      const progressEl = document.getElementById("seen-progress-text");
+      if (unseenIds.length === 0) {
+        progressEl.textContent = `✨ Em đã mở hết ${total}/${total} bí mật rồi! Bấm tiếp để xáo lại từ đầu nhé.`;
+        document.getElementById("draw-btn-label").textContent = "Xáo Lại Hộp Kỷ Niệm";
       } else {
-        boxStage.classList.remove('hidden');
-        revealedStage.classList.add('hidden');
+        progressEl.textContent = `Đã mở ${seenCount}/${total} kỷ niệm bí mật`;
+        document.getElementById("draw-btn-label").textContent = "Mở Một Điều Bất Ngờ Khác";
       }
     }
 
-    // Rút ngẫu nhiên 1 bí mật (không trùng lặp cho đến khi lật hết bộ bài)
-    function drawRandomSecret() {
-      const pool = getFilteredNotesPool();
-      if (pool.length === 0) return;
+    function renderRevealedCard(mem, animate = true) {
+      if (!mem) return;
+      const stage = document.getElementById("revealed-stage");
+      const slot = document.getElementById("revealed-card-slot");
+      stage.classList.remove("hidden");
 
-      revealFlowType = 'random';
-      let unrevealed = pool.filter(n => !discoveredIds.has(n.id));
+      const formattedDate = mem.date
+        ? new Date(mem.date).toLocaleDateString("vi-VN", { day: "2-digit", month: "2-digit", year: "numeric" })
+        : "";
 
-      // Nếu đã khám phá hết bộ bài thì tự động xào lại để rút tiếp
-      if (unrevealed.length === 0) {
-        pool.forEach(n => discoveredIds.delete(n.id));
-        unrevealed = [...pool];
-        showToast('Em đã mở hết tất cả bí mật rồi! Xào lại từ đầu nhé ✨');
-        triggerConfettiBurst();
-      }
+      const imageHtml = mem.image
+        ? `<div class="mb-4 rounded-xl overflow-hidden bg-pink-50 border border-pink-100">
+             <img src="${mem.image}" alt="${escapeHtml(mem.title)}" class="w-full max-h-80 object-cover mx-auto" />
+           </div>`
+        : "";
 
-      const randomIdx = Math.floor(Math.random() * unrevealed.length);
-      const chosenNote = unrevealed[randomIdx];
-      discoveredIds.add(chosenNote.id);
-      activeRevealNote = chosenNote;
-
-      renderRevealedCard(chosenNote);
-      updateMysteryStageSummary();
-    }
-
-    // Bắt đầu chế độ Hành trình từng bước (từ thẻ đầu tiên đến cuối)
-    function startJourneyMode() {
-      const pool = getFilteredNotesPool();
-      if (pool.length === 0) return;
-
-      revealFlowType = 'journey';
-      journeyIndex = 0;
-      const chosenNote = pool[journeyIndex];
-      discoveredIds.add(chosenNote.id);
-      activeRevealNote = chosenNote;
-
-      renderRevealedCard(chosenNote);
-      updateMysteryStageSummary();
-    }
-
-    function stepJourney(delta) {
-      const pool = getFilteredNotesPool();
-      if (pool.length === 0) return;
-
-      journeyIndex = (journeyIndex + delta + pool.length) % pool.length;
-      const chosenNote = pool[journeyIndex];
-      discoveredIds.add(chosenNote.id);
-      activeRevealNote = chosenNote;
-
-      if (journeyIndex === pool.length - 1 && delta > 0) {
-        triggerConfettiBurst();
-      }
-
-      renderRevealedCard(chosenNote);
-      updateMysteryStageSummary();
-    }
-
-    function renderRevealedCard(note) {
-      const container = document.getElementById('revealed-card-container');
-      const controls = document.getElementById('revealed-card-controls');
-      const catObj = CATEGORIES.find(c => c.id === note.category) || CATEGORIES[1];
-      const formattedDate = note.date ? note.date.split('-').reverse().join('/') : 'Kỷ niệm đẹp';
-      const isLoved = lovedIds.has(note.id);
-      const pool = getFilteredNotesPool();
-
-      // Re-trigger animation mượt mà
-      container.classList.remove('animate-reveal-card');
-      void container.offsetWidth;
-      container.classList.add('animate-reveal-card');
-
-      container.innerHTML = `
-        <article class="relative bg-white rounded-3xl p-6 sm:p-8 pt-9 shadow-[0_20px_50px_-12px_rgba(224,87,128,0.24)] border-2 border-pink-100">
-          <div class="washi-tape ${catObj.washi}"></div>
-
-          <!-- Header thẻ -->
-          <div class="flex items-center justify-between gap-2 mb-4">
-            <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold ${catObj.badgeBg}">
-              <span>${catObj.icon}</span>
-              <span>${catObj.label}</span>
+      slot.innerHTML = `
+        <div class="polaroid-card ${animate ? "animate-pop-in" : ""}">
+          <div class="washi-tape"></div>
+          <div class="flex items-center justify-between gap-2 mb-3 pt-1">
+            <span class="px-3 py-1 rounded-full bg-pink-50 text-pink-600 text-xs font-bold border border-pink-100">
+              ${escapeHtml(mem.tag || "Kỷ niệm")}
             </span>
-            <span class="text-3xl select-none drop-shadow-sm">${note.sticker || '🧸'}</span>
+            <span class="text-xs font-semibold text-pink-400">${formattedDate}</span>
           </div>
 
-          <!-- Ảnh Polaroid nếu có -->
-          ${note.image ? `
-            <div class="mb-5 bg-cream p-2.5 pb-5 rounded-2xl border border-pink-100 shadow-inner max-w-md mx-auto">
-              <div class="aspect-[4/3] w-full overflow-hidden rounded-xl bg-pink-50">
-                <img src="${note.image}" alt="${escapeHtml(note.title)}"
-                  onerror="this.parentElement.parentElement.style.display='none'"
-                  class="w-full h-full object-cover" />
-              </div>
-            </div>
-          ` : ''}
+          ${imageHtml}
 
-          <!-- Tiêu đề & Nội dung -->
-          <h3 class="font-hand text-2xl sm:text-3xl font-bold text-cocoa leading-snug mb-3 text-center">
-            ${escapeHtml(note.title)}
-          </h3>
-          <p class="text-sm sm:text-base text-cocoa/85 leading-relaxed whitespace-pre-line text-center max-w-xl mx-auto">
-            ${escapeHtml(note.content)}
+          <div class="flex items-start justify-between gap-3">
+            <h3 class="text-lg sm:text-xl font-bold text-gray-800 leading-snug">
+              ${escapeHtml(mem.title)}
+            </h3>
+            <span class="text-3xl select-none shrink-0">${mem.sticker || "💖"}</span>
+          </div>
+
+          <p class="font-note text-2xl sm:text-[26px] text-gray-700 mt-3 leading-relaxed whitespace-pre-line">
+            "${escapeHtml(mem.note)}"
           </p>
-
-          <!-- Chân thẻ: Ngày tháng & Nút Thả tim kỷ niệm -->
-          <div class="mt-6 pt-4 border-t border-dashed border-pink-100 flex flex-wrap items-center justify-between gap-3">
-            <span class="inline-flex items-center gap-1.5 text-xs font-semibold text-cocoa/60">
-              <i data-lucide="calendar-heart" class="w-4 h-4 text-roseSoft"></i>
-              <span>${formattedDate}</span>
-            </span>
-
-            <button onclick="toggleLoveNote('${note.id}')"
-              class="inline-flex items-center gap-1.5 px-4 py-1.5 rounded-full text-xs font-bold transition-all ${
-                isLoved
-                  ? 'bg-roseDeep text-white shadow-sm scale-105'
-                  : 'bg-blush/80 hover:bg-pink-100 text-roseDeep'
-              }">
-              <span>${isLoved ? 'Đã thả tim kỷ niệm ❤️' : 'Thả tim kỷ niệm này ❤️'}</span>
-            </button>
-          </div>
-        </article>
+        </div>
       `;
+    }
 
-      // Nút điều hướng bên dưới thẻ
-      if (revealFlowType === 'journey') {
-        controls.innerHTML = `
-          <button onclick="stepJourney(-1)"
-            class="inline-flex items-center gap-1.5 px-5 py-2.5 rounded-2xl bg-white hover:bg-pink-50 text-cocoa border border-pink-200 font-bold text-sm shadow-sm transition">
-            <span>← Trước đó</span>
-          </button>
-          <span class="px-3.5 py-1.5 rounded-full bg-white/90 text-xs font-bold text-roseDeep border border-pink-100">
-            Trang ${journeyIndex + 1} / ${pool.length}
-          </span>
-          <button onclick="stepJourney(1)"
-            class="inline-flex items-center gap-1.5 px-5 py-2.5 rounded-2xl bg-gradient-to-r from-roseSoft to-roseDeep text-white font-bold text-sm shadow-md hover:scale-105 transition">
-            <span>Bí mật tiếp theo →</span>
-          </button>
-          <button onclick="closeRevealedCard()"
-            class="inline-flex items-center gap-1 px-4 py-2.5 rounded-2xl bg-gray-100 hover:bg-gray-200 text-cocoa/75 font-bold text-xs transition">
-            <span>Cất thẻ lại</span>
-          </button>
-        `;
+    // =========================================================================
+    // CHUYỂN CHẾ ĐỘ & XÁC THỰC MẬT KHẨU
+    // =========================================================================
+    function switchMode(mode) {
+      currentMode = mode;
+      const btnView = document.getElementById("btn-mode-view");
+      const btnEdit = document.getElementById("btn-mode-edit");
+      const adminEls = document.querySelectorAll(".admin-only");
+
+      if (mode === "view") {
+        btnView.className = "px-3.5 py-1.5 rounded-full text-xs font-bold transition-all bg-pink-500 text-white shadow-sm flex items-center gap-1.5";
+        btnEdit.className = "px-3.5 py-1.5 rounded-full text-xs font-bold transition-all bg-pink-50 text-pink-600 hover:bg-pink-100 flex items-center gap-1.5";
+        adminEls.forEach((el) => el.classList.add("hidden"));
+        document.getElementById("admin-manage-drawer").classList.add("hidden");
       } else {
-        controls.innerHTML = `
-          <button onclick="drawRandomSecret()"
-            class="inline-flex items-center gap-2 px-6 py-3 rounded-2xl bg-gradient-to-r from-roseSoft to-roseDeep text-white font-bold text-sm shadow-md hover:scale-105 transition">
-            <span>Rút Bí Mật Tiếp Theo ✨</span>
-          </button>
-          <button onclick="closeRevealedCard()"
-            class="inline-flex items-center gap-1.5 px-4 py-3 rounded-2xl bg-white hover:bg-pink-50 text-cocoa/75 border border-pink-200 font-bold text-sm transition">
-            <span>Đóng thẻ lại</span>
-          </button>
-        `;
+        btnEdit.className = "px-3.5 py-1.5 rounded-full text-xs font-bold transition-all bg-pink-500 text-white shadow-sm flex items-center gap-1.5";
+        btnView.className = "px-3.5 py-1.5 rounded-full text-xs font-bold transition-all bg-pink-50 text-pink-600 hover:bg-pink-100 flex items-center gap-1.5";
+        adminEls.forEach((el) => el.classList.remove("hidden"));
       }
-
       lucide.createIcons();
     }
 
-    function toggleLoveNote(noteId) {
-      if (lovedIds.has(noteId)) {
-        lovedIds.delete(noteId);
+    function requestEditMode() {
+      if (isUnlocked) {
+        switchMode("edit");
+        return;
+      }
+      document.getElementById("input-admin-password").value = "";
+      document.getElementById("password-error").classList.add("hidden");
+      document.getElementById("modal-password").classList.remove("hidden");
+      setTimeout(() => document.getElementById("input-admin-password").focus(), 100);
+    }
+
+    function closePasswordModal() {
+      document.getElementById("modal-password").classList.add("hidden");
+    }
+
+    function verifyPassword() {
+      const input = document.getElementById("input-admin-password").value.trim();
+      const correct = appData.profile.adminPassword || "1234";
+      if (input === correct) {
+        isUnlocked = true;
+        document.getElementById("edit-lock-icon").setAttribute("data-lucide", "unlock");
+        closePasswordModal();
+        switchMode("edit");
       } else {
-        lovedIds.add(noteId);
-        triggerConfettiBurst();
-        showToast('Em đã thả tim cho kỷ niệm này 💖');
-      }
-      if (activeRevealNote && activeRevealNote.id === noteId) {
-        renderRevealedCard(activeRevealNote);
+        document.getElementById("password-error").classList.remove("hidden");
       }
     }
 
-    function closeRevealedCard() {
-      activeRevealNote = null;
-      updateMysteryStageSummary();
+    // =========================================================================
+    // QUẢN LÝ KỶ NIỆM (THÊM / SỬA / XÓA)
+    // =========================================================================
+    function toggleManageDrawer() {
+      const drawer = document.getElementById("admin-manage-drawer");
+      drawer.classList.toggle("hidden");
+      renderAdminManageList();
     }
 
-    function resetDiscoveryDeck() {
-      discoveredIds.clear();
-      closeRevealedCard();
-      showToast('Đã úp lại toàn bộ thẻ bí mật ✨');
-    }
-
-    // ==================== NGĂN KÉO QUẢN LÝ DANH SÁCH RIÊNG TƯ (CHẾ ĐỘ CỦA ANH) ====================
-    function openManageDrawer() {
-      if (currentMode !== 'edit') return;
-      renderManageDrawerList();
-      toggleModal('manage-drawer-modal', true);
-    }
-
-    function closeManageDrawer() {
-      toggleModal('manage-drawer-modal', false);
-    }
-
-    function renderManageDrawerList() {
-      const container = document.getElementById('manage-drawer-list');
-      const keyword = (document.getElementById('drawer-search-input')?.value || '').trim().toLowerCase();
-
-      const list = appData.notes.filter(n =>
-        !keyword ||
-        n.title.toLowerCase().includes(keyword) ||
-        n.content.toLowerCase().includes(keyword)
-      );
-
-      if (list.length === 0) {
-        container.innerHTML = `
-          <div class="text-center py-12 text-cocoa/60">
-            <div class="text-4xl mb-2">📝</div>
-            <p class="font-hand text-lg font-bold">Chưa có ghi chú nào phù hợp</p>
-          </div>
-        `;
+    function renderAdminManageList() {
+      const container = document.getElementById("admin-memories-list");
+      if (appData.memories.length === 0) {
+        container.innerHTML = `<p class="text-xs text-gray-400 italic">Chưa có kỷ niệm nào.</p>`;
         return;
       }
 
-      container.innerHTML = list.map(note => {
-        const catObj = CATEGORIES.find(c => c.id === note.category) || CATEGORIES[1];
-        return `
-          <div class="bg-white rounded-2xl p-4 border border-pink-100 shadow-sm flex items-start justify-between gap-3">
-            <div class="flex items-start gap-3 min-w-0">
-              <div class="w-10 h-10 rounded-xl bg-blush/70 flex items-center justify-center text-xl shrink-0">
-                ${note.sticker || '🧸'}
-              </div>
-              <div class="min-w-0">
-                <span class="inline-block px-2 py-0.5 rounded-full text-[10px] font-bold ${catObj.badgeBg} mb-1">
-                  ${catObj.icon} ${catObj.label}
-                </span>
-                <h4 class="font-hand font-bold text-base text-cocoa truncate">${escapeHtml(note.title)}</h4>
-                <p class="text-xs text-cocoa/70 line-clamp-2 mt-0.5">${escapeHtml(note.content)}</p>
+      container.innerHTML = appData.memories
+        .map(
+          (m) => `
+          <div class="flex items-center justify-between gap-3 p-3 rounded-2xl bg-pink-50/70 border border-pink-100">
+            <div class="flex items-center gap-2.5 min-w-0">
+              <span class="text-xl shrink-0">${m.sticker || "💖"}</span>
+              <div class="truncate">
+                <div class="text-xs font-bold text-gray-800 truncate">${escapeHtml(m.title)}</div>
+                <div class="text-[11px] text-gray-500 truncate">${escapeHtml(m.note)}</div>
               </div>
             </div>
-
-            <div class="flex items-center gap-1 shrink-0">
-              <button onclick="openNoteModal('${note.id}')" title="Sửa bí mật này"
-                class="p-2 rounded-xl bg-lavender/60 hover:bg-lavender text-lavenderDeep transition">
-                <i data-lucide="edit-2" class="w-4 h-4"></i>
+            <div class="flex items-center gap-1.5 shrink-0">
+              <button onclick="openMemoryModal('${m.id}')" class="p-1.5 rounded-lg bg-white text-pink-600 hover:bg-pink-100 border border-pink-200" title="Sửa">
+                <i data-lucide="pencil" class="w-3.5 h-3.5"></i>
               </button>
-              <button onclick="askDeleteNote('${note.id}')" title="Xóa bí mật này"
-                class="p-2 rounded-xl bg-rose-50 hover:bg-rose-100 text-roseDeep transition">
-                <i data-lucide="trash-2" class="w-4 h-4"></i>
+              <button onclick="deleteMemory('${m.id}')" class="p-1.5 rounded-lg bg-white text-rose-500 hover:bg-rose-50 border border-rose-200" title="Xóa">
+                <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
               </button>
             </div>
           </div>
-        `;
-      }).join('');
-
+        `
+        )
+        .join("");
       lucide.createIcons();
     }
 
-    // ==================== MODAL THÊM / SỬA GHI CHÚ ====================
     function renderStickerPicker() {
-      const container = document.getElementById('sticker-picker');
-      container.innerHTML = STICKERS.map(st => `
-        <button type="button" onclick="selectSticker('${st}')" data-sticker="${st}"
-          class="sticker-btn w-9 h-9 rounded-xl flex items-center justify-center text-xl hover:bg-pink-100 transition border border-transparent">
-          ${st}
+      const picker = document.getElementById("sticker-picker");
+      picker.innerHTML = STICKERS.map(
+        (s) => `
+        <button type="button" onclick="selectSticker('${s}')" data-sticker="${s}" class="sticker-btn w-8 h-8 rounded-lg flex items-center justify-center text-lg hover:bg-white transition ${
+          s === selectedSticker ? "bg-white ring-2 ring-pink-400 shadow-sm" : ""
+        }">
+          ${s}
         </button>
-      `).join('');
+      `
+      ).join("");
     }
 
-    function selectSticker(st) {
-      document.getElementById('note-sticker').value = st;
-      document.querySelectorAll('.sticker-btn').forEach(btn => {
-        if (btn.dataset.sticker === st) {
-          btn.classList.add('bg-pink-100', 'border-roseSoft', 'scale-110');
+    function selectSticker(s) {
+      selectedSticker = s;
+      document.querySelectorAll(".sticker-btn").forEach((btn) => {
+        if (btn.dataset.sticker === s) {
+          btn.className = "sticker-btn w-8 h-8 rounded-lg flex items-center justify-center text-lg bg-white ring-2 ring-pink-400 shadow-sm";
         } else {
-          btn.classList.remove('bg-pink-100', 'border-roseSoft', 'scale-110');
+          btn.className = "sticker-btn w-8 h-8 rounded-lg flex items-center justify-center text-lg hover:bg-white transition";
         }
       });
     }
 
-    function openNoteModal(noteId = null) {
-      const form = document.getElementById('note-form');
-      form.reset();
-      clearNoteImage();
+    function openMemoryModal(id = null) {
+      document.getElementById("edit-memory-id").value = id || "";
+      document.getElementById("mem-image-file").value = "";
 
-      if (noteId) {
-        const note = appData.notes.find(n => n.id === noteId);
-        if (!note) return;
-        document.getElementById('note-modal-title').textContent = 'Chỉnh Sửa Mảnh Ký Ức ✨';
-        document.getElementById('note-id').value = note.id;
-        document.getElementById('note-category').value = note.category;
-        document.getElementById('note-title').value = note.title;
-        document.getElementById('note-date').value = note.date || '';
-        document.getElementById('note-content').value = note.content;
-        selectSticker(note.sticker || '🧸');
-
-        if (note.image) {
-          currentNoteImageBase64 = note.image;
-          if (note.image.startsWith('http')) {
-            document.getElementById('note-image-url').value = note.image;
-          }
-          showImagePreview(note.image);
-        }
+      if (id) {
+        const mem = appData.memories.find((m) => m.id === id);
+        if (!mem) return;
+        document.getElementById("memory-modal-title").innerHTML = `<i data-lucide="pencil" class="w-5 h-5"></i> Chỉnh Sửa Kỷ Niệm`;
+        document.getElementById("mem-title").value = mem.title || "";
+        document.getElementById("mem-date").value = mem.date || "";
+        document.getElementById("mem-tag").value = mem.tag || "Kỷ niệm của tụi mình";
+        document.getElementById("mem-note").value = mem.note || "";
+        selectSticker(mem.sticker || "💖");
+        uploadedImageBase64 = mem.image || "";
       } else {
-        document.getElementById('note-modal-title').textContent = 'Ghi Lại Điều Thú Vị Mới 🌸';
-        document.getElementById('note-id').value = '';
-        document.getElementById('note-date').value = new Date().toISOString().split('T')[0];
-        selectSticker('🧸');
+        document.getElementById("memory-modal-title").innerHTML = `<i data-lucide="camera" class="w-5 h-5"></i> Thêm Kỷ Niệm Mới`;
+        document.getElementById("mem-title").value = "";
+        document.getElementById("mem-date").value = new Date().toISOString().split("T")[0];
+        document.getElementById("mem-tag").value = "Thói quen đáng yêu";
+        document.getElementById("mem-note").value = "";
+        selectSticker("💖");
+        uploadedImageBase64 = "";
       }
 
-      toggleModal('note-modal', true);
+      if (uploadedImageBase64) {
+        document.getElementById("mem-image-preview").src = uploadedImageBase64;
+        document.getElementById("mem-image-preview-box").classList.remove("hidden");
+      } else {
+        document.getElementById("mem-image-preview-box").classList.add("hidden");
+      }
+
+      document.getElementById("modal-memory").classList.remove("hidden");
+      lucide.createIcons();
     }
 
-    function closeNoteModal() { toggleModal('note-modal', false); }
+    function closeMemoryModal() {
+      document.getElementById("modal-memory").classList.add("hidden");
+    }
 
-    // Xử lý nén & tải ảnh lên để nhẹ localStorage
+    // Nén ảnh tối ưu dung lượng cho Firestore (< 250KB)
     function handleImageUpload(event) {
       const file = event.target.files[0];
       if (!file) return;
 
       const reader = new FileReader();
-      reader.onload = function(e) {
+      reader.onload = function (e) {
         const img = new Image();
-        img.onload = function() {
-          const canvas = document.createElement('canvas');
-          const MAX_WIDTH = 700;
+        img.onload = function () {
+          const canvas = document.createElement("canvas");
+          const MAX_WIDTH = 720;
           let width = img.width;
           let height = img.height;
 
           if (width > MAX_WIDTH) {
-            height *= MAX_WIDTH / width;
+            height = Math.round((height * MAX_WIDTH) / width);
             width = MAX_WIDTH;
           }
+
           canvas.width = width;
           canvas.height = height;
-          const ctx = canvas.getContext('2d');
+          const ctx = canvas.getContext("2d");
           ctx.drawImage(img, 0, 0, width, height);
 
-          const compressedBase64 = canvas.toDataURL('image/jpeg', 0.78);
-          currentNoteImageBase64 = compressedBase64;
-          document.getElementById('note-image-url').value = '';
-          showImagePreview(compressedBase64);
+          uploadedImageBase64 = canvas.toDataURL("image/jpeg", 0.72);
+          document.getElementById("mem-image-preview").src = uploadedImageBase64;
+          document.getElementById("mem-image-preview-box").classList.remove("hidden");
         };
         img.src = e.target.result;
       };
       reader.readAsDataURL(file);
     }
 
-    function previewImageUrl(url) {
-      if (url && url.trim().startsWith('http')) {
-        currentNoteImageBase64 = url.trim();
-        showImagePreview(currentNoteImageBase64);
-      } else if (!url) {
-        clearNoteImage();
+    function clearUploadedImage() {
+      uploadedImageBase64 = "";
+      document.getElementById("mem-image-file").value = "";
+      document.getElementById("mem-image-preview-box").classList.add("hidden");
+    }
+
+    async function saveMemory() {
+      const title = document.getElementById("mem-title").value.trim();
+      const note = document.getElementById("mem-note").value.trim();
+      const date = document.getElementById("mem-date").value;
+      const tag = document.getElementById("mem-tag").value;
+      const editId = document.getElementById("edit-memory-id").value;
+
+      if (!title || !note) {
+        alert("Anh nhớ nhập đủ Tiêu đề và Lời nhắn nhé!");
+        return;
       }
-    }
 
-    function showImagePreview(src) {
-      document.getElementById('image-preview-img').src = src;
-      document.getElementById('image-preview-box').classList.remove('hidden');
-    }
-
-    function clearNoteImage() {
-      currentNoteImageBase64 = '';
-      document.getElementById('note-image-file').value = '';
-      document.getElementById('note-image-url').value = '';
-      document.getElementById('image-preview-box').classList.add('hidden');
-    }
-
-    function saveNote(e) {
-      e.preventDefault();
-      const id = document.getElementById('note-id').value;
-      const category = document.getElementById('note-category').value;
-      const title = document.getElementById('note-title').value.trim();
-      const date = document.getElementById('note-date').value;
-      const sticker = document.getElementById('note-sticker').value;
-      const content = document.getElementById('note-content').value.trim();
-
-      if (id) {
-        const index = appData.notes.findIndex(n => n.id === id);
-        if (index !== -1) {
-          appData.notes[index] = {
-            ...appData.notes[index],
-            category, title, date, sticker, content,
-            image: currentNoteImageBase64
+      if (editId) {
+        const idx = appData.memories.findIndex((m) => m.id === editId);
+        if (idx !== -1) {
+          appData.memories[idx] = {
+            ...appData.memories[idx],
+            title,
+            date,
+            tag,
+            sticker: selectedSticker,
+            image: uploadedImageBase64,
+            note
           };
         }
-        showToast('Đã cập nhật mảnh ký ức ✨');
       } else {
-        const randomRot = (Math.random() * 3.6 - 1.8).toFixed(1);
-        appData.notes.unshift({
-          id: 'note-' + Date.now(),
-          category, title, date, sticker, content,
-          image: currentNoteImageBase64,
-          rotation: parseFloat(randomRot)
-        });
-        showToast('Đã thêm một điều đáng yêu mới vào sổ 💖');
+        const newMem = {
+          id: "mem_" + Date.now(),
+          title,
+          date,
+          tag,
+          sticker: selectedSticker,
+          image: uploadedImageBase64,
+          note
+        };
+        appData.memories.unshift(newMem);
+        unseenIds.push(newMem.id);
       }
 
-      saveAppData();
-      updateMysteryStageSummary();
-      renderManageDrawerList();
-      if (activeRevealNote && activeRevealNote.id === id) {
-        const updated = appData.notes.find(n => n.id === id);
-        if (updated) {
-          activeRevealNote = updated;
-          renderRevealedCard(updated);
-        }
+      closeMemoryModal();
+      await saveAppData();
+    }
+
+    async function deleteMemory(id) {
+      if (!confirm("Anh có chắc muốn xóa kỷ niệm này không?")) return;
+      appData.memories = appData.memories.filter((m) => m.id !== id);
+      await saveAppData();
+    }
+
+    // =========================================================================
+    // CÀI ĐẶT HỒ SƠ & BỨC THƯ BÍ MẬT
+    // =========================================================================
+    function openProfileModal() {
+      document.getElementById("input-title").value = appData.profile.title || "";
+      document.getElementById("input-subtitle").value = appData.profile.subtitle || "";
+      document.getElementById("input-start-date").value = appData.profile.startDate || "2025-01-01";
+      document.getElementById("input-new-password").value = appData.profile.adminPassword || "1234";
+      document.getElementById("modal-profile").classList.remove("hidden");
+    }
+
+    function closeProfileModal() {
+      document.getElementById("modal-profile").classList.add("hidden");
+    }
+
+    async function saveProfile() {
+      appData.profile.title = document.getElementById("input-title").value.trim() || "Góc Nhỏ Về Em 💖";
+      appData.profile.subtitle = document.getElementById("input-subtitle").value.trim();
+      appData.profile.startDate = document.getElementById("input-start-date").value || "2025-01-01";
+      const newPass = document.getElementById("input-new-password").value.trim();
+      if (newPass) {
+        appData.profile.adminPassword = newPass;
       }
-      closeNoteModal();
+      closeProfileModal();
+      await saveAppData();
     }
 
-    // Xóa ghi chú với Modal xác nhận đẹp
-    function askDeleteNote(id) {
-      noteIdToDelete = id;
-      toggleModal('confirm-delete-modal', true);
-      document.getElementById('btn-confirm-delete-action').onclick = () => {
-        appData.notes = appData.notes.filter(n => n.id !== noteIdToDelete);
-        discoveredIds.delete(noteIdToDelete);
-        if (activeRevealNote && activeRevealNote.id === noteIdToDelete) {
-          activeRevealNote = null;
-        }
-        saveAppData();
-        updateMysteryStageSummary();
-        renderManageDrawerList();
-        closeDeleteModal();
-        showToast('Đã xóa ghi chú khỏi sổ tay');
-      };
-    }
-    function closeDeleteModal() { toggleModal('confirm-delete-modal', false); }
-
-    // ==================== GÓC BỨC THƯ TƯƠNG LAI ====================
-    function renderLetter() {
-      document.getElementById('letter-envelope-title').textContent = appData.letter.title;
-      document.getElementById('letter-content-display').textContent = appData.letter.content;
-      document.getElementById('letter-date-display').textContent = appData.letter.updatedAt || 'Viết dành riêng cho em 💕';
-    }
-
-    function toggleEnvelope() {
-      const bodyWrapper = document.getElementById('letter-body-wrapper');
-      const chevron = document.getElementById('envelope-chevron');
-      const hint = document.getElementById('envelope-hint-text');
-      const isHidden = bodyWrapper.classList.contains('hidden');
-
-      if (isHidden) {
-        bodyWrapper.classList.remove('hidden');
-        chevron.style.transform = 'rotate(180deg)';
-        hint.textContent = 'Chạm để gấp phong bì lại 💌';
-        if (currentMode === 'gift') triggerConfettiBurst();
+    function toggleSecretLetter() {
+      const box = document.getElementById("secret-letter-content");
+      const btn = document.getElementById("btn-toggle-letter");
+      if (box.classList.contains("hidden")) {
+        box.classList.remove("hidden");
+        btn.textContent = "Gấp Thư Lại";
+        triggerHeartConfetti();
       } else {
-        bodyWrapper.classList.add('hidden');
-        chevron.style.transform = 'rotate(0deg)';
-        hint.textContent = 'Chạm để mở phong bì thư bí mật ✨';
+        box.classList.add("hidden");
+        btn.textContent = "Mở Phong Bì";
       }
     }
 
     function openLetterModal() {
-      document.getElementById('input-letter-title').value = appData.letter.title;
-      document.getElementById('input-letter-content').value = appData.letter.content;
-      toggleModal('letter-modal', true);
+      document.getElementById("input-letter-body").value = appData.letter.body || "";
+      document.getElementById("input-letter-sign").value = appData.letter.sign || "";
+      document.getElementById("modal-letter").classList.remove("hidden");
     }
-    function closeLetterModal() { toggleModal('letter-modal', false); }
 
-    function saveLetter(e) {
-      e.preventDefault();
-      appData.letter.title = document.getElementById('input-letter-title').value.trim();
-      appData.letter.content = document.getElementById('input-letter-content').value.trim();
-      const todayStr = new Date().toLocaleDateString('vi-VN');
-      appData.letter.updatedAt = `Cập nhật ngày ${todayStr} 💕`;
-      saveAppData();
-      renderLetter();
+    function closeLetterModal() {
+      document.getElementById("modal-letter").classList.add("hidden");
+    }
+
+    async function saveLetter() {
+      appData.letter.body = document.getElementById("input-letter-body").value;
+      appData.letter.sign = document.getElementById("input-letter-sign").value;
       closeLetterModal();
-      showToast('Đã niêm phong bức thư tình thật đẹp 💌');
+      await saveAppData();
     }
 
-    // ==================== HIỆU ỨNG BẤT NGỜ & TRÌNH CHIẾU (CHẾ ĐỘ TẶNG EM) ====================
-    function triggerConfettiBurst() {
-      if (typeof confetti === 'function') {
-        confetti({
-          particleCount: 75,
-          spread: 80,
-          origin: { y: 0.6 },
-          colors: ['#FF8FA3', '#FFB3C6', '#D8B4FE', '#FDE047', '#FFFFFF']
-        });
+    // =========================================================================
+    // HIỆU ỨNG TRANG TRÍ (HEARTS & CONFETTI)
+    // =========================================================================
+    function createFloatingHearts() {
+      const container = document.getElementById("hearts-container");
+      const symbols = ["♥", "♡", "✿", "✦"];
+      for (let i = 0; i < 16; i++) {
+        const el = document.createElement("div");
+        el.className = "floating-heart";
+        el.textContent = symbols[i % symbols.length];
+        el.style.left = Math.random() * 100 + "vw";
+        el.style.fontSize = 14 + Math.random() * 16 + "px";
+        el.style.animationDuration = 10 + Math.random() * 14 + "s";
+        el.style.animationDelay = Math.random() * 10 + "s";
+        container.appendChild(el);
       }
     }
 
-    function triggerSurprise() {
-      triggerConfettiBurst();
-      const totalNotes = appData.notes.length;
-      const days = document.getElementById('days-together-count').textContent;
-
-      document.getElementById('surprise-emoji').textContent = '💝';
-      document.getElementById('surprise-heading').textContent = `Gửi ${appData.profile.nickname} Xinh Đẹp!`;
-      document.getElementById('surprise-body').innerHTML = `
-        <p class="mb-3">Suốt <strong>${days} ngày</strong> bên nhau, anh đã lén ghi lại tận <strong>${totalNotes} điều đáng yêu</strong> về em ở trong cuốn sổ này!</p>
-        <p class="text-roseDeep font-bold">Cảm ơn em vì đã luôn là điều ngọt ngào nhất trong cuộc sống của anh. Yêu em thật nhiều! 🥰✨</p>
-      `;
-      document.getElementById('surprise-controls').innerHTML = `
-        <button onclick="triggerConfettiBurst()" class="px-5 py-2.5 rounded-full bg-roseDeep text-white font-bold text-sm shadow-md hover:scale-105 transition">
-          Bắn Thêm Tim Nhé 💖
-        </button>
-        <button onclick="startSlideshow()" class="px-5 py-2.5 rounded-full bg-white text-roseDeep border border-pink-200 font-bold text-sm shadow-sm hover:bg-pink-50 transition">
-          Xem Từng Kỷ Niệm ✨
-        </button>
-      `;
-      toggleModal('surprise-modal', true);
-    }
-
-    function startSlideshow() {
-      if (appData.notes.length === 0) {
-        showToast('Chưa có kỷ niệm nào để trình chiếu!');
-        return;
-      }
-      slideshowIndex = 0;
-      renderSlideshowCard();
-      toggleModal('surprise-modal', true);
-      triggerConfettiBurst();
-    }
-
-    function renderSlideshowCard() {
-      const note = appData.notes[slideshowIndex];
-      const cat = CATEGORIES.find(c => c.id === note.category) || CATEGORIES[1];
-      document.getElementById('surprise-emoji').textContent = note.sticker || '🧸';
-      document.getElementById('surprise-heading').textContent = note.title;
-      document.getElementById('surprise-body').innerHTML = `
-        <div class="text-xs font-bold text-roseSoft uppercase mb-2">${cat.icon} ${cat.label} (${slideshowIndex + 1}/${appData.notes.length})</div>
-        ${note.image ? `<img src="${note.image}" class="w-44 h-36 object-cover rounded-xl mx-auto mb-3 border-2 border-pink-100 shadow-sm" />` : ''}
-        <p class="text-base sm:text-lg text-cocoa">${escapeHtml(note.content)}</p>
-      `;
-      document.getElementById('surprise-controls').innerHTML = `
-        <button onclick="prevSlide()" class="px-4 py-2 rounded-full bg-white text-cocoa border border-pink-200 font-bold text-sm hover:bg-pink-50">
-          ← Trước
-        </button>
-        <button onclick="nextSlide()" class="px-5 py-2 rounded-full bg-roseDeep text-white font-bold text-sm shadow hover:scale-105 transition">
-          Tiếp Theo →
-        </button>
-      `;
-    }
-
-    function nextSlide() {
-      slideshowIndex = (slideshowIndex + 1) % appData.notes.length;
-      renderSlideshowCard();
-    }
-
-    function prevSlide() {
-      slideshowIndex = (slideshowIndex - 1 + appData.notes.length) % appData.notes.length;
-      renderSlideshowCard();
-    }
-
-    function closeSurpriseModal() { toggleModal('surprise-modal', false); }
-
-    // ==================== XUẤT / NHẬP DỮ LIỆU BACKUP JSON ====================
-    function exportData() {
-      const dataStr = JSON.stringify(appData, null, 2);
-      const blob = new Blob([dataStr], { type: 'application/json' });
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      const dateStamp = new Date().toISOString().slice(0, 10);
-      a.href = url;
-      a.download = `so-tay-ve-em-${dateStamp}.json`;
-      a.click();
-      URL.revokeObjectURL(url);
-      showToast('Đã tải xuống file sao lưu JSON an toàn 📦✨');
-    }
-
-    function importData(event) {
-      const file = event.target.files[0];
-      if (!file) return;
-
-      const reader = new FileReader();
-      reader.onload = function(e) {
-        try {
-          const parsed = JSON.parse(e.target.result);
-          if (parsed && parsed.profile && Array.isArray(parsed.notes)) {
-            appData = parsed;
-            discoveredIds.clear();
-            activeRevealNote = null;
-            saveAppData();
-            renderProfile();
-            updateMysteryStageSummary();
-            renderLetter();
-            showToast('Khôi phục dữ liệu thành công! 💖');
-          } else {
-            showToast('File không đúng định dạng sổ tay!', 'error');
-          }
-        } catch (err) {
-          showToast('Không thể đọc file JSON này!', 'error');
-        }
-        event.target.value = '';
-      };
-      reader.readAsText(file);
-    }
-
-    // ==================== TIỆN ÍCH UI ====================
-    function toggleModal(modalId, show) {
-      const modal = document.getElementById(modalId);
-      if (show) {
-        modal.classList.remove('hidden');
-        modal.classList.add('flex');
-      } else {
-        modal.classList.add('hidden');
-        modal.classList.remove('flex');
-      }
-    }
-
-    function showToast(message, type = 'success') {
-      const container = document.getElementById('toast-container');
-      const toast = document.createElement('div');
-      const bgClass = type === 'error' ? 'bg-rose-600 text-white' : 'bg-cocoa text-white';
-      toast.className = `${bgClass} px-4 py-3 rounded-2xl shadow-lg text-xs sm:text-sm font-semibold flex items-center gap-2 transform transition-all duration-300 translate-y-2 opacity-0`;
-      toast.innerHTML = `<span>${type === 'error' ? '⚠️' : '🌸'}</span><span>${message}</span>`;
-      container.appendChild(toast);
-
-      requestAnimationFrame(() => {
-        toast.classList.remove('translate-y-2', 'opacity-0');
+    function triggerHeartConfetti() {
+      if (typeof confetti !== "function") return;
+      confetti({
+        particleCount: 45,
+        spread: 65,
+        origin: { y: 0.7 },
+        colors: ["#ff6b9d", "#ff9ebb", "#ffc2d6", "#ff477e", "#ffd166"]
       });
-
-      setTimeout(() => {
-        toast.classList.add('opacity-0', 'translate-y-2');
-        setTimeout(() => toast.remove(), 300);
-      }, 3200);
     }
 
     function escapeHtml(str) {
-      if (!str) return '';
-      return str
-        .replace(/&/g, '&amp;')
-        .replace(/</g, '&lt;')
-        .replace(/>/g, '&gt;')
-        .replace(/"/g, '&quot;')
-        .replace(/'/g, '&#039;');
+      if (!str) return "";
+      return String(str)
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;");
     }
+
+    // Start
+    window.addEventListener("DOMContentLoaded", initApp);
   </script>
 </body>
 </html>
