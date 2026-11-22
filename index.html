@@ -1,0 +1,1619 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Góc Nhỏ Về Em ✨ | Sổ Tay Kỷ Niệm</title>
+  
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  
+  <!-- Google Fonts: Mali (nét chữ viết tay dễ thương) & Quicksand (mềm mại, hiện đại) -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Mali:ital,wght@0,400;0,500;0,600;0,700;1,400&family=Quicksand:wght@400;500;600;700&display=swap" rel="stylesheet">
+  
+  <!-- Lucide Icons -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+  
+  <!-- Canvas Confetti cho hiệu ứng bất ngờ -->
+  <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Quicksand', 'sans-serif'],
+            hand: ['Mali', 'cursive'],
+          },
+          colors: {
+            cream: '#FFFDF9',
+            blush: '#FFEBF0',
+            roseSoft: '#FF8FA3',
+            roseDeep: '#E05780',
+            lavender: '#F3E8FF',
+            lavenderDeep: '#9D4EDD',
+            peach: '#FFF0E5',
+            mint: '#E6F8F3',
+            cocoa: '#5C4742',
+          }
+        }
+      }
+    }
+  </script>
+
+  <style>
+    /* Nền chấm bi scrapbook ấm áp */
+    body {
+      background-color: #FFFDF9;
+      background-image: radial-gradient(#F8C8DC 1.2px, transparent 1.2px), radial-gradient(#E5D4FF 1.2px, #FFFDF9 1.2px);
+      background-size: 40px 40px;
+      background-position: 0 0, 20px 20px;
+      color: #5C4742;
+      overflow-x: hidden;
+    }
+
+    /* Thanh cuộn mềm mại */
+    ::-webkit-scrollbar {
+      width: 8px;
+    }
+    ::-webkit-scrollbar-track {
+      background: #FFF5F7;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: #FFB3C6;
+      border-radius: 999px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: #FF8FA3;
+    }
+
+    /* Hiệu ứng băng dính Washi Tape trên đầu thẻ Polaroid */
+    .washi-tape {
+      position: absolute;
+      top: -12px;
+      left: 50%;
+      transform: translateX(-50%) rotate(-2deg);
+      width: 105px;
+      height: 26px;
+      background-color: rgba(255, 179, 198, 0.72);
+      background-image: repeating-linear-gradient(
+        45deg,
+        transparent,
+        transparent 6px,
+        rgba(255, 255, 255, 0.45) 6px,
+        rgba(255, 255, 255, 0.45) 12px
+      );
+      box-shadow: 0 2px 5px rgba(92, 71, 66, 0.08);
+      backdrop-filter: blur(2px);
+      z-index: 10;
+      border-left: 2px dotted rgba(255,255,255,0.6);
+      border-right: 2px dotted rgba(255,255,255,0.6);
+    }
+
+    .washi-lavender {
+      background-color: rgba(216, 180, 254, 0.72);
+      transform: translateX(-50%) rotate(2.5deg);
+    }
+    .washi-mint {
+      background-color: rgba(167, 243, 208, 0.75);
+      transform: translateX(-50%) rotate(-1.5deg);
+    }
+    .washi-peach {
+      background-color: rgba(253, 186, 116, 0.65);
+      transform: translateX(-50%) rotate(1.8deg);
+    }
+
+    /* Hiệu ứng thẻ Scrapbook Polaroid */
+    .scrapbook-card {
+      transition: all 0.35s cubic-bezier(0.22, 1, 0.36, 1);
+    }
+    .scrapbook-card:hover {
+      transform: translateY(-6px) rotate(0deg) !important;
+      box-shadow: 0 18px 35px -10px rgba(224, 87, 128, 0.18);
+    }
+
+    /* Hiệu ứng lật/bung mở thẻ bí mật */
+    @keyframes revealCard {
+      0% {
+        opacity: 0;
+        transform: scale(0.86) rotateY(16deg) translateY(14px);
+      }
+      100% {
+        opacity: 1;
+        transform: scale(1) rotateY(0deg) translateY(0);
+      }
+    }
+    .animate-reveal-card {
+      animation: revealCard 0.55s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+    }
+
+    @keyframes gentleFloat {
+      0%, 100% { transform: translateY(0px) rotate(-1deg); }
+      50% { transform: translateY(-6px) rotate(1deg); }
+    }
+    .animate-gentle-float {
+      animation: gentleFloat 3.6s ease-in-out infinite;
+    }
+
+    /* Hiệu ứng tim bay nền */
+    @keyframes floatUp {
+      0% {
+        transform: translateY(105vh) scale(0.6) rotate(0deg);
+        opacity: 0;
+      }
+      15% {
+        opacity: 0.55;
+      }
+      85% {
+        opacity: 0.45;
+      }
+      100% {
+        transform: translateY(-10vh) scale(1.15) rotate(25deg);
+        opacity: 0;
+      }
+    }
+
+    .floating-heart {
+      position: fixed;
+      pointer-events: none;
+      z-index: 0;
+      animation: floatUp linear infinite;
+    }
+
+    /* Hiệu ứng nhịp đập trái tim */
+    @keyframes heartbeat {
+      0%, 100% { transform: scale(1); }
+      25% { transform: scale(1.16); }
+      50% { transform: scale(0.96); }
+      75% { transform: scale(1.12); }
+    }
+    .animate-heartbeat {
+      animation: heartbeat 2.2s infinite ease-in-out;
+    }
+
+    /* Hiệu ứng phong bì thư 3D mở ra */
+    .envelope-wrapper {
+      perspective: 1200px;
+    }
+    .envelope-flap {
+      transform-origin: top center;
+      transition: transform 0.7s cubic-bezier(0.4, 0, 0.2, 1), z-index 0.3s;
+    }
+    .envelope-open .envelope-flap {
+      transform: rotateX(180deg);
+      z-index: 1;
+    }
+    .letter-paper {
+      transition: transform 0.8s cubic-bezier(0.22, 1, 0.36, 1), opacity 0.5s ease;
+    }
+
+    /* Chế độ Tặng Em (Gift Mode) hiệu ứng ánh sáng ấm */
+    body.gift-mode {
+      background-color: #FFF6F9;
+      background-image: radial-gradient(#FF9EBB 1.4px, transparent 1.4px), radial-gradient(#D8B4FE 1.4px, #FFF6F9 1.4px);
+    }
+  </style>
+</head>
+<body class="min-h-screen relative selection:bg-pink-200 selection:text-rose-900">
+
+  <!-- Container cho hiệu ứng tim bay nền -->
+  <div id="floating-hearts-container" aria-hidden="true"></div>
+
+  <!-- Thanh điều hướng trên cùng (Mode Switcher & Data Actions) -->
+  <nav class="sticky top-0 z-40 backdrop-blur-md bg-white/75 border-b border-pink-100 shadow-sm">
+    <div class="max-w-6xl mx-auto px-4 py-3 flex flex-wrap items-center justify-between gap-3">
+      <!-- Logo nhỏ -->
+      <div class="flex items-center gap-2">
+        <span class="text-2xl animate-heartbeat inline-block">🧸</span>
+        <span id="nav-brand-title" class="font-hand font-bold text-lg sm:text-xl text-roseDeep tracking-wide">
+          Góc Nhỏ Về Em
+        </span>
+      </div>
+
+      <!-- Công tắc chuyển đổi chế độ: Ghi Chép vs Tặng Em -->
+      <div class="flex items-center bg-pink-50/90 p-1 rounded-full border border-pink-200/80 shadow-inner">
+        <button id="btn-mode-edit" onclick="setAppMode('edit')" 
+          class="flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-xs sm:text-sm font-semibold transition-all duration-300 bg-roseDeep text-white shadow-sm">
+          <i data-lucide="pen-tool" class="w-3.5 h-3.5"></i>
+          <span>Ghi Chép (Của Anh)</span>
+        </button>
+        <button id="btn-mode-gift" onclick="setAppMode('gift')" 
+          class="flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-xs sm:text-sm font-semibold transition-all duration-300 text-cocoa/75 hover:text-roseDeep">
+          <i data-lucide="gift" class="w-3.5 h-3.5"></i>
+          <span>Ngắm Nhìn (Tặng Em) ✨</span>
+        </button>
+      </div>
+
+      <!-- Công cụ Backup / Restore (Chỉ hiện ở chế độ Ghi Chép hoặc thu gọn) -->
+      <div id="backup-controls" class="flex items-center gap-1.5">
+        <button onclick="exportData()" title="Xuất file sao lưu JSON"
+          class="p-2 rounded-full bg-lavender/70 hover:bg-lavender text-lavenderDeep transition flex items-center gap-1 text-xs font-semibold px-3">
+          <i data-lucide="download" class="w-3.5 h-3.5"></i>
+          <span class="hidden md:inline">Lưu Backup</span>
+        </button>
+        <label title="Nhập file sao lưu JSON"
+          class="cursor-pointer p-2 rounded-full bg-mint hover:bg-emerald-100 text-emerald-700 transition flex items-center gap-1 text-xs font-semibold px-3">
+          <i data-lucide="upload" class="w-3.5 h-3.5"></i>
+          <span class="hidden md:inline">Khôi phục</span>
+          <input type="file" id="import-file-input" accept=".json" class="hidden" onchange="importData(event)" />
+        </label>
+      </div>
+    </div>
+  </nav>
+
+  <!-- MAIN CONTENT -->
+  <main class="relative z-10 max-w-6xl mx-auto px-4 pt-6 pb-20">
+    <!-- 1. HERO HEADER & BỘ ĐẾM NGÀY YÊU -->
+    <header class="relative bg-white/85 backdrop-blur-md rounded-3xl p-6 sm:p-8 mb-7 border-2 border-white shadow-[0_14px_40px_-10px_rgba(224,87,128,0.16)] text-center overflow-hidden">
+      <div class="washi-tape washi-lavender"></div>
+
+      <div class="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-blush text-roseDeep text-xs font-bold mb-3">
+        <span>✨ Góc bí mật dành riêng cho <strong id="hero-nickname">Em Bé</strong></span>
+        <button id="btn-edit-profile" onclick="openProfileModal()" title="Chỉnh sửa thông tin"
+          class="p-1 rounded-full bg-white hover:bg-pink-100 text-roseDeep shadow-sm transition">
+          <i data-lucide="pencil" class="w-3 h-3"></i>
+        </button>
+      </div>
+
+      <h1 id="hero-title" class="font-hand text-3xl sm:text-4xl font-bold text-cocoa mb-2">
+        Góc Nhỏ Về Em ✨
+      </h1>
+      <p id="hero-subtitle" class="text-xs sm:text-sm text-cocoa/75 max-w-lg mx-auto leading-relaxed">
+        Nơi anh lén ghi lại những điều nhỏ bé, đáng yêu và thú vị nhất về em mỗi ngày.
+      </p>
+
+      <!-- Bộ đếm ngày bên nhau -->
+      <div class="mt-5 inline-flex items-center gap-3 px-5 py-2.5 rounded-2xl bg-gradient-to-r from-blush via-lavender/60 to-peach border border-pink-100 shadow-inner">
+        <span class="text-xl animate-heartbeat">💖</span>
+        <div class="text-left">
+          <div class="text-[11px] font-bold uppercase tracking-wider text-cocoa/60">Chúng mình đã bên nhau</div>
+          <div class="font-hand text-lg sm:text-xl font-bold text-roseDeep">
+            <span id="days-together-count">0</span> ngày ngọt ngào
+          </div>
+        </div>
+      </div>
+
+      <!-- Nút đặc biệt chỉ hiện ở Chế độ Tặng Em -->
+      <div id="gift-mode-actions" class="hidden mt-5 flex flex-wrap items-center justify-center gap-3">
+        <button onclick="triggerSurprise()"
+          class="inline-flex items-center gap-2 px-5 py-2.5 rounded-full bg-gradient-to-r from-roseSoft to-roseDeep text-white font-bold text-xs sm:text-sm shadow-md hover:scale-105 transition">
+          <span>Mở Điều Bất Ngờ 💝</span>
+        </button>
+        <button onclick="startSlideshow()"
+          class="inline-flex items-center gap-2 px-5 py-2.5 rounded-full bg-white hover:bg-pink-50 text-roseDeep border border-pink-200 font-bold text-xs sm:text-sm shadow-sm transition">
+          <span>Trình Chiếu Kỷ Niệm ✨</span>
+        </button>
+      </div>
+    </header>
+
+    <!-- 2. THANH LỌC CHỦ ĐỀ & CÔNG CỤ QUẢN LÝ RIÊNG TƯ (CHỈ HIỆN Ở CHẾ ĐỘ CỦA ANH) -->
+    <section class="mb-7">
+      <div class="flex flex-col md:flex-row items-stretch md:items-center justify-between gap-4">
+        <!-- Bộ lọc chủ đề muốn rút bí mật -->
+        <div id="category-filters" class="flex items-center gap-2 overflow-x-auto pb-2 md:pb-0 no-scrollbar">
+          <!-- Render bằng JS -->
+        </div>
+
+        <!-- Nhóm nút quản lý riêng tư (Tự động ẩn khi sang Chế độ Tặng Em) -->
+        <div id="edit-mode-toolbar" class="flex flex-wrap items-center gap-2.5 shrink-0">
+          <button onclick="openManageDrawer()"
+            class="inline-flex items-center justify-center gap-2 px-4 py-3 rounded-2xl bg-white hover:bg-lavender/50 text-lavenderDeep border border-purple-200 font-bold text-sm shadow-sm transition">
+            <i data-lucide="lock" class="w-4 h-4"></i>
+            <span>Quản lý danh sách (<span id="manage-count-badge">0</span>)</span>
+          </button>
+
+          <button id="btn-add-note" onclick="openNoteModal()"
+            class="inline-flex items-center justify-center gap-2 px-5 py-3 rounded-2xl bg-gradient-to-r from-roseSoft to-roseDeep text-white font-bold text-sm shadow-md shadow-pink-200 hover:shadow-lg hover:-translate-y-0.5 transition-all">
+            <i data-lucide="plus-circle" class="w-4 h-4"></i>
+            <span>Ghi Thêm Bí Mật</span>
+          </button>
+        </div>
+      </div>
+    </section>
+
+    <!-- 3. SÂN KHẤU KHÁM PHÁ BÍ MẬT (THAY THẾ HOÀN TOÀN LƯỚI TẤT CẢ KỶ NIỆM) -->
+    <section aria-label="Sân khấu khám phá từng bí mật về em" class="mb-12">
+      <div class="max-w-2xl mx-auto">
+        
+        <!-- Thanh tiến độ khám phá nhỏ xinh -->
+        <div class="flex items-center justify-between bg-white/85 backdrop-blur-sm px-5 py-2.5 rounded-full border border-pink-100 shadow-sm mb-6">
+          <div class="flex items-center gap-2 text-xs sm:text-sm font-bold text-cocoa/80">
+            <span class="text-base">🔮</span>
+            <span>Đã khám phá <strong id="discovered-count" class="text-roseDeep">0</strong> / <strong id="total-pool-count">0</strong> điều bí mật</span>
+          </div>
+          <button onclick="resetDiscoveryDeck()" title="Úp lại toàn bộ thẻ để rút lại từ đầu"
+            class="text-xs font-bold text-lavenderDeep hover:underline flex items-center gap-1">
+            <i data-lucide="rotate-ccw" class="w-3.5 h-3.5"></i>
+            <span>Xào lại thẻ</span>
+          </button>
+        </div>
+
+        <!-- TRẠNG THÁI 1: HỘP QUÀ / BỘ THẺ BÍ MẬT ĐANG ÚP (CHƯA LẬT) -->
+        <div id="mystery-box-stage" class="relative bg-gradient-to-b from-white via-blush/50 to-lavender/40 rounded-3xl p-8 sm:p-11 border-2 border-white shadow-[0_18px_45px_-12px_rgba(224,87,128,0.22)] text-center overflow-hidden">
+          <div class="washi-tape"></div>
+
+          <!-- Minh họa bộ bài úp ngược / hộp bí mật -->
+          <div class="relative w-32 h-36 mx-auto mb-5 flex items-center justify-center">
+            <div class="absolute inset-0 bg-pink-200/70 rounded-2xl -rotate-6 border-2 border-white shadow-md"></div>
+            <div class="absolute inset-0 bg-purple-200/70 rounded-2xl rotate-6 border-2 border-white shadow-md"></div>
+            <div class="relative w-full h-full bg-gradient-to-br from-roseSoft to-roseDeep rounded-2xl border-4 border-white shadow-xl flex flex-col items-center justify-center text-white animate-gentle-float cursor-pointer"
+                 onclick="drawRandomSecret()">
+              <span class="text-4xl mb-1">🎁</span>
+              <span class="font-hand text-xs font-bold tracking-wider uppercase opacity-95">Chạm Để Mở</span>
+            </div>
+          </div>
+
+          <h2 id="mystery-stage-title" class="font-hand text-2xl sm:text-3xl font-bold text-cocoa mb-2">
+            Có 5 điều thú vị về em đang được cất giấu ở đây...
+          </h2>
+          <p class="text-sm text-cocoa/75 max-w-md mx-auto leading-relaxed mb-7">
+            Mỗi tấm thẻ là một bí mật nhỏ anh lén ghi lại. Em hãy bấm rút ngẫu nhiên hoặc đi theo hành trình từng bước để mở từng trang nhé!
+          </p>
+
+          <!-- 2 Nút hành động chính nổi bật -->
+          <div class="flex flex-col sm:flex-row items-center justify-center gap-3.5">
+            <button onclick="drawRandomSecret()"
+              class="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-6 py-3.5 rounded-2xl bg-gradient-to-r from-roseSoft to-roseDeep text-white font-bold text-sm sm:text-base shadow-lg shadow-pink-300/50 hover:shadow-xl hover:scale-105 transition-all">
+              <span>Rút Ngẫu Nhiên 1 Bí Mật ✨</span>
+            </button>
+
+            <button onclick="startJourneyMode()"
+              class="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-6 py-3.5 rounded-2xl bg-white hover:bg-pink-50 text-roseDeep border-2 border-pink-200 font-bold text-sm sm:text-base shadow-sm hover:scale-[1.02] transition-all">
+              <span>Xem Hành Trình Từng Bước 🎬</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- TRẠNG THÁI 2: TẤM THẺ BÍ MẬT ĐANG ĐƯỢC LẬT MỞ -->
+        <div id="revealed-card-stage" class="hidden">
+          <div id="revealed-card-container" class="animate-reveal-card">
+            <!-- Nội dung tấm thẻ Polaroid được render động tại đây -->
+          </div>
+
+          <!-- Thanh điều hướng dưới thẻ đang mở -->
+          <div id="revealed-card-controls" class="mt-6 flex flex-wrap items-center justify-center gap-3">
+            <!-- Nút điều khiển render động tùy theo chế độ Ngẫu nhiên hay Hành trình từng bước -->
+          </div>
+        </div>
+
+        <!-- Trạng thái trống nếu chủ đề đang lọc chưa có bí mật nào -->
+        <div id="empty-state" class="hidden text-center py-14 bg-white/80 rounded-3xl border-2 border-dashed border-pink-200">
+          <div class="text-5xl mb-3">🐰</div>
+          <h3 class="font-hand text-xl font-bold text-cocoa">Chưa có bí mật nào ở chủ đề này</h3>
+          <p class="text-sm text-cocoa/65 mt-1">Hãy chọn "Tất cả chủ đề" hoặc ghi thêm điều thú vị mới nhé!</p>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- 4. GÓC HỘP BÍ MẬT / BỨC THƯ TƯƠNG LAI -->
+    <section class="mt-16">
+      <div class="text-center mb-6">
+        <span class="inline-block px-3.5 py-1 rounded-full bg-lavender text-lavenderDeep text-xs font-bold mb-2">
+          💌 Góc Bí Mật Dành Riêng Cho Ngày Em Xem Trang Này
+        </span>
+        <h2 class="font-hand text-2xl sm:text-3xl font-bold text-cocoa">
+          Bức Thư Gửi Em Trong Tương Lai
+        </h2>
+        <p class="text-xs sm:text-sm text-cocoa/70 mt-1">
+          Nhấn vào phong bì bên dưới để mở lá thư anh đã bí mật viết sẵn cho em ✨
+        </p>
+      </div>
+
+      <div class="max-w-2xl mx-auto">
+        <!-- Phong bì tương tác -->
+        <div id="envelope-container" class="envelope-wrapper relative bg-gradient-to-b from-pink-100 to-rose-200/80 rounded-3xl p-4 sm:p-6 shadow-xl border-2 border-white">
+          
+          <!-- Nắp phong bì -->
+          <div id="envelope-header-bar" onclick="toggleEnvelope()" 
+            class="cursor-pointer flex items-center justify-between bg-white/90 hover:bg-white px-5 py-4 rounded-2xl shadow-sm border border-pink-100 transition group">
+            <div class="flex items-center gap-3">
+              <div class="w-11 h-11 rounded-full bg-blush flex items-center justify-center text-2xl group-hover:scale-110 transition-transform">
+                💌
+              </div>
+              <div>
+                <h3 id="letter-envelope-title" class="font-hand font-bold text-base sm:text-lg text-roseDeep">
+                  Gửi Em Yêu Của Anh...
+                </h3>
+                <p id="envelope-hint-text" class="text-xs text-cocoa/65">
+                  Chạm để mở phong bì thư bí mật ✨
+                </p>
+              </div>
+            </div>
+
+            <div class="flex items-center gap-2">
+              <button id="btn-edit-letter" onclick="event.stopPropagation(); openLetterModal()"
+                class="px-3 py-1.5 rounded-xl bg-lavender/80 hover:bg-lavender text-lavenderDeep text-xs font-bold flex items-center gap-1 transition">
+                <i data-lucide="pen" class="w-3.5 h-3.5"></i>
+                <span>Viết thư</span>
+              </button>
+              <span id="envelope-chevron" class="p-2 rounded-full bg-pink-50 text-roseDeep transition-transform duration-300">
+                <i data-lucide="chevron-down" class="w-5 h-5"></i>
+              </span>
+            </div>
+          </div>
+
+          <!-- Nội dung lá thư bên trong (Mở ra mượt mà) -->
+          <div id="letter-body-wrapper" class="hidden mt-4">
+            <div class="letter-paper relative bg-[#FFFDF7] rounded-2xl p-6 sm:p-8 shadow-inner border border-amber-100/80"
+                 style="background-image: repeating-linear-gradient(transparent, transparent 31px, #F6E6EA 32px); line-height: 32px;">
+              
+              <!-- Tem thư trang trí -->
+              <div class="float-right ml-4 mb-2 w-16 h-20 bg-blush border-2 border-dashed border-roseSoft rounded-lg flex flex-col items-center justify-center rotate-3 shadow-sm select-none">
+                <span class="text-2xl">🌸</span>
+                <span class="text-[9px] font-bold text-roseDeep uppercase tracking-tighter mt-1">Love Mail</span>
+              </div>
+
+              <div id="letter-content-display" class="font-hand text-base sm:text-lg text-cocoa whitespace-pre-line">
+                <!-- Nội dung thư render từ JS -->
+              </div>
+
+              <div class="mt-6 pt-2 flex items-center justify-between text-xs text-cocoa/60 font-sans">
+                <span id="letter-date-display">Viết vào một ngày nhớ em 💕</span>
+                <span class="font-hand font-bold text-roseDeep text-sm">— Người luôn thương em</span>
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- ==================== MODALS ==================== -->
+
+  <!-- MODAL 1: THÊM / SỬA GHI CHÚ SCRAPBOOK -->
+  <div id="note-modal" class="fixed inset-0 z-50 hidden items-center justify-center p-4 bg-cocoa/40 backdrop-blur-sm">
+    <div class="bg-cream w-full max-w-lg rounded-3xl p-6 sm:p-7 shadow-2xl border-2 border-white max-h-[92vh] overflow-y-auto relative">
+      <button onclick="closeNoteModal()" class="absolute top-5 right-5 p-2 rounded-full bg-pink-50 hover:bg-pink-100 text-cocoa/70 transition">
+        <i data-lucide="x" class="w-5 h-5"></i>
+      </button>
+
+      <div class="flex items-center gap-2.5 mb-5">
+        <span class="text-2xl">📝</span>
+        <h3 id="note-modal-title" class="font-hand text-2xl font-bold text-roseDeep">Ghi Lại Điều Thú Vị Mới</h3>
+      </div>
+
+      <form id="note-form" onsubmit="saveNote(event)" class="space-y-4">
+        <input type="hidden" id="note-id" />
+
+        <!-- Chọn Danh mục -->
+        <div>
+          <label class="block text-xs font-bold text-cocoa/80 mb-1.5">Danh mục kỷ niệm</label>
+          <select id="note-category" required
+            class="w-full px-4 py-2.5 rounded-2xl bg-white border border-pink-200 focus:border-roseSoft outline-none text-sm font-semibold text-cocoa">
+            <option value="food">🧋 Món khoái khẩu & Sở thích</option>
+            <option value="habit">🌷 Thói quen đáng yêu</option>
+            <option value="quote">💌 Câu nói & Khoảnh khắc buồn cười</option>
+            <option value="wish">🎁 Quà muốn tặng / Điều muốn làm cùng nhau</option>
+            <option value="reason">✨ Lý do anh thích em</option>
+          </select>
+        </div>
+
+        <!-- Tiêu đề & Ngày -->
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+          <div class="sm:col-span-2">
+            <label class="block text-xs font-bold text-cocoa/80 mb-1.5">Tiêu đề ngắn gọn *</label>
+            <input type="text" id="note-title" required placeholder="VD: Trà sữa ô long kem cheese..."
+              class="w-full px-4 py-2.5 rounded-2xl bg-white border border-pink-200 focus:border-roseSoft outline-none text-sm text-cocoa" />
+          </div>
+          <div>
+            <label class="block text-xs font-bold text-cocoa/80 mb-1.5">Ngày ghi chú</label>
+            <input type="date" id="note-date"
+              class="w-full px-3 py-2.5 rounded-2xl bg-white border border-pink-200 focus:border-roseSoft outline-none text-sm text-cocoa" />
+          </div>
+        </div>
+
+        <!-- Chọn Sticker đại diện -->
+        <div>
+          <label class="block text-xs font-bold text-cocoa/80 mb-1.5">Chọn Sticker trang trí</label>
+          <div id="sticker-picker" class="flex flex-wrap gap-2 bg-white p-2.5 rounded-2xl border border-pink-100">
+            <!-- Render nút emoji bằng JS -->
+          </div>
+          <input type="hidden" id="note-sticker" value="🧸" />
+        </div>
+
+        <!-- Nội dung chi tiết -->
+        <div>
+          <label class="block text-xs font-bold text-cocoa/80 mb-1.5">Chi tiết đáng yêu *</label>
+          <textarea id="note-content" rows="3" required placeholder="Ghi lại chi tiết để sau này hai đứa đọc lại cùng cười nhé..."
+            class="w-full px-4 py-2.5 rounded-2xl bg-white border border-pink-200 focus:border-roseSoft outline-none text-sm text-cocoa resize-none"></textarea>
+        </div>
+
+        <!-- Đính kèm ảnh Polaroid (Upload file hoặc dán link) -->
+        <div class="bg-blush/40 p-3.5 rounded-2xl border border-pink-100">
+          <label class="block text-xs font-bold text-roseDeep mb-2 flex items-center gap-1.5">
+            <i data-lucide="image" class="w-4 h-4"></i>
+            <span>Ảnh Polaroid đính kèm (Không bắt buộc)</span>
+          </label>
+          
+          <div class="flex flex-col sm:flex-row gap-2">
+            <label class="cursor-pointer shrink-0 inline-flex items-center justify-center gap-1.5 px-3.5 py-2 rounded-xl bg-white hover:bg-pink-50 text-roseDeep border border-pink-200 text-xs font-bold transition">
+              <i data-lucide="camera" class="w-3.5 h-3.5"></i>
+              <span>Tải ảnh từ máy</span>
+              <input type="file" id="note-image-file" accept="image/*" class="hidden" onchange="handleImageUpload(event)" />
+            </label>
+            <input type="url" id="note-image-url" oninput="previewImageUrl(this.value)" placeholder="Hoặc dán đường link ảnh tại đây..."
+              class="flex-1 px-3 py-2 rounded-xl bg-white border border-pink-200 text-xs text-cocoa outline-none" />
+          </div>
+
+          <!-- Xem trước ảnh -->
+          <div id="image-preview-box" class="hidden mt-3 relative w-32 h-32 mx-auto bg-white p-1.5 pb-5 rounded-lg shadow border border-pink-100">
+            <img id="image-preview-img" src="" alt="Preview" class="w-full h-full object-cover rounded" />
+            <button type="button" onclick="clearNoteImage()" title="Xóa ảnh"
+              class="absolute -top-2 -right-2 w-6 h-6 rounded-full bg-roseDeep text-white flex items-center justify-center shadow text-xs">
+              ✕
+            </button>
+          </div>
+        </div>
+
+        <div class="pt-2 flex items-center justify-end gap-2.5">
+          <button type="button" onclick="closeNoteModal()"
+            class="px-5 py-2.5 rounded-2xl bg-gray-100 hover:bg-gray-200 text-cocoa text-sm font-bold transition">
+            Hủy
+          </button>
+          <button type="submit"
+            class="px-6 py-2.5 rounded-2xl bg-gradient-to-r from-roseSoft to-roseDeep text-white text-sm font-bold shadow-md hover:shadow-lg transition">
+            Lưu Vào Sổ Tay 💖
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- MODAL 2: CHỈNH SỬA THÔNG TIN BẠN GÁI & NGÀY KỶ NIỆM -->
+  <div id="profile-modal" class="fixed inset-0 z-50 hidden items-center justify-center p-4 bg-cocoa/40 backdrop-blur-sm">
+    <div class="bg-cream w-full max-w-md rounded-3xl p-6 shadow-2xl border-2 border-white relative">
+      <button onclick="closeProfileModal()" class="absolute top-5 right-5 p-2 rounded-full bg-pink-50 text-cocoa/70">
+        <i data-lucide="x" class="w-5 h-5"></i>
+      </button>
+      <h3 class="font-hand text-2xl font-bold text-roseDeep mb-4">Cài Đặt Góc Nhỏ ✨</h3>
+      <form onsubmit="saveProfile(event)" class="space-y-4">
+        <div>
+          <label class="block text-xs font-bold text-cocoa/80 mb-1">Tiêu đề sổ tay</label>
+          <input type="text" id="input-book-title" required
+            class="w-full px-4 py-2.5 rounded-2xl bg-white border border-pink-200 text-sm text-cocoa outline-none" />
+        </div>
+        <div>
+          <label class="block text-xs font-bold text-cocoa/80 mb-1">Biệt danh dễ thương của bạn gái</label>
+          <input type="text" id="input-nickname" required
+            class="w-full px-4 py-2.5 rounded-2xl bg-white border border-pink-200 text-sm text-cocoa outline-none" />
+        </div>
+        <div>
+          <label class="block text-xs font-bold text-cocoa/80 mb-1">Ngày bắt đầu yêu nhau</label>
+          <input type="date" id="input-start-date" required
+            class="w-full px-4 py-2.5 rounded-2xl bg-white border border-pink-200 text-sm text-cocoa outline-none" />
+        </div>
+        <div>
+          <label class="block text-xs font-bold text-cocoa/80 mb-1">Lời đề tựa ngắn</label>
+          <textarea id="input-subtitle" rows="2"
+            class="w-full px-4 py-2.5 rounded-2xl bg-white border border-pink-200 text-sm text-cocoa outline-none resize-none"></textarea>
+        </div>
+        <div class="flex justify-end gap-2 pt-2">
+          <button type="button" onclick="closeProfileModal()" class="px-4 py-2 rounded-xl bg-gray-100 text-sm font-bold">Đóng</button>
+          <button type="submit" class="px-5 py-2 rounded-xl bg-roseDeep text-white text-sm font-bold shadow">Cập nhật 💕</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- MODAL 3: VIẾT BỨC THƯ TƯƠNG LAI -->
+  <div id="letter-modal" class="fixed inset-0 z-50 hidden items-center justify-center p-4 bg-cocoa/40 backdrop-blur-sm">
+    <div class="bg-cream w-full max-w-lg rounded-3xl p-6 shadow-2xl border-2 border-white relative">
+      <button onclick="closeLetterModal()" class="absolute top-5 right-5 p-2 rounded-full bg-pink-50 text-cocoa/70">
+        <i data-lucide="x" class="w-5 h-5"></i>
+      </button>
+      <h3 class="font-hand text-2xl font-bold text-roseDeep mb-1">Viết Thư Gửi Em 💌</h3>
+      <p class="text-xs text-cocoa/65 mb-4">Những lời nhắn nhủ chân thành để ngày em mở trang web này sẽ mỉm cười thật tươi.</p>
+      
+      <form onsubmit="saveLetter(event)" class="space-y-4">
+        <div>
+          <label class="block text-xs font-bold text-cocoa/80 mb-1">Tiêu đề ngoài phong bì</label>
+          <input type="text" id="input-letter-title" required
+            class="w-full px-4 py-2.5 rounded-2xl bg-white border border-pink-200 text-sm text-cocoa outline-none" />
+        </div>
+        <div>
+          <label class="block text-xs font-bold text-cocoa/80 mb-1">Nội dung bức thư</label>
+          <textarea id="input-letter-content" rows="7" required
+            class="w-full px-4 py-3 rounded-2xl bg-white border border-pink-200 font-hand text-base text-cocoa outline-none leading-relaxed"></textarea>
+        </div>
+        <div class="flex justify-end gap-2">
+          <button type="button" onclick="closeLetterModal()" class="px-4 py-2 rounded-xl bg-gray-100 text-sm font-bold">Hủy</button>
+          <button type="submit" class="px-5 py-2 rounded-xl bg-roseDeep text-white text-sm font-bold shadow">Niêm Phong Thư 💌</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- MODAL 4: ĐIỀU BẤT NGỜ / TRÌNH CHIẾU KỶ NIỆM (CHẾ ĐỘ TẶNG EM) -->
+  <div id="surprise-modal" class="fixed inset-0 z-50 hidden items-center justify-center p-4 bg-rose-950/50 backdrop-blur-md">
+    <div class="bg-gradient-to-b from-white via-blush/80 to-lavender/80 w-full max-w-lg rounded-3xl p-7 sm:p-9 shadow-2xl border-4 border-white text-center relative overflow-hidden">
+      <button onclick="closeSurpriseModal()" class="absolute top-4 right-4 p-2 rounded-full bg-white/80 hover:bg-white text-roseDeep shadow-sm">
+        <i data-lucide="x" class="w-5 h-5"></i>
+      </button>
+
+      <div id="surprise-emoji" class="text-6xl mb-4 animate-bounce">💝</div>
+      <h3 id="surprise-heading" class="font-hand text-2xl sm:text-3xl font-bold text-roseDeep mb-3">
+        Gửi Công Chúa Nhỏ Của Anh!
+      </h3>
+      <div id="surprise-body" class="bg-white/90 rounded-2xl p-5 shadow-inner border border-pink-100 text-cocoa font-hand text-lg leading-relaxed mb-6">
+        <!-- Nội dung bất ngờ hoặc slide thẻ kỷ niệm -->
+      </div>
+
+      <div id="surprise-controls" class="flex items-center justify-center gap-3">
+        <button onclick="triggerConfettiBurst()" class="px-5 py-2.5 rounded-full bg-roseDeep text-white font-bold text-sm shadow-md hover:scale-105 transition">
+          Bắn Thêm Tim Nhé 💖
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL 5: XÁC NHẬN XÓA THẺ (THAY CHO CONFIRM() THÔ CỨNG) -->
+  <div id="confirm-delete-modal" class="fixed inset-0 z-50 hidden items-center justify-center p-4 bg-cocoa/40 backdrop-blur-sm">
+    <div class="bg-white w-full max-w-sm rounded-3xl p-6 shadow-xl border-2 border-pink-100 text-center">
+      <div class="text-4xl mb-2">🥺</div>
+      <h4 class="font-hand text-xl font-bold text-cocoa">Xóa mảnh ghi chú này?</h4>
+      <p class="text-xs text-cocoa/70 mt-1 mb-5">Mảnh ký ức này sẽ biến mất khỏi sổ tay đó nha.</p>
+      <div class="flex justify-center gap-3">
+        <button onclick="closeDeleteModal()" class="px-5 py-2 rounded-xl bg-gray-100 hover:bg-gray-200 text-sm font-bold text-cocoa">Giữ lại</button>
+        <button id="btn-confirm-delete-action" class="px-5 py-2 rounded-xl bg-roseDeep hover:bg-rose-600 text-sm font-bold text-white shadow">Xóa luôn</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL 6: NGĂN KÉO QUẢN LÝ DANH SÁCH RIÊNG TƯ (CHỈ DÀNH CHO CHẾ ĐỘ CỦA ANH) -->
+  <div id="manage-drawer-modal" class="fixed inset-0 z-50 hidden justify-end bg-cocoa/45 backdrop-blur-sm">
+    <div class="bg-cream w-full max-w-xl h-full shadow-2xl border-l-2 border-white flex flex-col">
+      <!-- Header ngăn kéo -->
+      <div class="p-5 sm:p-6 bg-white border-b border-pink-100 flex items-center justify-between">
+        <div>
+          <div class="inline-flex items-center gap-1.5 text-xs font-bold text-lavenderDeep bg-lavender/70 px-2.5 py-0.5 rounded-full mb-1">
+            <i data-lucide="shield-check" class="w-3.5 h-3.5"></i>
+            <span>Khu vực riêng tư của anh</span>
+          </div>
+          <h3 class="font-hand text-2xl font-bold text-cocoa">Danh Sách Bí Mật Đã Ghi</h3>
+        </div>
+        <button onclick="closeManageDrawer()" class="p-2 rounded-full bg-pink-50 hover:bg-pink-100 text-cocoa/70 transition">
+          <i data-lucide="x" class="w-5 h-5"></i>
+        </button>
+      </div>
+
+      <!-- Thanh tìm kiếm & thêm nhanh trong ngăn kéo -->
+      <div class="p-4 bg-blush/30 border-b border-pink-100 flex items-center gap-2.5">
+        <div class="relative flex-1">
+          <i data-lucide="search" class="w-4 h-4 text-roseSoft absolute left-3.5 top-1/2 -translate-y-1/2"></i>
+          <input type="text" id="drawer-search-input" oninput="renderManageDrawerList()" placeholder="Tìm nhanh trong danh sách bí mật..."
+            class="w-full pl-9 pr-3 py-2 rounded-xl bg-white border border-pink-200 text-sm text-cocoa outline-none" />
+        </div>
+        <button onclick="closeManageDrawer(); openNoteModal();"
+          class="shrink-0 px-3.5 py-2 rounded-xl bg-roseDeep text-white text-xs font-bold flex items-center gap-1 shadow-sm hover:bg-rose-600 transition">
+          <i data-lucide="plus" class="w-4 h-4"></i>
+          <span>Thêm mới</span>
+        </button>
+      </div>
+
+      <!-- Danh sách các ghi chú để sửa / xóa -->
+      <div id="manage-drawer-list" class="flex-1 overflow-y-auto p-4 sm:p-5 space-y-3">
+        <!-- Render bằng JS -->
+      </div>
+    </div>
+  </div>
+
+  <!-- TOAST THÔNG BÁO MỀM MẠI -->
+  <div id="toast-container" class="fixed bottom-5 right-5 z-50 flex flex-col gap-2 pointer-events-none"></div>
+
+  <script>
+    // ==================== CẤU HÌNH DANH MỤC & DỮ LIỆU MẪU ====================
+    const CATEGORIES = [
+      { id: 'all', label: 'Tất cả chủ đề', icon: '🌸', badgeBg: 'bg-pink-100 text-roseDeep', washi: '' },
+      { id: 'food', label: 'Món khoái khẩu & Sở thích', icon: '🧋', badgeBg: 'bg-amber-100 text-amber-800', washi: 'washi-peach' },
+      { id: 'habit', label: 'Thói quen đáng yêu', icon: '🌷', badgeBg: 'bg-pink-100 text-roseDeep', washi: '' },
+      { id: 'quote', label: 'Câu nói & Khoảnh khắc vui', icon: '💌', badgeBg: 'bg-purple-100 text-purple-800', washi: 'washi-lavender' },
+      { id: 'wish', label: 'Quà muốn tặng & Dự định', icon: '🎁', badgeBg: 'bg-emerald-100 text-emerald-800', washi: 'washi-mint' },
+      { id: 'reason', label: 'Lý do anh thích em', icon: '✨', badgeBg: 'bg-rose-100 text-rose-700', washi: '' },
+    ];
+
+    const STICKERS = ['🧸', '🌸', '🧋', '🍓', '🐰', '💌', '✨', '🎀', '🍰', '🌙', '🌷', '🥰'];
+
+    const DEFAULT_DATA = {
+      profile: {
+        title: 'Góc Nhỏ Về Em ✨',
+        nickname: 'Công Chúa Nhỏ',
+        startDate: new Date(Date.now() - 100 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
+        subtitle: 'Nơi anh lén ghi lại từng điều dễ thương, thói quen nhỏ và những khoảnh khắc bên em.'
+      },
+      notes: [
+        {
+          id: 'note-1',
+          category: 'food',
+          title: 'Trà sữa ô long kem cheese ít đường',
+          date: new Date().toISOString().split('T')[0],
+          sticker: '🧋',
+          content: 'Mỗi lần hơi buồn ngủ hoặc dỗi nhẹ là chỉ cần một ly trà sữa ô long kem cheese 50% đường, nhiều trân châu trắng là mắt sáng rực lên ngay.',
+          image: ''
+        },
+        {
+          id: 'note-2',
+          category: 'habit',
+          title: 'Hay chu môi khi tập trung suy nghĩ',
+          date: new Date().toISOString().split('T')[0],
+          sticker: '🐰',
+          content: 'Lúc chọn món ăn hoặc đọc tin nhắn dài là em hay vô thức chu môi nhẹ và nghiêng đầu sang bên trái, nhìn cưng xỉu luôn.',
+          image: ''
+        },
+        {
+          id: 'note-3',
+          category: 'quote',
+          title: 'Câu cửa miệng: "Anh đoán xem~"',
+          date: new Date().toISOString().split('T')[0],
+          sticker: '💌',
+          content: 'Mỗi khi muốn kể chuyện gì vui hay muốn đi ăn món gì đó là y như rằng bắt anh đoán 3 lần mới chịu bật mí.',
+          image: ''
+        },
+        {
+          id: 'note-4',
+          category: 'wish',
+          title: 'Chuyến đi Đà Lạt săn mây cùng nhau',
+          date: new Date().toISOString().split('T')[0],
+          sticker: '🎀',
+          content: 'Em từng bảo thích mặc áo len ấm, uống sữa đậu nành nóng ở chợ đêm Đà Lạt và chụp thật nhiều ảnh phim.',
+          image: ''
+        },
+        {
+          id: 'note-5',
+          category: 'reason',
+          title: 'Nụ cười làm tan biến mọi mệt mỏi',
+          date: new Date().toISOString().split('T')[0],
+          sticker: '✨',
+          content: 'Dù cả ngày có bận rộn thế nào, chỉ cần thấy em cười tít mắt là anh thấy mọi thứ đều nhẹ nhàng và đáng yêu trở lại.',
+          image: ''
+        }
+      ],
+      letter: {
+        title: 'Gửi Em Yêu Của Anh...',
+        content: 'Cảm ơn em đã bước vào cuộc sống của anh và biến những ngày bình thường trở nên thật rực rỡ.\n\nAnh làm góc nhỏ này để lưu giữ từng thói quen, từng sở thích và mọi điều đáng yêu về em — để sau này mỗi lần hai đứa mở lại, mình đều nhớ rằng anh đã thương em nhiều đến nhường nào 💕',
+        updatedAt: 'Viết dành riêng cho em 💕'
+      }
+    };
+
+    function loadAppData() {
+      try {
+        const raw = localStorage.getItem(STORAGE_KEY);
+        if (raw) {
+          const parsed = JSON.parse(raw);
+          return {
+            profile: { ...DEFAULT_DATA.profile, ...(parsed.profile || {}) },
+            notes: Array.isArray(parsed.notes) ? parsed.notes : DEFAULT_DATA.notes,
+            letter: { ...DEFAULT_DATA.letter, ...(parsed.letter || {}) }
+          };
+        }
+      } catch (e) {
+        console.warn('Không thể đọc dữ liệu từ localStorage:', e);
+      }
+      return JSON.parse(JSON.stringify(DEFAULT_DATA));
+    }
+
+    function saveAppData() {
+      try {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(appData));
+      } catch (e) {
+        showToast('Bộ nhớ trình duyệt đã đầy, hãy xuất file Backup nhé!', 'error');
+      }
+    }
+
+    function createFloatingHearts() {
+      const container = document.getElementById('floating-hearts-container');
+      if (!container) return;
+      const icons = ['💗', '🌸', '✨', '💕', '🧸'];
+      container.innerHTML = '';
+      for (let i = 0; i < 14; i++) {
+        const el = document.createElement('span');
+        el.className = 'floating-heart text-sm sm:text-base select-none';
+        el.textContent = icons[i % icons.length];
+        el.style.left = `${Math.random() * 100}%`;
+        el.style.animationDuration = `${12 + Math.random() * 14}s`;
+        el.style.animationDelay = `${-Math.random() * 15}s`;
+        container.appendChild(el);
+      }
+    }
+
+    function renderProfile() {
+      const { title, nickname, startDate, subtitle } = appData.profile;
+      document.getElementById('nav-brand-title').textContent = title;
+      document.getElementById('hero-title').textContent = title;
+      document.getElementById('hero-nickname').textContent = nickname;
+      document.getElementById('hero-subtitle').textContent = subtitle;
+
+      const start = new Date(startDate);
+      const now = new Date();
+      const diffDays = Math.max(1, Math.floor((now - start) / (1000 * 60 * 60 * 24)));
+      document.getElementById('days-together-count').textContent = isNaN(diffDays) ? 1 : diffDays;
+    }
+
+    function openProfileModal() {
+      document.getElementById('input-book-title').value = appData.profile.title;
+      document.getElementById('input-nickname').value = appData.profile.nickname;
+      document.getElementById('input-start-date').value = appData.profile.startDate;
+      document.getElementById('input-subtitle').value = appData.profile.subtitle;
+      toggleModal('profile-modal', true);
+    }
+
+    function closeProfileModal() {
+      toggleModal('profile-modal', false);
+    }
+
+    function saveProfile(e) {
+      e.preventDefault();
+      appData.profile.title = document.getElementById('input-book-title').value.trim();
+      appData.profile.nickname = document.getElementById('input-nickname').value.trim();
+      appData.profile.startDate = document.getElementById('input-start-date').value;
+      appData.profile.subtitle = document.getElementById('input-subtitle').value.trim();
+      saveAppData();
+      renderProfile();
+      closeProfileModal();
+      showToast('Đã cập nhật thông tin góc nhỏ ✨');
+    }
+
+    // ==================== TRẠNG THÁI ỨNG DỤNG ====================
+    const STORAGE_KEY = 'love_scrapbook_data_v1';
+    let appData = loadAppData();
+    let currentCategory = 'all';
+    let currentMode = 'edit'; // 'edit' | 'gift'
+    let currentNoteImageBase64 = '';
+    let noteIdToDelete = null;
+    let slideshowIndex = 0;
+
+    // Trạng thái sân khấu khám phá bí mật
+    let discoveredIds = new Set();
+    let lovedIds = new Set();
+    let activeRevealNote = null;
+    let revealFlowType = 'random'; // 'random' | 'journey'
+    let journeyIndex = 0;
+
+    // ==================== KHỞI TẠO ====================
+    window.addEventListener('DOMContentLoaded', () => {
+      createFloatingHearts();
+      renderStickerPicker();
+      renderProfile();
+      renderCategoryFilters();
+      updateMysteryStageSummary();
+      renderLetter();
+      lucide.createIcons();
+    });
+// ... existing code ... -->
+    // ==================== CHUYỂN ĐỔI CHẾ ĐỘ (GHI CHÉP VS TẶNG EM) ====================
+    function setAppMode(mode) {
+      currentMode = mode;
+      const btnEdit = document.getElementById('btn-mode-edit');
+      const btnGift = document.getElementById('btn-mode-gift');
+      const editToolbar = document.getElementById('edit-mode-toolbar');
+      const btnEditProfile = document.getElementById('btn-edit-profile');
+      const btnEditLetter = document.getElementById('btn-edit-letter');
+      const backupControls = document.getElementById('backup-controls');
+      const giftActions = document.getElementById('gift-mode-actions');
+
+      if (mode === 'gift') {
+        document.body.classList.add('gift-mode');
+        btnGift.className = 'flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-xs sm:text-sm font-semibold transition-all duration-300 bg-gradient-to-r from-roseSoft to-roseDeep text-white shadow-sm';
+        btnEdit.className = 'flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-xs sm:text-sm font-semibold transition-all duration-300 text-cocoa/75 hover:text-roseDeep';
+        
+        editToolbar.classList.add('hidden');
+        btnEditProfile.classList.add('hidden');
+        btnEditLetter.classList.add('hidden');
+        backupControls.classList.add('hidden');
+        giftActions.classList.remove('hidden');
+        closeManageDrawer();
+        
+        // Đóng thẻ đang mở nếu có để tạo bất ngờ từ đầu cho bạn gái
+        closeRevealedCard();
+        triggerConfettiBurst();
+        showToast(`Chào mừng ${appData.profile.nickname} đến với góc bí mật dành riêng cho em ✨`);
+      } else {
+        document.body.classList.remove('gift-mode');
+        btnEdit.className = 'flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-xs sm:text-sm font-semibold transition-all duration-300 bg-roseDeep text-white shadow-sm';
+        btnGift.className = 'flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-xs sm:text-sm font-semibold transition-all duration-300 text-cocoa/75 hover:text-roseDeep';
+
+        editToolbar.classList.remove('hidden');
+        btnEditProfile.classList.remove('hidden');
+        btnEditLetter.classList.remove('hidden');
+        backupControls.classList.remove('hidden');
+        giftActions.classList.add('hidden');
+      }
+
+      updateMysteryStageSummary();
+      lucide.createIcons();
+    }
+    // ==================== DANH MỤC & SÂN KHẤU KHÁM PHÁ BÍ MẬT ====================
+    function renderCategoryFilters() {
+      const container = document.getElementById('category-filters');
+      container.innerHTML = CATEGORIES.map(cat => {
+        const isActive = currentCategory === cat.id;
+        return `
+          <button onclick="selectCategory('${cat.id}')"
+            class="shrink-0 inline-flex items-center gap-1.5 px-4 py-2 rounded-2xl text-xs sm:text-sm font-bold transition-all ${
+              isActive 
+                ? 'bg-cocoa text-white shadow-md scale-[1.02]' 
+                : 'bg-white/90 hover:bg-pink-50 text-cocoa/80 border border-pink-100'
+            }">
+            <span>${cat.icon}</span>
+            <span>${cat.label}</span>
+          </button>
+        `;
+      }).join('');
+    }
+
+    function getFilteredNotesPool() {
+      if (currentCategory === 'all') return appData.notes;
+      return appData.notes.filter(n => n.category === currentCategory);
+    }
+
+    function selectCategory(catId) {
+      currentCategory = catId;
+      renderCategoryFilters();
+      closeRevealedCard();
+      updateMysteryStageSummary();
+    }
+
+    function updateMysteryStageSummary() {
+      const pool = getFilteredNotesPool();
+      const boxStage = document.getElementById('mystery-box-stage');
+      const revealedStage = document.getElementById('revealed-card-stage');
+      const emptyState = document.getElementById('empty-state');
+
+      // Cập nhật badge số lượng ở nút Quản lý danh sách
+      const manageBadge = document.getElementById('manage-count-badge');
+      if (manageBadge) manageBadge.textContent = appData.notes.length;
+
+      // Cập nhật tiến độ đã khám phá trong chủ đề hiện tại
+      const discoveredInPool = pool.filter(n => discoveredIds.has(n.id)).length;
+      document.getElementById('discovered-count').textContent = discoveredInPool;
+      document.getElementById('total-pool-count').textContent = pool.length;
+
+      if (pool.length === 0) {
+        boxStage.classList.add('hidden');
+        revealedStage.classList.add('hidden');
+        emptyState.classList.remove('hidden');
+        return;
+      }
+
+      emptyState.classList.add('hidden');
+      const catObj = CATEGORIES.find(c => c.id === currentCategory);
+      const catText = currentCategory === 'all' ? 'về em' : `thuộc mục "${catObj.label}"`;
+      document.getElementById('mystery-stage-title').textContent =
+        `Có ${pool.length} điều thú vị ${catText} đang được cất giấu ở đây...`;
+
+      if (activeRevealNote) {
+        boxStage.classList.add('hidden');
+        revealedStage.classList.remove('hidden');
+      } else {
+        boxStage.classList.remove('hidden');
+        revealedStage.classList.add('hidden');
+      }
+    }
+
+    // Rút ngẫu nhiên 1 bí mật (không trùng lặp cho đến khi lật hết bộ bài)
+    function drawRandomSecret() {
+      const pool = getFilteredNotesPool();
+      if (pool.length === 0) return;
+
+      revealFlowType = 'random';
+      let unrevealed = pool.filter(n => !discoveredIds.has(n.id));
+
+      // Nếu đã khám phá hết bộ bài thì tự động xào lại để rút tiếp
+      if (unrevealed.length === 0) {
+        pool.forEach(n => discoveredIds.delete(n.id));
+        unrevealed = [...pool];
+        showToast('Em đã mở hết tất cả bí mật rồi! Xào lại từ đầu nhé ✨');
+        triggerConfettiBurst();
+      }
+
+      const randomIdx = Math.floor(Math.random() * unrevealed.length);
+      const chosenNote = unrevealed[randomIdx];
+      discoveredIds.add(chosenNote.id);
+      activeRevealNote = chosenNote;
+
+      renderRevealedCard(chosenNote);
+      updateMysteryStageSummary();
+    }
+
+    // Bắt đầu chế độ Hành trình từng bước (từ thẻ đầu tiên đến cuối)
+    function startJourneyMode() {
+      const pool = getFilteredNotesPool();
+      if (pool.length === 0) return;
+
+      revealFlowType = 'journey';
+      journeyIndex = 0;
+      const chosenNote = pool[journeyIndex];
+      discoveredIds.add(chosenNote.id);
+      activeRevealNote = chosenNote;
+
+      renderRevealedCard(chosenNote);
+      updateMysteryStageSummary();
+    }
+
+    function stepJourney(delta) {
+      const pool = getFilteredNotesPool();
+      if (pool.length === 0) return;
+
+      journeyIndex = (journeyIndex + delta + pool.length) % pool.length;
+      const chosenNote = pool[journeyIndex];
+      discoveredIds.add(chosenNote.id);
+      activeRevealNote = chosenNote;
+
+      if (journeyIndex === pool.length - 1 && delta > 0) {
+        triggerConfettiBurst();
+      }
+
+      renderRevealedCard(chosenNote);
+      updateMysteryStageSummary();
+    }
+
+    function renderRevealedCard(note) {
+      const container = document.getElementById('revealed-card-container');
+      const controls = document.getElementById('revealed-card-controls');
+      const catObj = CATEGORIES.find(c => c.id === note.category) || CATEGORIES[1];
+      const formattedDate = note.date ? note.date.split('-').reverse().join('/') : 'Kỷ niệm đẹp';
+      const isLoved = lovedIds.has(note.id);
+      const pool = getFilteredNotesPool();
+
+      // Re-trigger animation mượt mà
+      container.classList.remove('animate-reveal-card');
+      void container.offsetWidth;
+      container.classList.add('animate-reveal-card');
+
+      container.innerHTML = `
+        <article class="relative bg-white rounded-3xl p-6 sm:p-8 pt-9 shadow-[0_20px_50px_-12px_rgba(224,87,128,0.24)] border-2 border-pink-100">
+          <div class="washi-tape ${catObj.washi}"></div>
+
+          <!-- Header thẻ -->
+          <div class="flex items-center justify-between gap-2 mb-4">
+            <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold ${catObj.badgeBg}">
+              <span>${catObj.icon}</span>
+              <span>${catObj.label}</span>
+            </span>
+            <span class="text-3xl select-none drop-shadow-sm">${note.sticker || '🧸'}</span>
+          </div>
+
+          <!-- Ảnh Polaroid nếu có -->
+          ${note.image ? `
+            <div class="mb-5 bg-cream p-2.5 pb-5 rounded-2xl border border-pink-100 shadow-inner max-w-md mx-auto">
+              <div class="aspect-[4/3] w-full overflow-hidden rounded-xl bg-pink-50">
+                <img src="${note.image}" alt="${escapeHtml(note.title)}"
+                  onerror="this.parentElement.parentElement.style.display='none'"
+                  class="w-full h-full object-cover" />
+              </div>
+            </div>
+          ` : ''}
+
+          <!-- Tiêu đề & Nội dung -->
+          <h3 class="font-hand text-2xl sm:text-3xl font-bold text-cocoa leading-snug mb-3 text-center">
+            ${escapeHtml(note.title)}
+          </h3>
+          <p class="text-sm sm:text-base text-cocoa/85 leading-relaxed whitespace-pre-line text-center max-w-xl mx-auto">
+            ${escapeHtml(note.content)}
+          </p>
+
+          <!-- Chân thẻ: Ngày tháng & Nút Thả tim kỷ niệm -->
+          <div class="mt-6 pt-4 border-t border-dashed border-pink-100 flex flex-wrap items-center justify-between gap-3">
+            <span class="inline-flex items-center gap-1.5 text-xs font-semibold text-cocoa/60">
+              <i data-lucide="calendar-heart" class="w-4 h-4 text-roseSoft"></i>
+              <span>${formattedDate}</span>
+            </span>
+
+            <button onclick="toggleLoveNote('${note.id}')"
+              class="inline-flex items-center gap-1.5 px-4 py-1.5 rounded-full text-xs font-bold transition-all ${
+                isLoved
+                  ? 'bg-roseDeep text-white shadow-sm scale-105'
+                  : 'bg-blush/80 hover:bg-pink-100 text-roseDeep'
+              }">
+              <span>${isLoved ? 'Đã thả tim kỷ niệm ❤️' : 'Thả tim kỷ niệm này ❤️'}</span>
+            </button>
+          </div>
+        </article>
+      `;
+
+      // Nút điều hướng bên dưới thẻ
+      if (revealFlowType === 'journey') {
+        controls.innerHTML = `
+          <button onclick="stepJourney(-1)"
+            class="inline-flex items-center gap-1.5 px-5 py-2.5 rounded-2xl bg-white hover:bg-pink-50 text-cocoa border border-pink-200 font-bold text-sm shadow-sm transition">
+            <span>← Trước đó</span>
+          </button>
+          <span class="px-3.5 py-1.5 rounded-full bg-white/90 text-xs font-bold text-roseDeep border border-pink-100">
+            Trang ${journeyIndex + 1} / ${pool.length}
+          </span>
+          <button onclick="stepJourney(1)"
+            class="inline-flex items-center gap-1.5 px-5 py-2.5 rounded-2xl bg-gradient-to-r from-roseSoft to-roseDeep text-white font-bold text-sm shadow-md hover:scale-105 transition">
+            <span>Bí mật tiếp theo →</span>
+          </button>
+          <button onclick="closeRevealedCard()"
+            class="inline-flex items-center gap-1 px-4 py-2.5 rounded-2xl bg-gray-100 hover:bg-gray-200 text-cocoa/75 font-bold text-xs transition">
+            <span>Cất thẻ lại</span>
+          </button>
+        `;
+      } else {
+        controls.innerHTML = `
+          <button onclick="drawRandomSecret()"
+            class="inline-flex items-center gap-2 px-6 py-3 rounded-2xl bg-gradient-to-r from-roseSoft to-roseDeep text-white font-bold text-sm shadow-md hover:scale-105 transition">
+            <span>Rút Bí Mật Tiếp Theo ✨</span>
+          </button>
+          <button onclick="closeRevealedCard()"
+            class="inline-flex items-center gap-1.5 px-4 py-3 rounded-2xl bg-white hover:bg-pink-50 text-cocoa/75 border border-pink-200 font-bold text-sm transition">
+            <span>Đóng thẻ lại</span>
+          </button>
+        `;
+      }
+
+      lucide.createIcons();
+    }
+
+    function toggleLoveNote(noteId) {
+      if (lovedIds.has(noteId)) {
+        lovedIds.delete(noteId);
+      } else {
+        lovedIds.add(noteId);
+        triggerConfettiBurst();
+        showToast('Em đã thả tim cho kỷ niệm này 💖');
+      }
+      if (activeRevealNote && activeRevealNote.id === noteId) {
+        renderRevealedCard(activeRevealNote);
+      }
+    }
+
+    function closeRevealedCard() {
+      activeRevealNote = null;
+      updateMysteryStageSummary();
+    }
+
+    function resetDiscoveryDeck() {
+      discoveredIds.clear();
+      closeRevealedCard();
+      showToast('Đã úp lại toàn bộ thẻ bí mật ✨');
+    }
+
+    // ==================== NGĂN KÉO QUẢN LÝ DANH SÁCH RIÊNG TƯ (CHẾ ĐỘ CỦA ANH) ====================
+    function openManageDrawer() {
+      if (currentMode !== 'edit') return;
+      renderManageDrawerList();
+      toggleModal('manage-drawer-modal', true);
+    }
+
+    function closeManageDrawer() {
+      toggleModal('manage-drawer-modal', false);
+    }
+
+    function renderManageDrawerList() {
+      const container = document.getElementById('manage-drawer-list');
+      const keyword = (document.getElementById('drawer-search-input')?.value || '').trim().toLowerCase();
+
+      const list = appData.notes.filter(n =>
+        !keyword ||
+        n.title.toLowerCase().includes(keyword) ||
+        n.content.toLowerCase().includes(keyword)
+      );
+
+      if (list.length === 0) {
+        container.innerHTML = `
+          <div class="text-center py-12 text-cocoa/60">
+            <div class="text-4xl mb-2">📝</div>
+            <p class="font-hand text-lg font-bold">Chưa có ghi chú nào phù hợp</p>
+          </div>
+        `;
+        return;
+      }
+
+      container.innerHTML = list.map(note => {
+        const catObj = CATEGORIES.find(c => c.id === note.category) || CATEGORIES[1];
+        return `
+          <div class="bg-white rounded-2xl p-4 border border-pink-100 shadow-sm flex items-start justify-between gap-3">
+            <div class="flex items-start gap-3 min-w-0">
+              <div class="w-10 h-10 rounded-xl bg-blush/70 flex items-center justify-center text-xl shrink-0">
+                ${note.sticker || '🧸'}
+              </div>
+              <div class="min-w-0">
+                <span class="inline-block px-2 py-0.5 rounded-full text-[10px] font-bold ${catObj.badgeBg} mb-1">
+                  ${catObj.icon} ${catObj.label}
+                </span>
+                <h4 class="font-hand font-bold text-base text-cocoa truncate">${escapeHtml(note.title)}</h4>
+                <p class="text-xs text-cocoa/70 line-clamp-2 mt-0.5">${escapeHtml(note.content)}</p>
+              </div>
+            </div>
+
+            <div class="flex items-center gap-1 shrink-0">
+              <button onclick="openNoteModal('${note.id}')" title="Sửa bí mật này"
+                class="p-2 rounded-xl bg-lavender/60 hover:bg-lavender text-lavenderDeep transition">
+                <i data-lucide="edit-2" class="w-4 h-4"></i>
+              </button>
+              <button onclick="askDeleteNote('${note.id}')" title="Xóa bí mật này"
+                class="p-2 rounded-xl bg-rose-50 hover:bg-rose-100 text-roseDeep transition">
+                <i data-lucide="trash-2" class="w-4 h-4"></i>
+              </button>
+            </div>
+          </div>
+        `;
+      }).join('');
+
+      lucide.createIcons();
+    }
+
+    // ==================== MODAL THÊM / SỬA GHI CHÚ ====================
+    function renderStickerPicker() {
+      const container = document.getElementById('sticker-picker');
+      container.innerHTML = STICKERS.map(st => `
+        <button type="button" onclick="selectSticker('${st}')" data-sticker="${st}"
+          class="sticker-btn w-9 h-9 rounded-xl flex items-center justify-center text-xl hover:bg-pink-100 transition border border-transparent">
+          ${st}
+        </button>
+      `).join('');
+    }
+
+    function selectSticker(st) {
+      document.getElementById('note-sticker').value = st;
+      document.querySelectorAll('.sticker-btn').forEach(btn => {
+        if (btn.dataset.sticker === st) {
+          btn.classList.add('bg-pink-100', 'border-roseSoft', 'scale-110');
+        } else {
+          btn.classList.remove('bg-pink-100', 'border-roseSoft', 'scale-110');
+        }
+      });
+    }
+
+    function openNoteModal(noteId = null) {
+      const form = document.getElementById('note-form');
+      form.reset();
+      clearNoteImage();
+
+      if (noteId) {
+        const note = appData.notes.find(n => n.id === noteId);
+        if (!note) return;
+        document.getElementById('note-modal-title').textContent = 'Chỉnh Sửa Mảnh Ký Ức ✨';
+        document.getElementById('note-id').value = note.id;
+        document.getElementById('note-category').value = note.category;
+        document.getElementById('note-title').value = note.title;
+        document.getElementById('note-date').value = note.date || '';
+        document.getElementById('note-content').value = note.content;
+        selectSticker(note.sticker || '🧸');
+
+        if (note.image) {
+          currentNoteImageBase64 = note.image;
+          if (note.image.startsWith('http')) {
+            document.getElementById('note-image-url').value = note.image;
+          }
+          showImagePreview(note.image);
+        }
+      } else {
+        document.getElementById('note-modal-title').textContent = 'Ghi Lại Điều Thú Vị Mới 🌸';
+        document.getElementById('note-id').value = '';
+        document.getElementById('note-date').value = new Date().toISOString().split('T')[0];
+        selectSticker('🧸');
+      }
+
+      toggleModal('note-modal', true);
+    }
+
+    function closeNoteModal() { toggleModal('note-modal', false); }
+
+    // Xử lý nén & tải ảnh lên để nhẹ localStorage
+    function handleImageUpload(event) {
+      const file = event.target.files[0];
+      if (!file) return;
+
+      const reader = new FileReader();
+      reader.onload = function(e) {
+        const img = new Image();
+        img.onload = function() {
+          const canvas = document.createElement('canvas');
+          const MAX_WIDTH = 700;
+          let width = img.width;
+          let height = img.height;
+
+          if (width > MAX_WIDTH) {
+            height *= MAX_WIDTH / width;
+            width = MAX_WIDTH;
+          }
+          canvas.width = width;
+          canvas.height = height;
+          const ctx = canvas.getContext('2d');
+          ctx.drawImage(img, 0, 0, width, height);
+
+          const compressedBase64 = canvas.toDataURL('image/jpeg', 0.78);
+          currentNoteImageBase64 = compressedBase64;
+          document.getElementById('note-image-url').value = '';
+          showImagePreview(compressedBase64);
+        };
+        img.src = e.target.result;
+      };
+      reader.readAsDataURL(file);
+    }
+
+    function previewImageUrl(url) {
+      if (url && url.trim().startsWith('http')) {
+        currentNoteImageBase64 = url.trim();
+        showImagePreview(currentNoteImageBase64);
+      } else if (!url) {
+        clearNoteImage();
+      }
+    }
+
+    function showImagePreview(src) {
+      document.getElementById('image-preview-img').src = src;
+      document.getElementById('image-preview-box').classList.remove('hidden');
+    }
+
+    function clearNoteImage() {
+      currentNoteImageBase64 = '';
+      document.getElementById('note-image-file').value = '';
+      document.getElementById('note-image-url').value = '';
+      document.getElementById('image-preview-box').classList.add('hidden');
+    }
+
+    function saveNote(e) {
+      e.preventDefault();
+      const id = document.getElementById('note-id').value;
+      const category = document.getElementById('note-category').value;
+      const title = document.getElementById('note-title').value.trim();
+      const date = document.getElementById('note-date').value;
+      const sticker = document.getElementById('note-sticker').value;
+      const content = document.getElementById('note-content').value.trim();
+
+      if (id) {
+        const index = appData.notes.findIndex(n => n.id === id);
+        if (index !== -1) {
+          appData.notes[index] = {
+            ...appData.notes[index],
+            category, title, date, sticker, content,
+            image: currentNoteImageBase64
+          };
+        }
+        showToast('Đã cập nhật mảnh ký ức ✨');
+      } else {
+        const randomRot = (Math.random() * 3.6 - 1.8).toFixed(1);
+        appData.notes.unshift({
+          id: 'note-' + Date.now(),
+          category, title, date, sticker, content,
+          image: currentNoteImageBase64,
+          rotation: parseFloat(randomRot)
+        });
+        showToast('Đã thêm một điều đáng yêu mới vào sổ 💖');
+      }
+
+      saveAppData();
+      updateMysteryStageSummary();
+      renderManageDrawerList();
+      if (activeRevealNote && activeRevealNote.id === id) {
+        const updated = appData.notes.find(n => n.id === id);
+        if (updated) {
+          activeRevealNote = updated;
+          renderRevealedCard(updated);
+        }
+      }
+      closeNoteModal();
+    }
+
+    // Xóa ghi chú với Modal xác nhận đẹp
+    function askDeleteNote(id) {
+      noteIdToDelete = id;
+      toggleModal('confirm-delete-modal', true);
+      document.getElementById('btn-confirm-delete-action').onclick = () => {
+        appData.notes = appData.notes.filter(n => n.id !== noteIdToDelete);
+        discoveredIds.delete(noteIdToDelete);
+        if (activeRevealNote && activeRevealNote.id === noteIdToDelete) {
+          activeRevealNote = null;
+        }
+        saveAppData();
+        updateMysteryStageSummary();
+        renderManageDrawerList();
+        closeDeleteModal();
+        showToast('Đã xóa ghi chú khỏi sổ tay');
+      };
+    }
+    function closeDeleteModal() { toggleModal('confirm-delete-modal', false); }
+
+    // ==================== GÓC BỨC THƯ TƯƠNG LAI ====================
+    function renderLetter() {
+      document.getElementById('letter-envelope-title').textContent = appData.letter.title;
+      document.getElementById('letter-content-display').textContent = appData.letter.content;
+      document.getElementById('letter-date-display').textContent = appData.letter.updatedAt || 'Viết dành riêng cho em 💕';
+    }
+
+    function toggleEnvelope() {
+      const bodyWrapper = document.getElementById('letter-body-wrapper');
+      const chevron = document.getElementById('envelope-chevron');
+      const hint = document.getElementById('envelope-hint-text');
+      const isHidden = bodyWrapper.classList.contains('hidden');
+
+      if (isHidden) {
+        bodyWrapper.classList.remove('hidden');
+        chevron.style.transform = 'rotate(180deg)';
+        hint.textContent = 'Chạm để gấp phong bì lại 💌';
+        if (currentMode === 'gift') triggerConfettiBurst();
+      } else {
+        bodyWrapper.classList.add('hidden');
+        chevron.style.transform = 'rotate(0deg)';
+        hint.textContent = 'Chạm để mở phong bì thư bí mật ✨';
+      }
+    }
+
+    function openLetterModal() {
+      document.getElementById('input-letter-title').value = appData.letter.title;
+      document.getElementById('input-letter-content').value = appData.letter.content;
+      toggleModal('letter-modal', true);
+    }
+    function closeLetterModal() { toggleModal('letter-modal', false); }
+
+    function saveLetter(e) {
+      e.preventDefault();
+      appData.letter.title = document.getElementById('input-letter-title').value.trim();
+      appData.letter.content = document.getElementById('input-letter-content').value.trim();
+      const todayStr = new Date().toLocaleDateString('vi-VN');
+      appData.letter.updatedAt = `Cập nhật ngày ${todayStr} 💕`;
+      saveAppData();
+      renderLetter();
+      closeLetterModal();
+      showToast('Đã niêm phong bức thư tình thật đẹp 💌');
+    }
+
+    // ==================== HIỆU ỨNG BẤT NGỜ & TRÌNH CHIẾU (CHẾ ĐỘ TẶNG EM) ====================
+    function triggerConfettiBurst() {
+      if (typeof confetti === 'function') {
+        confetti({
+          particleCount: 75,
+          spread: 80,
+          origin: { y: 0.6 },
+          colors: ['#FF8FA3', '#FFB3C6', '#D8B4FE', '#FDE047', '#FFFFFF']
+        });
+      }
+    }
+
+    function triggerSurprise() {
+      triggerConfettiBurst();
+      const totalNotes = appData.notes.length;
+      const days = document.getElementById('days-together-count').textContent;
+
+      document.getElementById('surprise-emoji').textContent = '💝';
+      document.getElementById('surprise-heading').textContent = `Gửi ${appData.profile.nickname} Xinh Đẹp!`;
+      document.getElementById('surprise-body').innerHTML = `
+        <p class="mb-3">Suốt <strong>${days} ngày</strong> bên nhau, anh đã lén ghi lại tận <strong>${totalNotes} điều đáng yêu</strong> về em ở trong cuốn sổ này!</p>
+        <p class="text-roseDeep font-bold">Cảm ơn em vì đã luôn là điều ngọt ngào nhất trong cuộc sống của anh. Yêu em thật nhiều! 🥰✨</p>
+      `;
+      document.getElementById('surprise-controls').innerHTML = `
+        <button onclick="triggerConfettiBurst()" class="px-5 py-2.5 rounded-full bg-roseDeep text-white font-bold text-sm shadow-md hover:scale-105 transition">
+          Bắn Thêm Tim Nhé 💖
+        </button>
+        <button onclick="startSlideshow()" class="px-5 py-2.5 rounded-full bg-white text-roseDeep border border-pink-200 font-bold text-sm shadow-sm hover:bg-pink-50 transition">
+          Xem Từng Kỷ Niệm ✨
+        </button>
+      `;
+      toggleModal('surprise-modal', true);
+    }
+
+    function startSlideshow() {
+      if (appData.notes.length === 0) {
+        showToast('Chưa có kỷ niệm nào để trình chiếu!');
+        return;
+      }
+      slideshowIndex = 0;
+      renderSlideshowCard();
+      toggleModal('surprise-modal', true);
+      triggerConfettiBurst();
+    }
+
+    function renderSlideshowCard() {
+      const note = appData.notes[slideshowIndex];
+      const cat = CATEGORIES.find(c => c.id === note.category) || CATEGORIES[1];
+      document.getElementById('surprise-emoji').textContent = note.sticker || '🧸';
+      document.getElementById('surprise-heading').textContent = note.title;
+      document.getElementById('surprise-body').innerHTML = `
+        <div class="text-xs font-bold text-roseSoft uppercase mb-2">${cat.icon} ${cat.label} (${slideshowIndex + 1}/${appData.notes.length})</div>
+        ${note.image ? `<img src="${note.image}" class="w-44 h-36 object-cover rounded-xl mx-auto mb-3 border-2 border-pink-100 shadow-sm" />` : ''}
+        <p class="text-base sm:text-lg text-cocoa">${escapeHtml(note.content)}</p>
+      `;
+      document.getElementById('surprise-controls').innerHTML = `
+        <button onclick="prevSlide()" class="px-4 py-2 rounded-full bg-white text-cocoa border border-pink-200 font-bold text-sm hover:bg-pink-50">
+          ← Trước
+        </button>
+        <button onclick="nextSlide()" class="px-5 py-2 rounded-full bg-roseDeep text-white font-bold text-sm shadow hover:scale-105 transition">
+          Tiếp Theo →
+        </button>
+      `;
+    }
+
+    function nextSlide() {
+      slideshowIndex = (slideshowIndex + 1) % appData.notes.length;
+      renderSlideshowCard();
+    }
+
+    function prevSlide() {
+      slideshowIndex = (slideshowIndex - 1 + appData.notes.length) % appData.notes.length;
+      renderSlideshowCard();
+    }
+
+    function closeSurpriseModal() { toggleModal('surprise-modal', false); }
+
+    // ==================== XUẤT / NHẬP DỮ LIỆU BACKUP JSON ====================
+    function exportData() {
+      const dataStr = JSON.stringify(appData, null, 2);
+      const blob = new Blob([dataStr], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      const dateStamp = new Date().toISOString().slice(0, 10);
+      a.href = url;
+      a.download = `so-tay-ve-em-${dateStamp}.json`;
+      a.click();
+      URL.revokeObjectURL(url);
+      showToast('Đã tải xuống file sao lưu JSON an toàn 📦✨');
+    }
+
+    function importData(event) {
+      const file = event.target.files[0];
+      if (!file) return;
+
+      const reader = new FileReader();
+      reader.onload = function(e) {
+        try {
+          const parsed = JSON.parse(e.target.result);
+          if (parsed && parsed.profile && Array.isArray(parsed.notes)) {
+            appData = parsed;
+            discoveredIds.clear();
+            activeRevealNote = null;
+            saveAppData();
+            renderProfile();
+            updateMysteryStageSummary();
+            renderLetter();
+            showToast('Khôi phục dữ liệu thành công! 💖');
+          } else {
+            showToast('File không đúng định dạng sổ tay!', 'error');
+          }
+        } catch (err) {
+          showToast('Không thể đọc file JSON này!', 'error');
+        }
+        event.target.value = '';
+      };
+      reader.readAsText(file);
+    }
+
+    // ==================== TIỆN ÍCH UI ====================
+    function toggleModal(modalId, show) {
+      const modal = document.getElementById(modalId);
+      if (show) {
+        modal.classList.remove('hidden');
+        modal.classList.add('flex');
+      } else {
+        modal.classList.add('hidden');
+        modal.classList.remove('flex');
+      }
+    }
+
+    function showToast(message, type = 'success') {
+      const container = document.getElementById('toast-container');
+      const toast = document.createElement('div');
+      const bgClass = type === 'error' ? 'bg-rose-600 text-white' : 'bg-cocoa text-white';
+      toast.className = `${bgClass} px-4 py-3 rounded-2xl shadow-lg text-xs sm:text-sm font-semibold flex items-center gap-2 transform transition-all duration-300 translate-y-2 opacity-0`;
+      toast.innerHTML = `<span>${type === 'error' ? '⚠️' : '🌸'}</span><span>${message}</span>`;
+      container.appendChild(toast);
+
+      requestAnimationFrame(() => {
+        toast.classList.remove('translate-y-2', 'opacity-0');
+      });
+
+      setTimeout(() => {
+        toast.classList.add('opacity-0', 'translate-y-2');
+        setTimeout(() => toast.remove(), 300);
+      }, 3200);
+    }
+
+    function escapeHtml(str) {
+      if (!str) return '';
+      return str
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#039;');
+    }
+  </script>
+</body>
+</html>
