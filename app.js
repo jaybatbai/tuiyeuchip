@@ -20,8 +20,8 @@ function parseDateVN(dateStr) {
   if (!dateStr) return null;
   const clean = String(dateStr).trim();
 
-  // Định dạng dd/mm/yyyy hoặc dd-mm-yyyy
-  const vnMatch = clean.match(/^(\d{1,2})[\/\-](\d{1,2})[\/\-](\d{4})$/);
+  // Định dạng dd/mm/yyyy hoặc dd-mm-yyyy hoặc dd.mm.yyyy
+  const vnMatch = clean.match(/^(\d{1,2})[\/\-\.](\d{1,2})[\/\-\.](\d{4})$/);
   if (vnMatch) {
     const day = parseInt(vnMatch[1], 10);
     const month = parseInt(vnMatch[2], 10) - 1;
@@ -30,8 +30,18 @@ function parseDateVN(dateStr) {
     return isNaN(d.getTime()) ? null : d;
   }
 
+  // Định dạng viết liền ddmmyyyy (VD: 01012025)
+  const compactMatch = clean.match(/^(\d{2})(\d{2})(\d{4})$/);
+  if (compactMatch) {
+    const day = parseInt(compactMatch[1], 10);
+    const month = parseInt(compactMatch[2], 10) - 1;
+    const year = parseInt(compactMatch[3], 10);
+    const d = new Date(year, month, day);
+    return isNaN(d.getTime()) ? null : d;
+  }
+
   // Định dạng ISO yyyy-mm-dd (tương thích dữ liệu cũ đã lưu)
-  const isoMatch = clean.match(/^(\d{4})[\/\-](\d{1,2})[\/\-](\d{1,2})$/);
+  const isoMatch = clean.match(/^(\d{4})[\/\-\.](\d{1,2})[\/\-\.](\d{1,2})$/);
   if (isoMatch) {
     const year = parseInt(isoMatch[1], 10);
     const month = parseInt(isoMatch[2], 10) - 1;
@@ -177,8 +187,8 @@ const DEFAULT_DATA = {
 // TRẠNG THÁI ỨNG DỤNG
 // =========================================================================
 let appData = JSON.parse(JSON.stringify(DEFAULT_DATA));
-let currentMode = "view"; // Mặc định luôn là 'view' (Tặng Em)
-let isUnlocked = false;
+let userRole = null; // null (chưa mở phong bì) | 'gf' (của em) | 'admin' (của anh)
+let isAdminPreviewingGf = false;
 let db = null;
 
 // Mystery deck state
@@ -221,6 +231,7 @@ function initApp() {
 function setCloudStatus(connected, text) {
   const dot = document.getElementById("cloud-dot");
   const label = document.getElementById("cloud-text");
+  if (!dot || !label) return;
   label.textContent = text;
   dot.className = connected
     ? "w-2 h-2 rounded-full bg-emerald-500"
@@ -289,6 +300,103 @@ async function saveAppData() {
 }
 
 // =========================================================================
+// PHONG BÌ NIÊM PHONG & PHÂN QUYỀN (GATE SCREEN)
+// =========================================================================
+function isEditingAllowed() {
+  return userRole === "admin" && !isAdminPreviewingGf;
+}
+
+function unlockGate() {
+  const inputEl = document.getElementById("gate-password-input");
+  const errorEl = document.getElementById("gate-error-msg");
+  const rawInput = inputEl.value.trim();
+
+  if (!rawInput) return;
+
+  // 1. Kiểm tra mật khẩu riêng của anh (Admin)
+  const adminPass = String(appData.profile.adminPassword || "1234").trim();
+  if (rawInput === adminPass) {
+    userRole = "admin";
+    isAdminPreviewingGf = false;
+    enterApp();
+    return;
+  }
+
+  // 2. Kiểm tra ngày bắt đầu yêu nhau (Mật khẩu của cô ấy)
+  const savedStartDate = parseDateVN(appData.profile.startDate);
+  const inputStartDate = parseDateVN(rawInput);
+
+  if (
+    savedStartDate &&
+    inputStartDate &&
+    savedStartDate.getDate() === inputStartDate.getDate() &&
+    savedStartDate.getMonth() === inputStartDate.getMonth() &&
+    savedStartDate.getFullYear() === inputStartDate.getFullYear()
+  ) {
+    userRole = "gf";
+    isAdminPreviewingGf = false;
+    enterApp();
+    return;
+  }
+
+  // Sai mật khẩu
+  errorEl.classList.remove("hidden");
+  inputEl.classList.add("border-rose-400");
+}
+
+function enterApp() {
+  document.getElementById("gate-error-msg").classList.add("hidden");
+  document.getElementById("gate-screen").classList.add("hidden");
+  document.getElementById("main-app-wrapper").classList.remove("hidden");
+
+  triggerHeartConfetti();
+  applyRoleVisibility();
+  refreshAllUI();
+}
+
+function lockGate() {
+  userRole = null;
+  isAdminPreviewingGf = false;
+  document.getElementById("gate-password-input").value = "";
+  document.getElementById("gate-error-msg").classList.add("hidden");
+  document.getElementById("main-app-wrapper").classList.add("hidden");
+  document.getElementById("gate-screen").classList.remove("hidden");
+  lucide.createIcons();
+}
+
+function toggleAdminPreview() {
+  if (userRole !== "admin") return;
+  isAdminPreviewingGf = !isAdminPreviewingGf;
+  applyRoleVisibility();
+  refreshAllUI();
+}
+
+function applyRoleVisibility() {
+  const adminNav = document.getElementById("admin-top-nav");
+  const adminControls = document.querySelectorAll(".admin-control");
+  const previewBtn = document.getElementById("btn-preview-gf");
+
+  if (userRole === "admin") {
+    adminNav.classList.remove("hidden");
+    if (isAdminPreviewingGf) {
+      adminControls.forEach((el) => el.classList.add("hidden"));
+      document.getElementById("admin-manage-drawer").classList.add("hidden");
+      previewBtn.innerHTML = `<i data-lucide="arrow-left" class="w-3.5 h-3.5"></i> Quay Lại Bảng Điều Khiển`;
+      previewBtn.className = "px-3.5 py-1.5 rounded-full text-xs font-bold transition-all bg-pink-500 text-white shadow-sm flex items-center gap-1.5";
+    } else {
+      adminControls.forEach((el) => el.classList.remove("hidden"));
+      previewBtn.innerHTML = `<i data-lucide="eye" class="w-3.5 h-3.5"></i> Xem Thử Giao Diện Của Em`;
+      previewBtn.className = "px-3.5 py-1.5 rounded-full text-xs font-bold transition-all bg-pink-100 text-pink-700 hover:bg-pink-200 flex items-center gap-1.5";
+    }
+  } else {
+    // Giao diện dành riêng cho bạn gái: Ẩn hoàn toàn thanh Cloud & nút Của Anh
+    adminNav.classList.add("hidden");
+    adminControls.forEach((el) => el.classList.add("hidden"));
+  }
+  lucide.createIcons();
+}
+
+// =========================================================================
 // CẬP NHẬT GIAO DIỆN (RENDER)
 // =========================================================================
 function refreshAllUI() {
@@ -352,12 +460,13 @@ function renderTopicsSection() {
   const topics = appData.topics || [];
   const tabsBar = document.getElementById("topic-tabs-bar");
   const panel = document.getElementById("active-topic-panel");
+  const isEdit = isEditingAllowed();
 
   if (topics.length === 0) {
     tabsBar.innerHTML = "";
     panel.innerHTML = `
       <div class="text-center py-8 text-gray-400 text-xs">
-        Chưa có mục ghi chép nào. ${currentMode === "edit" ? "Bấm '+ Thêm Mục Mới' ở góc trên để tạo nhé!" : ""}
+        Chưa có mục ghi chép nào. ${isEdit ? "Bấm '+ Thêm Mục Mới' ở góc trên để tạo nhé!" : ""}
       </div>
     `;
     return;
@@ -388,7 +497,6 @@ function renderTopicsSection() {
 
   const activeTopic = topics.find((t) => t.id === activeTopicId);
   const items = activeTopic.items || [];
-  const isEdit = currentMode === "edit";
 
   const adminHeaderControls = isEdit
     ? `
@@ -599,7 +707,7 @@ async function deleteTopic(topicId) {
 function renderCouponsSection() {
   const grid = document.getElementById("coupons-grid");
   const coupons = appData.coupons || [];
-  const isEdit = currentMode === "edit";
+  const isEdit = isEditingAllowed();
 
   if (coupons.length === 0) {
     grid.innerHTML = `<p class="col-span-full text-center text-xs text-gray-400 py-4">Chưa có phiếu đổi quà nào.</p>`;
@@ -770,7 +878,7 @@ function updateMysteryDeckStats() {
 function drawRandomMemory() {
   const total = appData.memories.length;
   if (total === 0) {
-    alert("Chưa có thẻ bí mật nào trong hộp. Hãy chuyển sang chế độ 'Của Anh' để thêm nhé!");
+    alert("Chưa có thẻ bí mật nào trong hộp!");
     return;
   }
 
@@ -907,58 +1015,6 @@ async function replyToMemory(memId) {
 }
 
 // =========================================================================
-// CHUYỂN CHẾ ĐỘ & XÁC THỰC MẬT KHẨU
-// =========================================================================
-function switchMode(mode) {
-  currentMode = mode;
-  const btnView = document.getElementById("btn-mode-view");
-  const btnEdit = document.getElementById("btn-mode-edit");
-  const adminEls = document.querySelectorAll(".admin-only");
-
-  if (mode === "view") {
-    btnView.className = "px-3.5 py-1.5 rounded-full text-xs font-bold transition-all bg-pink-500 text-white shadow-sm flex items-center gap-1.5";
-    btnEdit.className = "px-3.5 py-1.5 rounded-full text-xs font-bold transition-all bg-pink-50 text-pink-600 hover:bg-pink-100 flex items-center gap-1.5";
-    adminEls.forEach((el) => el.classList.add("hidden"));
-    document.getElementById("admin-manage-drawer").classList.add("hidden");
-  } else {
-    btnEdit.className = "px-3.5 py-1.5 rounded-full text-xs font-bold transition-all bg-pink-500 text-white shadow-sm flex items-center gap-1.5";
-    btnView.className = "px-3.5 py-1.5 rounded-full text-xs font-bold transition-all bg-pink-50 text-pink-600 hover:bg-pink-100 flex items-center gap-1.5";
-    adminEls.forEach((el) => el.classList.remove("hidden"));
-  }
-  renderTopicsSection();
-  renderCouponsSection();
-  lucide.createIcons();
-}
-
-function requestEditMode() {
-  if (isUnlocked) {
-    switchMode("edit");
-    return;
-  }
-  document.getElementById("input-admin-password").value = "";
-  document.getElementById("password-error").classList.add("hidden");
-  document.getElementById("modal-password").classList.remove("hidden");
-  setTimeout(() => document.getElementById("input-admin-password").focus(), 100);
-}
-
-function closePasswordModal() {
-  document.getElementById("modal-password").classList.add("hidden");
-}
-
-function verifyPassword() {
-  const input = document.getElementById("input-admin-password").value.trim();
-  const correct = appData.profile.adminPassword || "1234";
-  if (input === correct) {
-    isUnlocked = true;
-    document.getElementById("edit-lock-icon").setAttribute("data-lucide", "unlock");
-    closePasswordModal();
-    switchMode("edit");
-  } else {
-    document.getElementById("password-error").classList.remove("hidden");
-  }
-}
-
-// =========================================================================
 // QUẢN LÝ THẺ BÍ MẬT (THÊM / SỬA / XÓA)
 // =========================================================================
 function toggleManageDrawer() {
@@ -969,6 +1025,7 @@ function toggleManageDrawer() {
 
 function renderAdminManageList() {
   const container = document.getElementById("admin-memories-list");
+  if (!container) return;
   if (appData.memories.length === 0) {
     container.innerHTML = `<p class="text-xs text-gray-400 italic">Chưa có thẻ bí mật nào.</p>`;
     return;
