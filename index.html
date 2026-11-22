@@ -65,15 +65,31 @@
         Nơi lưu giữ những điều đáng yêu nhất về em mỗi ngày
       </p>
 
-      <!-- Love Day Counter Pill -->
-      <div class="mt-5 inline-flex items-center gap-3 bg-white px-5 py-2.5 rounded-2xl shadow-sm border border-pink-100">
-        <div class="w-9 h-9 rounded-full bg-pink-100 flex items-center justify-center text-pink-500">
-          <i data-lucide="heart" class="w-5 h-5 fill-pink-500"></i>
+      <!-- Counters Row: Love Day Counter + Special Event Countdown -->
+      <div class="mt-5 flex flex-wrap items-center justify-center gap-3">
+        <!-- Love Day Counter Pill -->
+        <div class="inline-flex items-center gap-3 bg-white px-5 py-2.5 rounded-2xl shadow-sm border border-pink-100">
+          <div class="w-9 h-9 rounded-full bg-pink-100 flex items-center justify-center text-pink-500">
+            <i data-lucide="heart" class="w-5 h-5 fill-pink-500"></i>
+          </div>
+          <div class="text-left">
+            <div class="text-[11px] uppercase tracking-wider text-pink-400 font-bold">Bên nhau được</div>
+            <div class="text-base sm:text-lg font-bold text-pink-600">
+              <span id="days-counter">0</span> ngày ngọt ngào
+            </div>
+          </div>
         </div>
-        <div class="text-left">
-          <div class="text-[11px] uppercase tracking-wider text-pink-400 font-bold">Bên nhau được</div>
-          <div class="text-base sm:text-lg font-bold text-pink-600">
-            <span id="days-counter">0</span> ngày ngọt ngào
+
+        <!-- Special Event Countdown Pill -->
+        <div id="special-countdown-pill" class="inline-flex items-center gap-3 bg-white px-5 py-2.5 rounded-2xl shadow-sm border border-amber-100">
+          <div class="w-9 h-9 rounded-full bg-amber-100 flex items-center justify-center text-amber-500">
+            <i data-lucide="calendar-heart" class="w-5 h-5"></i>
+          </div>
+          <div class="text-left">
+            <div id="special-event-label" class="text-[11px] uppercase tracking-wider text-amber-500 font-bold">Ngày đặc biệt</div>
+            <div id="special-event-days" class="text-base sm:text-lg font-bold text-amber-600">
+              Còn 0 ngày
+            </div>
           </div>
         </div>
       </div>
@@ -95,6 +111,9 @@
           <button onclick="openTopicModal()" class="px-3.5 py-2 rounded-xl bg-amber-50 text-amber-700 border border-amber-200 text-xs font-bold hover:bg-amber-100 transition flex items-center gap-1.5">
             <i data-lucide="folder-plus" class="w-4 h-4"></i> Thêm Mục Ghi Chép
           </button>
+          <button onclick="openCouponModal()" class="px-3.5 py-2 rounded-xl bg-purple-50 text-purple-700 border border-purple-200 text-xs font-bold hover:bg-purple-100 transition flex items-center gap-1.5">
+            <i data-lucide="ticket" class="w-4 h-4"></i> Tạo Phiếu Đổi Quà
+          </button>
           <button onclick="toggleManageDrawer()" class="px-3.5 py-2 rounded-xl bg-pink-100 text-pink-700 text-xs font-bold hover:bg-pink-200 transition flex items-center gap-1.5">
             <i data-lucide="list" class="w-4 h-4"></i> Quản Lý Thẻ (<span id="admin-count">0</span>)
           </button>
@@ -103,7 +122,7 @@
 
       <!-- Private Drawer: Manage All Memories (Hidden in View Mode) -->
       <div id="admin-manage-drawer" class="hidden space-y-3 mt-3 max-h-96 overflow-y-auto pr-1">
-        <div class="text-xs font-bold text-pink-500 uppercase tracking-wider">Danh sách toàn bộ thẻ bí mật (Chỉ mình anh thấy):</div>
+        <div class="text-xs font-bold text-pink-500 uppercase tracking-wider">Danh sách toàn bộ thẻ bí mật & phản hồi của em:</div>
         <div id="admin-memories-list" class="space-y-2.5"></div>
       </div>
     </section>
@@ -168,6 +187,27 @@
       </div>
     </section>
 
+    <!-- LOVE COUPONS SECTION (PHIẾU ĐỔI QUÀ TÌNH YÊU) -->
+    <section class="mb-10">
+      <div class="bg-white/95 rounded-3xl p-5 sm:p-6 shadow-md border-2 border-pink-100 relative">
+        <div class="flex flex-wrap items-center justify-between gap-2 mb-4">
+          <div>
+            <h3 class="font-handwriting text-3xl font-bold text-pink-600 flex items-center gap-2">
+              Phiếu Đổi Quà Độc Quyền 🎟️
+            </h3>
+            <p class="text-xs text-pink-800/70">Bấm sử dụng bất cứ khi nào em muốn nhé (có hiệu lực vô thời hạn)</p>
+          </div>
+          <button onclick="openCouponModal()" class="admin-only hidden px-3.5 py-1.5 rounded-full bg-purple-500 text-white text-xs font-bold shadow-sm hover:bg-purple-600 transition flex items-center gap-1">
+            <i data-lucide="plus" class="w-3.5 h-3.5"></i> Thêm Phiếu Mới
+          </button>
+        </div>
+
+        <div id="coupons-grid" class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <!-- Coupons rendered via JS -->
+        </div>
+      </div>
+    </section>
+
     <!-- SECRET LOVE LETTER ENVELOPE -->
     <section class="mb-8">
       <div class="envelope-box p-6 text-center">
@@ -220,9 +260,9 @@
     </div>
   </div>
 
-  <!-- 2. Profile & Password Settings Modal -->
-  <div id="modal-profile" class="fixed inset-0 z-50 hidden bg-black/40 backdrop-blur-sm flex items-center justify-center p-4">
-    <div class="bg-white rounded-3xl max-w-md w-full p-6 shadow-2xl border-2 border-pink-100 animate-pop-in">
+  <!-- 2. Profile, Countdown & Password Settings Modal -->
+  <div id="modal-profile" class="fixed inset-0 z-50 hidden bg-black/40 backdrop-blur-sm flex items-center justify-center p-4 overflow-y-auto">
+    <div class="bg-white rounded-3xl max-w-md w-full p-6 shadow-2xl border-2 border-pink-100 my-8 animate-pop-in">
       <h3 class="text-lg font-bold text-pink-600 mb-4 flex items-center gap-2">
         <i data-lucide="settings" class="w-5 h-5"></i> Cài Đặt Sổ Tay
       </h3>
@@ -238,6 +278,11 @@
         <div>
           <label class="block text-xs font-bold text-gray-600 mb-1">Ngày bắt đầu yêu nhau</label>
           <input type="date" id="input-start-date" class="w-full px-3.5 py-2 rounded-xl border border-pink-200 text-sm focus:outline-none focus:border-pink-500" />
+        </div>
+        <div class="p-3 rounded-2xl bg-amber-50/70 border border-amber-100 space-y-2">
+          <div class="text-xs font-bold text-amber-700">Sự kiện đếm ngược (Sinh nhật em / Kỷ niệm)</div>
+          <input type="text" id="input-event-name" placeholder="VD: Sinh nhật Chip 🎂" class="w-full px-3 py-1.5 rounded-xl border border-amber-200 text-xs focus:outline-none focus:border-amber-500 bg-white" />
+          <input type="date" id="input-event-date" class="w-full px-3 py-1.5 rounded-xl border border-amber-200 text-xs focus:outline-none focus:border-amber-500 bg-white" />
         </div>
         <div>
           <label class="block text-xs font-bold text-gray-600 mb-1">Đổi mật khẩu mở khóa chế độ "Của Anh"</label>
@@ -336,7 +381,34 @@
     </div>
   </div>
 
-  <!-- 5. Edit Secret Letter Modal -->
+  <!-- 5. Add Coupon Modal -->
+  <div id="modal-coupon" class="fixed inset-0 z-50 hidden bg-black/40 backdrop-blur-sm flex items-center justify-center p-4">
+    <div class="bg-white rounded-3xl max-w-md w-full p-6 shadow-2xl border-2 border-pink-100 animate-pop-in">
+      <h3 class="text-lg font-bold text-purple-600 mb-4 flex items-center gap-2">
+        <i data-lucide="ticket" class="w-5 h-5"></i> Tạo Phiếu Đổi Quà Mới
+      </h3>
+      <div class="space-y-3 text-left">
+        <div>
+          <label class="block text-xs font-bold text-gray-600 mb-1">Tên phiếu quà tặng *</label>
+          <input type="text" id="input-coupon-title" placeholder="VD: 1 ly trà sữa full topping bất kể giờ giấc" class="w-full px-3.5 py-2 rounded-xl border border-pink-200 text-sm focus:outline-none focus:border-pink-500" />
+        </div>
+        <div>
+          <label class="block text-xs font-bold text-gray-600 mb-1">Mô tả ngắn / Điều kiện dễ thương</label>
+          <input type="text" id="input-coupon-desc" placeholder="VD: Áp dụng ngay lập tức khi em thèm ngọt" class="w-full px-3.5 py-2 rounded-xl border border-pink-200 text-sm focus:outline-none focus:border-pink-500" />
+        </div>
+        <div>
+          <label class="block text-xs font-bold text-gray-600 mb-1">Biểu tượng</label>
+          <div id="coupon-icon-picker" class="flex flex-wrap gap-1.5 bg-purple-50/70 p-2 rounded-xl border border-purple-100"></div>
+        </div>
+      </div>
+      <div class="flex gap-2 mt-5">
+        <button onclick="closeCouponModal()" class="flex-1 py-2.5 rounded-xl bg-gray-100 text-gray-600 text-xs font-bold">Hủy</button>
+        <button onclick="saveCoupon()" class="flex-1 py-2.5 rounded-xl bg-purple-500 text-white text-xs font-bold hover:bg-purple-600">Tạo Phiếu</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 6. Edit Secret Letter Modal -->
   <div id="modal-letter" class="fixed inset-0 z-50 hidden bg-black/40 backdrop-blur-sm flex items-center justify-center p-4">
     <div class="bg-white rounded-3xl max-w-md w-full p-6 shadow-2xl border-2 border-pink-100 animate-pop-in">
       <h3 class="text-lg font-bold text-pink-600 mb-3 flex items-center gap-2">
