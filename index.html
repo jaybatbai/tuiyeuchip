@@ -438,12 +438,13 @@
     </div>
   </div>
 
-  <!-- 4. Add Coupon Modal -->
+  <!-- 4. Add / Edit Coupon Modal -->
   <div id="modal-coupon" class="fixed inset-0 z-50 hidden bg-black/40 backdrop-blur-sm flex items-center justify-center p-4">
     <div class="bg-white rounded-3xl max-w-md w-full p-6 shadow-2xl border-2 border-pink-100 animate-pop-in">
-      <h3 class="text-lg font-bold text-purple-600 mb-4 flex items-center gap-2">
+      <h3 id="coupon-modal-title" class="text-lg font-bold text-purple-600 mb-4 flex items-center gap-2">
         <i data-lucide="ticket" class="w-5 h-5"></i> Tạo Phiếu Đổi Quà Mới
       </h3>
+      <input type="hidden" id="edit-coupon-id" />
       <div class="space-y-3 text-left">
         <div>
           <label class="block text-xs font-bold text-gray-600 mb-1">Tên phiếu quà tặng *</label>
@@ -460,7 +461,7 @@
       </div>
       <div class="flex gap-2 mt-5">
         <button onclick="closeCouponModal()" class="flex-1 py-2.5 rounded-xl bg-gray-100 text-gray-600 text-xs font-bold">Hủy</button>
-        <button onclick="saveCoupon()" class="flex-1 py-2.5 rounded-xl bg-purple-500 text-white text-xs font-bold hover:bg-purple-600">Tạo Phiếu</button>
+        <button onclick="saveCoupon()" class="flex-1 py-2.5 rounded-xl bg-purple-500 text-white text-xs font-bold hover:bg-purple-600">Lưu Phiếu</button>
       </div>
     </div>
   </div>
