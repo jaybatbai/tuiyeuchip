@@ -47,20 +47,21 @@
 
         <p class="text-xs sm:text-sm text-gray-500 leading-relaxed mb-6">
           Có một góc nhỏ bí mật đang chờ em bên trong.<br />
-          Hãy nhập <strong class="text-pink-600">ngày đầu tiên tụi mình yêu nhau</strong> (viết liền 8 số ddmmyyyy) để mở phong bì nhé!
+          Hãy nhập <strong class="text-pink-600">ngày đầu tiên tụi mình yêu nhau</strong> để mở phong bì nhé!
         </p>
 
-        <!-- Passcode Input (Hiển thị rõ số & bật bàn phím số trên điện thoại) -->
-        <div class="space-y-3">
-          <input
-            type="text"
-            inputmode="numeric"
-            autocomplete="off"
-            id="gate-password-input"
-            placeholder="Nhập mật khẩu mở thư..."
-            class="w-full px-4 py-3.5 rounded-2xl border-2 border-pink-200 focus:outline-none focus:border-pink-500 text-center text-lg font-bold tracking-[0.2em] text-pink-700 bg-pink-50/40"
-            onkeydown="if(event.key==='Enter') unlockGate()"
-          />
+        <!-- 8 Ô Trống Nhập Mật Khẩu -->
+        <div class="space-y-4">
+          <div id="passcode-slots" class="flex items-center justify-center gap-1.5 sm:gap-2">
+            <input type="text" inputmode="numeric" maxlength="1" autocomplete="off" placeholder="_" class="passcode-digit w-9 h-12 sm:w-10 sm:h-13 rounded-xl border-2 border-pink-200 focus:outline-none focus:border-pink-500 text-center text-lg sm:text-xl font-bold text-pink-700 bg-pink-50/40 transition" />
+            <input type="text" inputmode="numeric" maxlength="1" autocomplete="off" placeholder="_" class="passcode-digit w-9 h-12 sm:w-10 sm:h-13 rounded-xl border-2 border-pink-200 focus:outline-none focus:border-pink-500 text-center text-lg sm:text-xl font-bold text-pink-700 bg-pink-50/40 transition" />
+            <input type="text" inputmode="numeric" maxlength="1" autocomplete="off" placeholder="_" class="passcode-digit w-9 h-12 sm:w-10 sm:h-13 rounded-xl border-2 border-pink-200 focus:outline-none focus:border-pink-500 text-center text-lg sm:text-xl font-bold text-pink-700 bg-pink-50/40 transition" />
+            <input type="text" inputmode="numeric" maxlength="1" autocomplete="off" placeholder="_" class="passcode-digit w-9 h-12 sm:w-10 sm:h-13 rounded-xl border-2 border-pink-200 focus:outline-none focus:border-pink-500 text-center text-lg sm:text-xl font-bold text-pink-700 bg-pink-50/40 transition" />
+            <input type="text" inputmode="numeric" maxlength="1" autocomplete="off" placeholder="_" class="passcode-digit w-9 h-12 sm:w-10 sm:h-13 rounded-xl border-2 border-pink-200 focus:outline-none focus:border-pink-500 text-center text-lg sm:text-xl font-bold text-pink-700 bg-pink-50/40 transition" />
+            <input type="text" inputmode="numeric" maxlength="1" autocomplete="off" placeholder="_" class="passcode-digit w-9 h-12 sm:w-10 sm:h-13 rounded-xl border-2 border-pink-200 focus:outline-none focus:border-pink-500 text-center text-lg sm:text-xl font-bold text-pink-700 bg-pink-50/40 transition" />
+            <input type="text" inputmode="numeric" maxlength="1" autocomplete="off" placeholder="_" class="passcode-digit w-9 h-12 sm:w-10 sm:h-13 rounded-xl border-2 border-pink-200 focus:outline-none focus:border-pink-500 text-center text-lg sm:text-xl font-bold text-pink-700 bg-pink-50/40 transition" />
+            <input type="text" inputmode="numeric" maxlength="1" autocomplete="off" placeholder="_" class="passcode-digit w-9 h-12 sm:w-10 sm:h-13 rounded-xl border-2 border-pink-200 focus:outline-none focus:border-pink-500 text-center text-lg sm:text-xl font-bold text-pink-700 bg-pink-50/40 transition" />
+          </div>
 
           <p id="gate-error-msg" class="hidden text-xs text-rose-500 font-semibold">
             Mật khẩu chưa chính xác rồi, thử nhớ lại xem nào! 🥺
@@ -335,8 +336,8 @@
           <input type="text" id="input-subtitle" class="w-full px-3.5 py-2 rounded-xl border border-pink-200 text-sm focus:outline-none focus:border-pink-500" />
         </div>
         <div>
-          <label class="block text-xs font-bold text-pink-600 mb-1">Ngày bắt đầu yêu nhau (Mật khẩu mở thư của em - dd/mm/yyyy hoặc ddmmyyyy)</label>
-          <input type="text" id="input-start-date" placeholder="VD: 15/08/2026" class="w-full px-3.5 py-2 rounded-xl border border-pink-200 text-sm focus:outline-none focus:border-pink-500" />
+          <label class="block text-xs font-bold text-pink-600 mb-1">Ngày bắt đầu yêu nhau (Mật khẩu mở thư của em - 8 số ddmmyyyy)</label>
+          <input type="text" id="input-start-date" placeholder="VD: 15082026" class="w-full px-3.5 py-2 rounded-xl border border-pink-200 text-sm focus:outline-none focus:border-pink-500" />
         </div>
         <div class="p-3 rounded-2xl bg-amber-50/70 border border-amber-100 space-y-2">
           <div class="text-xs font-bold text-amber-700">Sự kiện đếm ngược (Sinh nhật em / Kỷ niệm)</div>
