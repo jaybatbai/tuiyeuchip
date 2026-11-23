@@ -201,6 +201,9 @@ let uploadedImageBase64 = "";
 let activeTopicId = "topic_nicknames";
 let selectedTopicIcon = "🏷️";
 let selectedCouponIcon = "🧋";
+let expandedTopicIds = new Set(); // Lưu các mục đang bấm "Xem thêm"
+let topicSearchQuery = "";        // Từ khóa lọc nhanh trong mục hiện tại
+const TOPIC_COLLAPSE_LIMIT = 5;   // Mặc định hiện 5 mục gọn gàng
 
 // =========================================================================
 // KHỞI TẠO & KẾT NỐI FIREBASE CLOUD
@@ -525,7 +528,7 @@ function renderLetter() {
 }
 
 // =========================================================================
-// CÁC MỤC CHỦ ĐỀ VỀ EM (TOPIC NOTEBOOK) - HỖ TRỢ SẮP XẾP VỊ TRÍ
+// CÁC MỤC CHỦ ĐỀ VỀ EM (TOPIC NOTEBOOK) - GỌN MẮT + THU GỌN/MỞ RỘNG + LỌC NHANH
 // =========================================================================
 function renderTopicsSection() {
   const topics = appData.topics || [];
@@ -549,9 +552,11 @@ function renderTopicsSection() {
     activeTopicId = topics[0].id;
   }
 
+  // Render các Tab (kèm số lượng nhỏ gọn)
   tabsBar.innerHTML = topics
     .map((t) => {
       const isActive = t.id === activeTopicId;
+      const count = (t.items || []).length;
       return `
         <button
           onclick="selectTopicTab('${t.id}')"
@@ -563,15 +568,29 @@ function renderTopicsSection() {
         >
           <span>${t.icon || "💖"}</span>
           <span>${escapeHtml(t.name)}</span>
+          <span class="text-[10px] px-1.5 py-0.2 rounded-full ${
+            isActive ? "bg-white/25 text-white" : "bg-pink-200/60 text-pink-600"
+          }">${count}</span>
         </button>
       `;
     })
     .join("");
 
   const activeTopic = topics[activeIndex];
-  const items = activeTopic.items || [];
+  const allItems = activeTopic.items || [];
   const canMoveTabLeft = activeIndex > 0;
   const canMoveTabRight = activeIndex < topics.length - 1;
+
+  // Lọc theo từ khóa (giữ nguyên index gốc để sửa/xóa/di chuyển chuẩn xác)
+  const queryNorm = topicSearchQuery.trim().toLowerCase();
+  const indexedItems = allItems
+    .map((text, originalIdx) => ({ text, originalIdx }))
+    .filter((entry) => !queryNorm || entry.text.toLowerCase().includes(queryNorm));
+
+  const isExpanded = expandedTopicIds.has(activeTopic.id) || Boolean(queryNorm);
+  const hasMoreToShow = !isExpanded && indexedItems.length > TOPIC_COLLAPSE_LIMIT;
+  const visibleItems = isExpanded ? indexedItems : indexedItems.slice(0, TOPIC_COLLAPSE_LIMIT);
+  const hiddenCount = indexedItems.length - visibleItems.length;
 
   const adminHeaderControls = isEdit
     ? `
@@ -610,17 +629,43 @@ function renderTopicsSection() {
     `
     : "";
 
+  // Ô tìm kiếm nhanh tự hiện khi mục có từ 6 dòng trở lên
+  const searchBarHtml =
+    allItems.length >= 6
+      ? `
+      <div class="relative mb-3">
+        <i data-lucide="search" class="w-3.5 h-3.5 text-pink-400 absolute left-3 top-1/2 -translate-y-1/2"></i>
+        <input
+          type="text"
+          id="topic-quick-search"
+          value="${escapeHtml(topicSearchQuery)}"
+          oninput="handleTopicSearch(this.value)"
+          placeholder="Tìm nhanh trong ${allItems.length} điều của mục này..."
+          class="w-full pl-8 pr-8 py-1.5 rounded-xl bg-pink-50/60 border border-pink-100 text-xs text-gray-700 focus:outline-none focus:border-pink-400 focus:bg-white transition"
+        />
+        ${
+          topicSearchQuery
+            ? `<button onclick="handleTopicSearch('')" class="absolute right-2.5 top-1/2 -translate-y-1/2 text-gray-400 hover:text-pink-500 text-xs font-bold">✕</button>`
+            : ""
+        }
+      </div>
+    `
+      : "";
+
+  // Danh sách hiển thị dạng lưới 2 cột thoáng mắt trên màn hình vừa/lớn
   const itemsListHtml =
-    items.length > 0
-      ? items
-          .map((itemText, idx) => {
+    visibleItems.length > 0
+      ? `
+      <ul class="grid grid-cols-1 sm:grid-cols-2 gap-2">
+        ${visibleItems
+          .map(({ text: itemText, originalIdx: idx }) => {
             const canMoveUp = idx > 0;
-            const canMoveDown = idx < items.length - 1;
+            const canMoveDown = idx < allItems.length - 1;
             return `
-          <li class="flex items-start justify-between gap-2 p-3 rounded-2xl bg-pink-50/50 border border-pink-100/80 hover:bg-pink-50 transition">
-            <div class="flex items-start gap-2.5">
-              <span class="text-pink-500 font-bold text-sm mt-0.5">✦</span>
-              <span class="text-sm text-gray-700 font-medium leading-relaxed">${escapeHtml(itemText)}</span>
+          <li class="flex items-start justify-between gap-2 px-3 py-2.5 rounded-2xl bg-pink-50/55 border border-pink-100/80 hover:bg-pink-50 transition">
+            <div class="flex items-start gap-2 min-w-0">
+              <span class="text-pink-400 font-bold text-xs mt-0.5 shrink-0">✦</span>
+              <span class="text-xs sm:text-[13px] text-gray-700 font-medium leading-snug break-words">${escapeHtml(itemText)}</span>
             </div>
             ${
               isEdit
@@ -632,9 +677,9 @@ function renderTopicsSection() {
                   class="p-1 rounded-md transition ${
                     canMoveUp ? "text-pink-500 hover:bg-pink-100" : "text-gray-300 cursor-not-allowed"
                   }"
-                  title="Đưa dòng này lên trên"
+                  title="Đưa lên trước"
                 >
-                  <i data-lucide="arrow-up" class="w-3.5 h-3.5"></i>
+                  <i data-lucide="arrow-up" class="w-3 h-3"></i>
                 </button>
                 <button
                   onclick="moveTopicItem('${activeTopic.id}', ${idx}, 1)"
@@ -642,15 +687,15 @@ function renderTopicsSection() {
                   class="p-1 rounded-md transition ${
                     canMoveDown ? "text-pink-500 hover:bg-pink-100" : "text-gray-300 cursor-not-allowed"
                   }"
-                  title="Đưa dòng này xuống dưới"
+                  title="Đưa xuống sau"
                 >
-                  <i data-lucide="arrow-down" class="w-3.5 h-3.5"></i>
+                  <i data-lucide="arrow-down" class="w-3 h-3"></i>
                 </button>
                 <button onclick="editTopicItem('${activeTopic.id}', ${idx})" class="p-1 rounded-md text-pink-500 hover:bg-pink-100" title="Sửa dòng này">
-                  <i data-lucide="edit-2" class="w-3.5 h-3.5"></i>
+                  <i data-lucide="edit-2" class="w-3 h-3"></i>
                 </button>
                 <button onclick="deleteTopicItem('${activeTopic.id}', ${idx})" class="p-1 rounded-md text-rose-400 hover:bg-rose-100" title="Xóa dòng này">
-                  <i data-lucide="x" class="w-3.5 h-3.5"></i>
+                  <i data-lucide="x" class="w-3 h-3"></i>
                 </button>
               </div>
             `
@@ -659,8 +704,31 @@ function renderTopicsSection() {
           </li>
         `;
           })
-          .join("")
-      : `<p class="text-xs text-gray-400 italic py-4 text-center">Mục này chưa có ghi chú nào...</p>`;
+          .join("")}
+      </ul>
+    `
+      : `<p class="text-xs text-gray-400 italic py-4 text-center">${
+          queryNorm ? "Không tìm thấy dòng nào khớp từ khóa..." : "Mục này chưa có ghi chú nào..."
+        }</p>`;
+
+  // Nút Xem thêm / Thu gọn để không bị dài ngoằng gây hoa mắt
+  const expandToggleHtml =
+    !queryNorm && indexedItems.length > TOPIC_COLLAPSE_LIMIT
+      ? `
+      <div class="mt-3 text-center">
+        <button
+          onclick="toggleTopicExpand('${activeTopic.id}')"
+          class="inline-flex items-center gap-1.5 px-4 py-1.5 rounded-full bg-pink-50 hover:bg-pink-100 text-pink-600 border border-pink-200/80 text-xs font-bold transition"
+        >
+          ${
+            hasMoreToShow
+              ? `<i data-lucide="chevron-down" class="w-3.5 h-3.5"></i><span>Xem thêm (${hiddenCount} điều nữa)</span>`
+              : `<i data-lucide="chevron-up" class="w-3.5 h-3.5"></i><span>Thu gọn bớt</span>`
+          }
+        </button>
+      </div>
+    `
+      : "";
 
   const addItemFormHtml = isEdit
     ? `
@@ -688,23 +756,46 @@ function renderTopicsSection() {
         <div class="flex items-center gap-2">
           <span class="text-2xl">${activeTopic.icon || "💖"}</span>
           <h4 class="font-bold text-base sm:text-lg text-gray-800">${escapeHtml(activeTopic.name)}</h4>
-          <span class="text-[11px] font-bold px-2 py-0.5 rounded-full bg-pink-100 text-pink-600">${items.length}</span>
+          <span class="text-[11px] font-bold px-2 py-0.5 rounded-full bg-pink-100 text-pink-600">${allItems.length}</span>
         </div>
         ${adminHeaderControls}
       </div>
 
-      <ul class="space-y-2">
-        ${itemsListHtml}
-      </ul>
-
+      ${searchBarHtml}
+      ${itemsListHtml}
+      ${expandToggleHtml}
       ${addItemFormHtml}
     </div>
   `;
   lucide.createIcons();
+
+  // Giữ focus trong ô tìm kiếm nếu người dùng đang gõ
+  if (topicSearchQuery) {
+    const searchEl = document.getElementById("topic-quick-search");
+    if (searchEl) {
+      searchEl.focus();
+      searchEl.setSelectionRange(searchEl.value.length, searchEl.value.length);
+    }
+  }
 }
 
 function selectTopicTab(topicId) {
   activeTopicId = topicId;
+  topicSearchQuery = "";
+  renderTopicsSection();
+}
+
+function toggleTopicExpand(topicId) {
+  if (expandedTopicIds.has(topicId)) {
+    expandedTopicIds.delete(topicId);
+  } else {
+    expandedTopicIds.add(topicId);
+  }
+  renderTopicsSection();
+}
+
+function handleTopicSearch(val) {
+  topicSearchQuery = val;
   renderTopicsSection();
 }
 
@@ -745,6 +836,7 @@ async function addTopicItem(topicId) {
 
   topic.items = topic.items || [];
   topic.items.push(text);
+  expandedTopicIds.add(topicId); // Tự mở rộng để thấy ngay mục vừa thêm
   input.value = "";
   await saveAppData();
 }
