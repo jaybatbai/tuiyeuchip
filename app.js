@@ -76,7 +76,7 @@ function ensureCustomDialogDOM() {
   if (document.getElementById("custom-prompt-modal")) return;
 
   const modalHtml = `
-    <div id="custom-prompt-modal" class="hidden fixed inset-0 z-[100] bg-black/45 backdrop-blur-xs flex items-center justify-center p-4">
+    <div id="custom-prompt-modal" class="hidden fixed inset-0 z-[100] bg-black/45 backdrop-blur-sm flex items-center justify-center p-4">
       <div class="bg-white rounded-3xl max-w-md w-full p-5 sm:p-6 shadow-2xl border border-pink-100 animate-pop-in">
         <div class="flex items-center justify-between gap-2 mb-2">
           <h3 id="custom-prompt-title" class="font-bold text-base sm:text-lg text-gray-800"></h3>
@@ -276,6 +276,7 @@ const DEFAULT_COUPONS = [
 
 const DEFAULT_DATA = {
   profile: {
+    badge: "✨ Sổ Tay Bí Mật Dành Riêng Cho Em ✨",
     title: "Góc Nhỏ Về Chip 💖",
     subtitle: "Nơi lưu giữ những điều đáng yêu nhất về em mỗi ngày",
     startDate: "01/01/2025",
@@ -331,6 +332,7 @@ let uploadedImageBase64 = "";
 
 // Topics & Coupons state
 let activeTopicId = "topic_nicknames";
+let activeSubGroupFilter = "ALL"; // 'ALL' hoặc tên nhóm nhỏ đang lọc
 let selectedTopicIcon = "🏷️";
 let selectedCouponIcon = "🧋";
 let expandedTopicIds = new Set(); // Lưu các mục đang bấm "Xem thêm"
@@ -618,6 +620,10 @@ function refreshAllUI() {
 }
 
 function renderProfile() {
+  const badgeEl = document.getElementById("display-badge");
+  if (badgeEl) {
+    badgeEl.textContent = appData.profile.badge || "✨ Sổ Tay Bí Mật Dành Riêng Cho Em ✨";
+  }
   document.getElementById("display-title").textContent = appData.profile.title || "Góc Nhỏ Về Em 💖";
   document.getElementById("display-subtitle").textContent = appData.profile.subtitle || "";
 
@@ -674,10 +680,29 @@ function normalizeTopicItem(item) {
   };
 }
 
-function renderSingleTopicCardHtml(topicId, entry, idx, totalInTopic, isLastOddCard, isEdit) {
+function renderSingleTopicCardHtml(topicId, entry, idx, totalInTopic, isLastOddCard, isEdit, groupList = []) {
   const canMoveUp = idx > 0;
   const canMoveDown = idx < totalInTopic - 1;
   const spanClass = isLastOddCard ? "sm:col-span-2" : "";
+
+  const quickGroupSelectHtml =
+    isEdit && Array.isArray(groupList) && groupList.length > 0
+      ? `
+        <select
+          onchange="quickAssignTopicItemGroup('${topicId}', ${idx}, this.value)"
+          class="max-w-[105px] px-1.5 py-0.5 rounded-lg bg-white border border-pink-200 text-[10px] font-semibold text-pink-700 focus:outline-none focus:border-pink-400"
+          title="Đổi nhanh nhóm nhỏ"
+        >
+          <option value="">Chung</option>
+          ${groupList
+            .map(
+              (g) =>
+                `<option value="${escapeHtml(g)}" ${entry.group === g ? "selected" : ""}>${escapeHtml(g)}</option>`
+            )
+            .join("")}
+        </select>
+      `
+      : "";
 
   return `
     <li class="${spanClass} flex items-start justify-between gap-2 px-3 py-2.5 rounded-2xl bg-pink-50/55 border border-pink-100/80 hover:bg-pink-50 transition">
@@ -689,6 +714,7 @@ function renderSingleTopicCardHtml(topicId, entry, idx, totalInTopic, isLastOddC
         isEdit
           ? `
         <div class="flex items-center gap-0.5 shrink-0">
+          ${quickGroupSelectHtml}
           <button
             onclick="moveTopicItem('${topicId}', ${idx}, -1)"
             ${!canMoveUp ? "disabled" : ""}
@@ -743,6 +769,7 @@ function renderTopicsSection() {
   if (activeIndex === -1) {
     activeIndex = 0;
     activeTopicId = topics[0].id;
+    activeSubGroupFilter = "ALL";
   }
 
   // Render các Tab (kèm số lượng nhỏ gọn)
@@ -782,6 +809,15 @@ function renderTopicsSection() {
   });
   const groupList = Array.from(groupSet);
 
+  // Đảm bảo bộ lọc nhóm con luôn hợp lệ khi chuyển tab hoặc xóa nhóm
+  if (
+    activeSubGroupFilter !== "ALL" &&
+    activeSubGroupFilter !== "__UNGROUPED__" &&
+    !groupList.includes(activeSubGroupFilter)
+  ) {
+    activeSubGroupFilter = "ALL";
+  }
+
   const canMoveTabLeft = activeIndex > 0;
   const canMoveTabRight = activeIndex < topics.length - 1;
 
@@ -793,7 +829,7 @@ function renderTopicsSection() {
       entry.group.toLowerCase().includes(queryNorm)
   );
 
-  const hasSubGroups = groupList.length > 0 && filteredItems.some((it) => it.group);
+  const hasSubGroups = groupList.length > 0;
 
   const adminHeaderControls = isEdit
     ? `
@@ -840,24 +876,66 @@ function renderTopicsSection() {
     `
     : "";
 
-  const subGroupsBarHtml =
-    isEdit && groupList.length > 0
-      ? `
-      <div class="flex flex-wrap items-center gap-1.5 mb-3 p-2 rounded-xl bg-amber-50/60 border border-amber-100">
-        <span class="text-[11px] font-bold text-amber-700 mr-1">Các nhóm nhỏ:</span>
+  // Thanh lọc nhóm nhỏ hiển thị cho CẢ EM VÀ ANH whenever mục có nhóm nhỏ
+  const ungroupedCount = filteredItems.filter((it) => !it.group || !groupList.includes(it.group)).length;
+  const subGroupsNavHtml = hasSubGroups
+    ? `
+      <div class="flex flex-wrap items-center gap-1.5 mb-3 p-2.5 rounded-2xl bg-pink-50/70 border border-pink-100">
+        <button
+          onclick="selectSubGroupFilter('ALL')"
+          class="px-2.5 py-1 rounded-full text-[11px] font-bold transition ${
+            activeSubGroupFilter === "ALL"
+              ? "bg-pink-500 text-white shadow-xs"
+              : "bg-white text-pink-700 border border-pink-200 hover:bg-pink-100"
+          }"
+        >
+          Tất cả (${filteredItems.length})
+        </button>
         ${groupList
-          .map(
-            (g) => `
-          <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-white text-amber-800 border border-amber-200 text-[11px] font-semibold">
-            <span>${escapeHtml(g)}</span>
-            <button onclick="removeTopicSubGroup('${activeTopic.id}', '${escapeHtml(g).replace(/'/g, "\\'")}')" class="text-gray-400 hover:text-rose-500 ml-0.5" title="Gỡ nhóm này">✕</button>
-          </span>
-        `
-          )
+          .map((g) => {
+            const gCount = filteredItems.filter((it) => it.group === g).length;
+            const isSelected = activeSubGroupFilter === g;
+            return `
+              <span class="inline-flex items-center rounded-full border transition ${
+                isSelected
+                  ? "bg-amber-500 text-white border-amber-500 shadow-xs"
+                  : "bg-white text-amber-800 border-amber-200 hover:bg-amber-50"
+              }">
+                <button
+                  onclick="selectSubGroupFilter('${escapeHtml(g).replace(/'/g, "\\'")}')"
+                  class="px-2.5 py-1 text-[11px] font-bold flex items-center gap-1"
+                >
+                  <span>${escapeHtml(g)}</span>
+                  <span class="opacity-80">(${gCount})</span>
+                </button>
+                ${
+                  isEdit
+                    ? `<button onclick="removeTopicSubGroup('${activeTopic.id}', '${escapeHtml(g).replace(/'/g, "\\'")}')" class="pr-2 pl-0.5 text-[10px] opacity-70 hover:opacity-100" title="Gỡ nhóm này">✕</button>`
+                    : ""
+                }
+              </span>
+            `;
+          })
           .join("")}
+        ${
+          ungroupedCount > 0
+            ? `
+              <button
+                onclick="selectSubGroupFilter('__UNGROUPED__')"
+                class="px-2.5 py-1 rounded-full text-[11px] font-bold transition ${
+                  activeSubGroupFilter === "__UNGROUPED__"
+                    ? "bg-gray-600 text-white shadow-xs"
+                    : "bg-white text-gray-600 border border-gray-200 hover:bg-gray-100"
+                }"
+              >
+                Chung (${ungroupedCount})
+              </button>
+            `
+            : ""
+        }
       </div>
     `
-      : "";
+    : "";
 
   const searchBarHtml =
     normalizedItems.length >= 6
@@ -890,52 +968,64 @@ function renderTopicsSection() {
     }</p>`;
   } else if (hasSubGroups) {
     const orderedBuckets = [];
-    const seenGroups = new Set();
 
-    groupList.forEach((g) => {
-      const bucketItems = filteredItems.filter((it) => it.group === g);
-      if (bucketItems.length > 0) {
+    if (activeSubGroupFilter === "ALL") {
+      groupList.forEach((g) => {
+        const bucketItems = filteredItems.filter((it) => it.group === g);
         orderedBuckets.push({ title: g, items: bucketItems });
-        seenGroups.add(g);
-      }
-    });
+      });
 
-    const ungroupedItems = filteredItems.filter((it) => !it.group || !seenGroups.has(it.group));
-    if (ungroupedItems.length > 0) {
-      orderedBuckets.push({ title: "Khác", items: ungroupedItems });
+      const ungroupedItems = filteredItems.filter((it) => !it.group || !groupList.includes(it.group));
+      if (ungroupedItems.length > 0) {
+        orderedBuckets.push({ title: "Chung", items: ungroupedItems });
+      }
+    } else if (activeSubGroupFilter === "__UNGROUPED__") {
+      const ungroupedItems = filteredItems.filter((it) => !it.group || !groupList.includes(it.group));
+      orderedBuckets.push({ title: "Chung", items: ungroupedItems });
+    } else {
+      const bucketItems = filteredItems.filter((it) => it.group === activeSubGroupFilter);
+      orderedBuckets.push({ title: activeSubGroupFilter, items: bucketItems });
     }
 
     contentBodyHtml = `
       <div class="space-y-4">
         ${orderedBuckets
-          .map(
-            (bucket) => `
-          <div>
-            <div class="flex items-center gap-2 mb-2">
-              <span class="text-xs font-bold text-pink-600 bg-pink-100/70 px-2.5 py-0.5 rounded-full">
-                ${escapeHtml(bucket.title)} (${bucket.items.length})
-              </span>
-              <div class="h-px flex-1 bg-pink-100"></div>
-            </div>
-            <ul class="grid grid-cols-1 sm:grid-cols-2 gap-2">
-              ${bucket.items
-                .map((entry, idxInBucket) => {
-                  const isLastOdd =
-                    bucket.items.length % 2 === 1 && idxInBucket === bucket.items.length - 1;
-                  return renderSingleTopicCardHtml(
-                    activeTopic.id,
-                    entry,
-                    entry.originalIdx,
-                    normalizedItems.length,
-                    isLastOdd,
-                    isEdit
-                  );
-                })
-                .join("")}
-            </ul>
-          </div>
-        `
-          )
+          .map((bucket) => {
+            const innerHtml =
+              bucket.items.length > 0
+                ? `<ul class="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                    ${bucket.items
+                      .map((entry, idxInBucket) => {
+                        const isLastOdd =
+                          bucket.items.length % 2 === 1 && idxInBucket === bucket.items.length - 1;
+                        return renderSingleTopicCardHtml(
+                          activeTopic.id,
+                          entry,
+                          entry.originalIdx,
+                          normalizedItems.length,
+                          isLastOdd,
+                          isEdit,
+                          groupList
+                        );
+                      })
+                      .join("")}
+                  </ul>`
+                : `<p class="text-[11px] text-gray-400 italic px-3 py-2 rounded-xl bg-gray-50/70 border border-dashed border-gray-200">
+                    Chưa có ghi chú nào trong nhóm này...
+                  </p>`;
+
+            return `
+              <div>
+                <div class="flex items-center gap-2 mb-2">
+                  <span class="text-xs font-bold text-pink-600 bg-pink-100/70 px-2.5 py-0.5 rounded-full">
+                    ${escapeHtml(bucket.title)} (${bucket.items.length})
+                  </span>
+                  <div class="h-px flex-1 bg-pink-100"></div>
+                </div>
+                ${innerHtml}
+              </div>
+            `;
+          })
           .join("")}
       </div>
     `;
@@ -959,7 +1049,8 @@ function renderTopicsSection() {
               entry.originalIdx,
               normalizedItems.length,
               isLastOdd,
-              isEdit
+              isEdit,
+              groupList
             );
           })
           .join("")}
@@ -1037,7 +1128,7 @@ function renderTopicsSection() {
         ${adminHeaderControls}
       </div>
 
-      ${subGroupsBarHtml}
+      ${subGroupsNavHtml}
       ${searchBarHtml}
       ${contentBodyHtml}
       ${expandToggleHtml}
@@ -1057,8 +1148,19 @@ function renderTopicsSection() {
 
 function selectTopicTab(topicId) {
   activeTopicId = topicId;
+  activeSubGroupFilter = "ALL";
   topicSearchQuery = "";
   selectedNewItemGroup = "";
+  renderTopicsSection();
+}
+
+function selectSubGroupFilter(groupFilter) {
+  activeSubGroupFilter = groupFilter;
+  if (groupFilter !== "ALL" && groupFilter !== "__UNGROUPED__") {
+    selectedNewItemGroup = groupFilter;
+  } else {
+    selectedNewItemGroup = "";
+  }
   renderTopicsSection();
 }
 
@@ -1074,6 +1176,15 @@ function toggleTopicExpand(topicId) {
 function handleTopicSearch(val) {
   topicSearchQuery = val;
   renderTopicsSection();
+}
+
+async function quickAssignTopicItemGroup(topicId, index, newGroup) {
+  const topic = appData.topics.find((t) => t.id === topicId);
+  if (!topic || !topic.items[index]) return;
+
+  const current = normalizeTopicItem(topic.items[index]);
+  topic.items[index] = newGroup ? { text: current.text, group: newGroup } : current.text;
+  await saveAppData();
 }
 
 async function addTopicSubGroup(topicId) {
@@ -1116,6 +1227,9 @@ async function removeTopicSubGroup(topicId, groupName) {
 
   if (selectedNewItemGroup === groupName) {
     selectedNewItemGroup = "";
+  }
+  if (activeSubGroupFilter === groupName) {
+    activeSubGroupFilter = "ALL";
   }
   await saveAppData();
 }
@@ -1270,6 +1384,7 @@ async function saveTopic() {
       items: []
     });
     activeTopicId = newId;
+    activeSubGroupFilter = "ALL";
   }
 
   closeTopicModal();
@@ -1583,7 +1698,7 @@ function renderRevealedCard(mem, animate = true) {
         <span class="text-3xl select-none shrink-0">${mem.sticker || "💖"}</span>
       </div>
 
-      <p class="font-note text-2xl sm:text-[26px] text-gray-700 mt-3 leading-relaxed whitespace-pre-line">
+      <p class="font-note text-xl sm:text-2xl text-gray-700 mt-3 leading-relaxed whitespace-pre-line">
         "${escapeHtml(mem.note)}"
       </p>
 
@@ -1836,6 +1951,7 @@ async function deleteMemory(id) {
 // CÀI ĐẶT HỒ SƠ & BỨC THƯ BÍ MẬT
 // =========================================================================
 function openProfileModal() {
+  document.getElementById("input-badge").value = appData.profile.badge || "✨ Sổ Tay Bí Mật Dành Riêng Cho Em ✨";
   document.getElementById("input-title").value = appData.profile.title || "";
   document.getElementById("input-subtitle").value = appData.profile.subtitle || "";
   document.getElementById("input-start-date").value = formatDateVN(appData.profile.startDate) || "01/01/2025";
@@ -1863,6 +1979,7 @@ async function saveProfile() {
     return;
   }
 
+  appData.profile.badge = document.getElementById("input-badge").value.trim() || "✨ Sổ Tay Bí Mật Dành Riêng Cho Em ✨";
   appData.profile.title = document.getElementById("input-title").value.trim() || "Góc Nhỏ Về Em 💖";
   appData.profile.subtitle = document.getElementById("input-subtitle").value.trim();
   appData.profile.startDate = rawStart ? formatDateVN(rawStart) : "01/01/2025";
