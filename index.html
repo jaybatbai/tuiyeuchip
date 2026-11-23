@@ -17,7 +17,7 @@
   <!-- Custom CSS -->
   <link rel="stylesheet" href="style.css" />
 </head>
-<body class="min-h-screen relative pb-20">
+<body class="min-h-screen relative pb-28">
 
   <!-- Floating Hearts Container -->
   <div id="hearts-container"></div>
@@ -182,13 +182,31 @@
             <button onclick="openCouponModal()" class="px-3.5 py-2 rounded-xl bg-purple-50 text-purple-700 border border-purple-200 text-xs font-bold hover:bg-purple-100 transition flex items-center gap-1.5">
               <i data-lucide="ticket" class="w-4 h-4"></i> Tạo Phiếu Đổi Quà
             </button>
+            <button onclick="openAddMusicModal()" class="px-3.5 py-2 rounded-xl bg-sky-50 text-sky-700 border border-sky-200 text-xs font-bold hover:bg-sky-100 transition flex items-center gap-1.5">
+              <i data-lucide="music" class="w-4 h-4"></i> Thêm Nhạc
+            </button>
             <button onclick="toggleManageDrawer()" class="px-3.5 py-2 rounded-xl bg-pink-100 text-pink-700 text-xs font-bold hover:bg-pink-200 transition flex items-center gap-1.5">
               <i data-lucide="list" class="w-4 h-4"></i> Quản Lý Thẻ (<span id="admin-count">0</span>)
+            </button>
+            <button onclick="toggleNotificationsDrawer()" class="relative px-3.5 py-2 rounded-xl bg-rose-50 text-rose-700 border border-rose-200 text-xs font-bold hover:bg-rose-100 transition flex items-center gap-1.5">
+              <i data-lucide="bell" class="w-4 h-4"></i> Hoạt Động Của Em
+              <span id="admin-notif-badge" class="hidden px-1.5 py-0.2 rounded-full bg-rose-500 text-white text-[10px] font-bold">0</span>
             </button>
           </div>
         </div>
 
-        <!-- Private Drawer: Manage All Memories (Hidden in View Mode) -->
+        <!-- Private Drawer 1: Activity Notifications from Girlfriend -->
+        <div id="admin-notif-drawer" class="hidden space-y-2.5 mt-3 mb-3 p-3.5 rounded-2xl bg-rose-50/70 border border-rose-200/80 max-h-72 overflow-y-auto">
+          <div class="flex items-center justify-between gap-2">
+            <span class="text-xs font-bold text-rose-700 uppercase tracking-wider">💌 Nhật ký tương tác của em:</span>
+            <button onclick="markAllNotificationsRead()" class="text-[11px] font-bold text-rose-600 hover:underline">
+              Đánh dấu đã xem tất cả
+            </button>
+          </div>
+          <div id="admin-notif-list" class="space-y-2"></div>
+        </div>
+
+        <!-- Private Drawer 2: Manage All Memories -->
         <div id="admin-manage-drawer" class="hidden space-y-3 mt-3 max-h-96 overflow-y-auto pr-1">
           <div class="text-xs font-bold text-pink-500 uppercase tracking-wider">Danh sách toàn bộ thẻ bí mật & phản hồi của em:</div>
           <div id="admin-memories-list" class="space-y-2.5"></div>
@@ -317,6 +335,106 @@
       </section>
 
     </main>
+
+    <!-- ========================================== -->
+    <!-- MINI MUSIC PLAYER NỔI GÓC DƯỚI             -->
+    <!-- ========================================== -->
+    <div id="music-player-widget" class="fixed bottom-4 right-4 z-40 max-w-[calc(100vw-2rem)]">
+      <!-- Hidden YouTube Audio Container -->
+      <div class="fixed -left-[9999px] -top-[9999px] w-1 h-1 overflow-hidden pointer-events-none">
+        <div id="yt-hidden-player"></div>
+      </div>
+
+      <!-- Compact Floating Bar -->
+      <div id="music-compact-bar" class="bg-white/95 backdrop-blur-md border-2 border-pink-200 rounded-full px-3 py-2 shadow-xl flex items-center gap-2.5">
+        <button
+          onclick="togglePlayPause()"
+          id="music-play-btn-compact"
+          class="w-9 h-9 rounded-full bg-gradient-to-r from-pink-500 to-rose-500 text-white flex items-center justify-center shadow-sm hover:opacity-95 transition shrink-0"
+          title="Phát / Tạm dừng"
+        >
+          <i data-lucide="play" class="w-4 h-4 fill-white"></i>
+        </button>
+
+        <div onclick="toggleMusicDrawer()" class="cursor-pointer min-w-0 max-w-[155px] sm:max-w-[200px]">
+          <div id="music-current-title" class="text-xs font-bold text-gray-800 truncate">Chưa có bài hát</div>
+          <div id="music-current-artist" class="text-[10px] text-pink-500 font-semibold truncate">Bấm để mở danh sách nhạc 🎵</div>
+        </div>
+
+        <button onclick="nextTrack()" class="p-1.5 rounded-full text-pink-500 hover:bg-pink-50 transition shrink-0" title="Bài tiếp theo">
+          <i data-lucide="skip-forward" class="w-4 h-4"></i>
+        </button>
+
+        <button onclick="toggleMusicDrawer()" class="p-1.5 rounded-full bg-pink-50 text-pink-600 hover:bg-pink-100 transition shrink-0" title="Mở danh sách phát">
+          <i data-lucide="list-music" class="w-4 h-4"></i>
+        </button>
+      </div>
+
+      <!-- Expanded Playlist Card -->
+      <div id="music-expanded-card" class="hidden w-80 sm:w-96 bg-white/98 backdrop-blur-md border-2 border-pink-200 rounded-3xl p-4 shadow-2xl animate-pop-in">
+        <div class="flex items-center justify-between gap-2 pb-2.5 mb-3 border-b border-pink-100">
+          <div class="flex items-center gap-2">
+            <span id="music-disc-icon" class="text-xl inline-block">💿</span>
+            <div>
+              <div class="text-xs font-bold text-pink-600">Góc Nhạc Của Tụi Mình</div>
+              <div id="music-playlist-count" class="text-[10px] text-gray-400 font-semibold">0 bài hát</div>
+            </div>
+          </div>
+          <div class="flex items-center gap-1">
+            <button onclick="openAddMusicModal()" class="admin-control hidden px-2.5 py-1 rounded-full bg-pink-500 text-white text-[11px] font-bold hover:bg-pink-600 transition flex items-center gap-1">
+              <i data-lucide="plus" class="w-3 h-3"></i> Thêm bài
+            </button>
+            <button onclick="toggleMusicDrawer()" class="p-1.5 rounded-full text-gray-400 hover:bg-pink-50 hover:text-pink-500 transition" title="Thu gọn">
+              <i data-lucide="chevron-down" class="w-4 h-4"></i>
+            </button>
+          </div>
+        </div>
+
+        <!-- Now Playing Box -->
+        <div class="p-3 rounded-2xl bg-gradient-to-br from-pink-50 to-rose-50/70 border border-pink-100 mb-3">
+          <div id="music-full-title" class="text-xs sm:text-sm font-bold text-gray-800 truncate">Chưa chọn bài hát</div>
+          <div id="music-full-artist" class="text-[11px] text-pink-600 font-medium truncate mt-0.5">—</div>
+
+          <div id="music-error-banner" class="hidden mt-1.5 text-[10px] text-rose-600 bg-rose-50 border border-rose-200 rounded-lg px-2 py-1"></div>
+
+          <!-- Progress Bar -->
+          <div class="mt-2.5">
+            <input
+              type="range"
+              id="music-progress-bar"
+              min="0"
+              max="100"
+              value="0"
+              oninput="seekMusic(this.value)"
+              class="w-full h-1.5 bg-pink-200 rounded-lg appearance-none cursor-pointer accent-pink-500"
+            />
+            <div class="flex justify-between text-[10px] text-gray-400 font-semibold mt-0.5">
+              <span id="music-time-current">0:00</span>
+              <span id="music-time-total">0:00</span>
+            </div>
+          </div>
+
+          <!-- Transport Controls -->
+          <div class="mt-2 flex items-center justify-center gap-3">
+            <button onclick="prevTrack()" class="p-2 rounded-full bg-white text-pink-600 border border-pink-100 hover:bg-pink-50 transition" title="Bài trước">
+              <i data-lucide="skip-back" class="w-4 h-4"></i>
+            </button>
+            <button onclick="togglePlayPause()" id="music-play-btn-full" class="w-10 h-10 rounded-full bg-gradient-to-r from-pink-500 to-rose-500 text-white flex items-center justify-center shadow-md hover:opacity-95 transition" title="Phát / Tạm dừng">
+              <i data-lucide="play" class="w-4 h-4 fill-white"></i>
+            </button>
+            <button onclick="nextTrack()" class="p-2 rounded-full bg-white text-pink-600 border border-pink-100 hover:bg-pink-50 transition" title="Bài tiếp theo">
+              <i data-lucide="skip-forward" class="w-4 h-4"></i>
+            </button>
+            <button onclick="toggleLoopMode()" id="music-loop-btn" class="p-2 rounded-full bg-pink-100 text-pink-600 border border-pink-200 transition" title="Lặp lại danh sách">
+              <i data-lucide="repeat" class="w-4 h-4"></i>
+            </button>
+          </div>
+        </div>
+
+        <!-- Playlist Tracks -->
+        <div id="music-playlist-list" class="max-h-48 overflow-y-auto space-y-1.5 pr-1"></div>
+      </div>
+    </div>
   </div>
 
   <!-- MODALS -->
@@ -488,10 +606,42 @@
     </div>
   </div>
 
-  <!-- Firebase SDK (Compat v10 for single-file HTML) -->
+  <!-- 6. Add / Edit Music Track Modal -->
+  <div id="modal-music" class="fixed inset-0 z-50 hidden bg-black/40 backdrop-blur-sm flex items-center justify-center p-4">
+    <div class="bg-white rounded-3xl max-w-md w-full p-6 shadow-2xl border-2 border-pink-100 animate-pop-in">
+      <h3 id="music-modal-title" class="text-lg font-bold text-pink-600 mb-3 flex items-center gap-2">
+        <i data-lucide="music" class="w-5 h-5"></i> Thêm Bài Hát Vào Playlist
+      </h3>
+      <input type="hidden" id="edit-music-id" />
+      <div class="space-y-3 text-left">
+        <div>
+          <label class="block text-xs font-bold text-gray-600 mb-1">Link YouTube hoặc Link nhạc (.mp3 / .m4a) *</label>
+          <input type="text" id="input-music-url" placeholder="VD: https://www.youtube.com/watch?v=..." class="w-full px-3.5 py-2 rounded-xl border border-pink-200 text-sm focus:outline-none focus:border-pink-500" />
+          <p class="text-[11px] text-gray-400 mt-1">Mẹo: Dán link YouTube xong để trống tên bài hát, hệ thống sẽ tự lấy tên gốc của video!</p>
+        </div>
+        <div>
+          <label class="block text-xs font-bold text-gray-600 mb-1">Tên bài hát (Tùy chọn)</label>
+          <input type="text" id="input-music-title" placeholder="Để trống để tự động nhận diện từ YouTube..." class="w-full px-3.5 py-2 rounded-xl border border-pink-200 text-sm focus:outline-none focus:border-pink-500" />
+        </div>
+        <div>
+          <label class="block text-xs font-bold text-gray-600 mb-1">Ghi chú nhỏ / Tên ca sĩ (Tùy chọn)</label>
+          <input type="text" id="input-music-artist" placeholder="VD: Bài hát đầu tiên tụi mình nghe chung 💕" class="w-full px-3.5 py-2 rounded-xl border border-pink-200 text-sm focus:outline-none focus:border-pink-500" />
+        </div>
+      </div>
+      <div class="flex gap-2 mt-5">
+        <button onclick="closeAddMusicModal()" class="flex-1 py-2.5 rounded-xl bg-gray-100 text-gray-600 text-xs font-bold">Hủy</button>
+        <button id="btn-save-music" onclick="saveMusicTrack()" class="flex-1 py-2.5 rounded-xl bg-pink-500 text-white text-xs font-bold hover:bg-pink-600">Lưu Bài Hát</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Firebase SDK (Compat v10) -->
   <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
-  <!-- Custom Logic -->
-  <script src="app.js"></script>
+  <!-- Modular App Scripts -->
+  <script src="core.js"></script>
+  <script src="features-notebook.js"></script>
+  <script src="features-memories.js"></script>
+  <script src="feature-music.js"></script>
 </body>
 </html>
