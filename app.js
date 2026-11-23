@@ -68,6 +68,135 @@ function getTodayVN() {
 }
 
 // =========================================================================
+// HỘP THOẠI NHẬP LIỆU TÙY CHỈNH (KHÔNG BỊ TỰ ĐÓNG KHI CHUYỂN TAB COPY/PASTE)
+// =========================================================================
+let customDialogResolve = null;
+
+function ensureCustomDialogDOM() {
+  if (document.getElementById("custom-prompt-modal")) return;
+
+  const modalHtml = `
+    <div id="custom-prompt-modal" class="hidden fixed inset-0 z-[100] bg-black/45 backdrop-blur-xs flex items-center justify-center p-4">
+      <div class="bg-white rounded-3xl max-w-md w-full p-5 sm:p-6 shadow-2xl border border-pink-100 animate-pop-in">
+        <div class="flex items-center justify-between gap-2 mb-2">
+          <h3 id="custom-prompt-title" class="font-bold text-base sm:text-lg text-gray-800"></h3>
+          <button type="button" onclick="closeCustomDialog(null)" class="p-1.5 rounded-full text-gray-400 hover:bg-pink-50 hover:text-pink-500 transition">
+            <i data-lucide="x" class="w-4 h-4"></i>
+          </button>
+        </div>
+        <p id="custom-prompt-desc" class="text-xs text-gray-500 mb-3 leading-relaxed"></p>
+
+        <div id="custom-prompt-group-wrap" class="hidden mb-3">
+          <label class="block text-[11px] font-bold text-pink-600 mb-1">Phân loại nhóm:</label>
+          <select id="custom-prompt-group-select" class="w-full px-3.5 py-2 rounded-xl border border-pink-200 text-xs sm:text-sm bg-pink-50/50 text-gray-700 focus:outline-none focus:border-pink-500"></select>
+        </div>
+
+        <input
+          type="text"
+          id="custom-prompt-input"
+          class="w-full px-3.5 py-2.5 rounded-xl border border-pink-200 text-sm text-gray-800 focus:outline-none focus:border-pink-500 mb-4"
+          placeholder="Nhập hoặc dán nội dung vào đây..."
+          onkeydown="if(event.key==='Enter') submitCustomDialog(); if(event.key==='Escape') closeCustomDialog(null);"
+        />
+
+        <div class="flex items-center justify-end gap-2">
+          <button
+            type="button"
+            onclick="closeCustomDialog(null)"
+            class="px-4 py-2 rounded-xl bg-gray-100 hover:bg-gray-200 text-gray-600 text-xs font-bold transition"
+          >
+            Hủy
+          </button>
+          <button
+            type="button"
+            onclick="submitCustomDialog()"
+            class="px-5 py-2 rounded-xl bg-pink-500 hover:bg-pink-600 text-white text-xs font-bold shadow-sm transition"
+          >
+            Lưu Lại ✨
+          </button>
+        </div>
+      </div>
+    </div>
+  `;
+
+  document.body.insertAdjacentHTML("beforeend", modalHtml);
+  lucide.createIcons();
+}
+
+function openCustomDialog({
+  title = "Nhập thông tin",
+  desc = "",
+  defaultValue = "",
+  placeholder = "Nhập hoặc dán nội dung vào đây...",
+  groups = null,
+  selectedGroup = ""
+}) {
+  ensureCustomDialogDOM();
+
+  return new Promise((resolve) => {
+    customDialogResolve = resolve;
+
+    const modal = document.getElementById("custom-prompt-modal");
+    const titleEl = document.getElementById("custom-prompt-title");
+    const descEl = document.getElementById("custom-prompt-desc");
+    const inputEl = document.getElementById("custom-prompt-input");
+    const groupWrap = document.getElementById("custom-prompt-group-wrap");
+    const groupSelect = document.getElementById("custom-prompt-group-select");
+
+    titleEl.textContent = title;
+    descEl.textContent = desc;
+    descEl.classList.toggle("hidden", !desc);
+
+    inputEl.value = defaultValue;
+    inputEl.placeholder = placeholder;
+
+    if (Array.isArray(groups) && groups.length > 0) {
+      groupWrap.classList.remove("hidden");
+      groupSelect.innerHTML =
+        `<option value="">Nhóm: Chung (Không phân nhóm)</option>` +
+        groups
+          .map(
+            (g) =>
+              `<option value="${escapeHtml(g)}" ${g === selectedGroup ? "selected" : ""}>${escapeHtml(g)}</option>`
+          )
+          .join("");
+    } else {
+      groupWrap.classList.add("hidden");
+      groupSelect.innerHTML = "";
+    }
+
+    modal.classList.remove("hidden");
+    lucide.createIcons();
+    setTimeout(() => {
+      inputEl.focus();
+      inputEl.select();
+    }, 30);
+  });
+}
+
+function submitCustomDialog() {
+  const inputEl = document.getElementById("custom-prompt-input");
+  const groupWrap = document.getElementById("custom-prompt-group-wrap");
+  const groupSelect = document.getElementById("custom-prompt-group-select");
+
+  const result = {
+    text: inputEl ? inputEl.value : "",
+    group: !groupWrap.classList.contains("hidden") && groupSelect ? groupSelect.value : ""
+  };
+  closeCustomDialog(result);
+}
+
+function closeCustomDialog(result) {
+  const modal = document.getElementById("custom-prompt-modal");
+  if (modal) modal.classList.add("hidden");
+  if (customDialogResolve) {
+    const fn = customDialogResolve;
+    customDialogResolve = null;
+    fn(result);
+  }
+}
+
+// =========================================================================
 // DỮ LIỆU MẶC ĐỊNH BAN ĐẦU
 // =========================================================================
 const STICKERS = ["💖", "🥰", "🍓", "🧸", "🧋", "🌸", "✨", "🎀", "🐱", "🍰", "🌙", "💌"];
@@ -214,6 +343,7 @@ const TOPIC_COLLAPSE_LIMIT = 6;   // Số chẵn (6 ô = 3 hàng x 2 cột) đ�
 // =========================================================================
 function initApp() {
   lucide.createIcons();
+  ensureCustomDialogDOM();
   createFloatingHearts();
   setupPasscodeSlots();
   renderStickerPicker();
@@ -547,7 +677,6 @@ function normalizeTopicItem(item) {
 function renderSingleTopicCardHtml(topicId, entry, idx, totalInTopic, isLastOddCard, isEdit) {
   const canMoveUp = idx > 0;
   const canMoveDown = idx < totalInTopic - 1;
-  // Nếu tổng số ô trong cụm là số lẻ và đây là ô cuối cùng -> giãn rộng 2 cột để không bị khuyết góc phải
   const spanClass = isLastOddCard ? "sm:col-span-2" : "";
 
   return `
@@ -647,7 +776,6 @@ function renderTopicsSection() {
     originalIdx
   }));
 
-  // Thu thập danh sách nhóm con (từ activeTopic.groups và các group thực tế đang có trong items)
   const groupSet = new Set(Array.isArray(activeTopic.groups) ? activeTopic.groups : []);
   normalizedItems.forEach((it) => {
     if (it.group) groupSet.add(it.group);
@@ -657,7 +785,6 @@ function renderTopicsSection() {
   const canMoveTabLeft = activeIndex > 0;
   const canMoveTabRight = activeIndex < topics.length - 1;
 
-  // Lọc theo từ khóa
   const queryNorm = topicSearchQuery.trim().toLowerCase();
   const filteredItems = normalizedItems.filter(
     (entry) =>
@@ -666,7 +793,6 @@ function renderTopicsSection() {
       entry.group.toLowerCase().includes(queryNorm)
   );
 
-  // Kiểm tra xem mục này có đang chia nhóm nhỏ không
   const hasSubGroups = groupList.length > 0 && filteredItems.some((it) => it.group);
 
   const adminHeaderControls = isEdit
@@ -675,7 +801,7 @@ function renderTopicsSection() {
         <button
           onclick="addTopicSubGroup('${activeTopic.id}')"
           class="px-2.5 py-1.5 rounded-lg bg-amber-50 text-amber-700 hover:bg-amber-100 border border-amber-200 text-[11px] font-bold flex items-center gap-1 transition"
-          title="Tạo nhóm nhỏ phân loại bên trong mục này (VD: Đồ uống, Đồ ăn vặt...)"
+          title="Tạo nhóm nhỏ phân loại bên trong mục này"
         >
           <i data-lucide="folder-plus" class="w-3.5 h-3.5"></i>
           <span>+ Chia nhóm</span>
@@ -714,7 +840,6 @@ function renderTopicsSection() {
     `
     : "";
 
-  // Thanh hiển thị các nhóm con (để anh dễ quản lý / xóa nhóm rỗng nếu muốn)
   const subGroupsBarHtml =
     isEdit && groupList.length > 0
       ? `
@@ -734,7 +859,6 @@ function renderTopicsSection() {
     `
       : "";
 
-  // Ô tìm kiếm nhanh tự hiện khi mục có từ 6 dòng trở lên
   const searchBarHtml =
     normalizedItems.length >= 6
       ? `
@@ -765,7 +889,6 @@ function renderTopicsSection() {
       queryNorm ? "Không tìm thấy dòng nào khớp từ khóa..." : "Mục này chưa có ghi chú nào..."
     }</p>`;
   } else if (hasSubGroups) {
-    // HIỂN THỊ GOM THEO TỪNG NHÓM CON (VD: Đồ uống, Đồ ăn vặt, Món chính...)
     const orderedBuckets = [];
     const seenGroups = new Set();
 
@@ -777,7 +900,6 @@ function renderTopicsSection() {
       }
     });
 
-    // Các dòng chưa gắn nhóm
     const ungroupedItems = filteredItems.filter((it) => !it.group || !seenGroups.has(it.group));
     if (ungroupedItems.length > 0) {
       orderedBuckets.push({ title: "Khác", items: ungroupedItems });
@@ -818,7 +940,6 @@ function renderTopicsSection() {
       </div>
     `;
   } else {
-    // HIỂN THỊ LƯỚI 2 CỘT THƯỜNG (6 MỤC CHẴN + TỰ GIÃN Ô CUỐI NẾU LẺ)
     const isExpanded = expandedTopicIds.has(activeTopic.id) || Boolean(queryNorm);
     const hasMoreToShow = !isExpanded && filteredItems.length > TOPIC_COLLAPSE_LIMIT;
     const visibleItems = isExpanded
@@ -863,7 +984,6 @@ function renderTopicsSection() {
     }
   }
 
-  // Dropdown chọn nhóm nếu mục hiện tại có các nhóm con
   const groupSelectHtml =
     groupList.length > 0
       ? `
@@ -926,7 +1046,6 @@ function renderTopicsSection() {
   `;
   lucide.createIcons();
 
-  // Giữ focus trong ô tìm kiếm nếu người dùng đang gõ
   if (topicSearchQuery) {
     const searchEl = document.getElementById("topic-quick-search");
     if (searchEl) {
@@ -961,12 +1080,15 @@ async function addTopicSubGroup(topicId) {
   const topic = appData.topics.find((t) => t.id === topicId);
   if (!topic) return;
 
-  const groupName = prompt(
-    `Nhập tên nhóm nhỏ trong "${topic.name}" (VD: 🧋 Đồ uống, 🍿 Đồ ăn vặt, 🍚 Món chính):`
-  );
-  if (!groupName || !groupName.trim()) return;
+  const dialogRes = await openCustomDialog({
+    title: `Tạo nhóm nhỏ trong "${topic.name}"`,
+    desc: "Bạn có thể chuyển sang tab/cửa sổ khác để copy và dán tên nhóm thoải mái mà hộp thoại không bị đóng.",
+    placeholder: "VD: 🧋 Đồ uống, 🍿 Đồ ăn vặt, 🍚 Món chính..."
+  });
 
-  const clean = groupName.trim();
+  if (!dialogRes || !dialogRes.text || !dialogRes.text.trim()) return;
+
+  const clean = dialogRes.text.trim();
   topic.groups = Array.isArray(topic.groups) ? topic.groups : [];
   if (!topic.groups.includes(clean)) {
     topic.groups.push(clean);
@@ -1054,27 +1176,21 @@ async function editTopicItem(topicId, index) {
   if (!topic || !topic.items[index]) return;
 
   const current = normalizeTopicItem(topic.items[index]);
-  const updatedText = prompt("Chỉnh sửa nội dung ghi chú:", current.text);
-  if (updatedText === null) return;
-  const trimmedText = updatedText.trim();
+  const groupList = Array.isArray(topic.groups) ? topic.groups : [];
+
+  const dialogRes = await openCustomDialog({
+    title: "Chỉnh sửa ghi chú",
+    desc: groupList.length > 0 ? "Sửa nội dung hoặc chọn lại nhóm phân loại bên dưới:" : "",
+    defaultValue: current.text,
+    groups: groupList,
+    selectedGroup: current.group
+  });
+
+  if (!dialogRes) return;
+  const trimmedText = dialogRes.text.trim();
   if (!trimmedText) return;
 
-  const groupList = Array.isArray(topic.groups) ? topic.groups : [];
-  let chosenGroup = current.group;
-
-  if (groupList.length > 0) {
-    const groupPrompt = prompt(
-      `Nhập tên nhóm cho mục này (Các nhóm hiện có: ${groupList.join(", ")} — để trống nếu thuộc nhóm Chung):`,
-      current.group
-    );
-    if (groupPrompt !== null) {
-      chosenGroup = groupPrompt.trim();
-      if (chosenGroup && !topic.groups.includes(chosenGroup)) {
-        topic.groups.push(chosenGroup);
-      }
-    }
-  }
-
+  const chosenGroup = dialogRes.group || "";
   topic.items[index] = chosenGroup ? { text: trimmedText, group: chosenGroup } : trimmedText;
   await saveAppData();
 }
@@ -1504,9 +1620,16 @@ async function setMemoryReaction(memId, emoji) {
 async function replyToMemory(memId) {
   const mem = appData.memories.find((m) => m.id === memId);
   if (!mem) return;
-  const text = prompt("Em muốn nhắn lại điều gì về kỷ niệm này cho anh biết không?", mem.gfReply || "");
-  if (text === null) return;
-  mem.gfReply = text.trim();
+
+  const dialogRes = await openCustomDialog({
+    title: "Nhắn lại cho anh 💌",
+    desc: "Em muốn nhắn lại điều gì về kỷ niệm này cho anh biết không?",
+    defaultValue: mem.gfReply || "",
+    placeholder: "Viết lời nhắn của em..."
+  });
+
+  if (!dialogRes) return;
+  mem.gfReply = dialogRes.text.trim();
   await saveAppData();
 }
 
