@@ -30,7 +30,7 @@ function parseDateVN(dateStr) {
     return isNaN(d.getTime()) ? null : d;
   }
 
-  // Định dạng viết liền ddmmyyyy (VD: 01012025)
+  // Định dạng viết liền ddmmyyyy (VD: 15082026)
   const compactMatch = clean.match(/^(\d{2})(\d{2})(\d{4})$/);
   if (compactMatch) {
     const day = parseInt(compactMatch[1], 10);
@@ -208,6 +208,7 @@ let selectedCouponIcon = "🧋";
 function initApp() {
   lucide.createIcons();
   createFloatingHearts();
+  setupPasscodeSlots();
   renderStickerPicker();
   renderTopicIconPicker();
   renderCouponIconPicker();
@@ -300,16 +301,86 @@ async function saveAppData() {
 }
 
 // =========================================================================
-// PHONG BÌ NIÊM PHONG & PHÂN QUYỀN (GATE SCREEN)
+// PHONG BÌ NIÊM PHONG & 8 Ô NHẬP SỐ (GATE SCREEN)
 // =========================================================================
+function setupPasscodeSlots() {
+  const slots = Array.from(document.querySelectorAll(".passcode-digit"));
+  if (slots.length === 0) return;
+
+  slots.forEach((slot, idx) => {
+    slot.addEventListener("input", () => {
+      const clean = slot.value.replace(/[^a-zA-Z0-9]/g, "");
+      slot.value = clean.slice(-1);
+
+      if (slot.value && idx < slots.length - 1) {
+        slots[idx + 1].focus();
+      }
+
+      const currentCode = getPasscodeValue();
+      const adminPass = String(appData.profile.adminPassword || "1234").trim();
+      if (currentCode === adminPass || currentCode.length === slots.length) {
+        unlockGate();
+      }
+    });
+
+    slot.addEventListener("keydown", (e) => {
+      if (e.key === "Backspace" && !slot.value && idx > 0) {
+        slots[idx - 1].value = "";
+        slots[idx - 1].focus();
+      } else if (e.key === "ArrowLeft" && idx > 0) {
+        slots[idx - 1].focus();
+      } else if (e.key === "ArrowRight" && idx < slots.length - 1) {
+        slots[idx + 1].focus();
+      } else if (e.key === "Enter") {
+        unlockGate();
+      }
+    });
+
+    slot.addEventListener("paste", (e) => {
+      e.preventDefault();
+      const pasted = (e.clipboardData || window.clipboardData)
+        .getData("text")
+        .replace(/[^a-zA-Z0-9]/g, "")
+        .slice(0, slots.length);
+      if (!pasted) return;
+
+      slots.forEach((s, i) => {
+        s.value = pasted[i] || "";
+      });
+
+      const nextFocus = Math.min(pasted.length, slots.length - 1);
+      slots[nextFocus].focus();
+
+      if (pasted.length === slots.length || pasted === String(appData.profile.adminPassword || "1234").trim()) {
+        unlockGate();
+      }
+    });
+  });
+}
+
+function getPasscodeValue() {
+  return Array.from(document.querySelectorAll(".passcode-digit"))
+    .map((s) => s.value.trim())
+    .join("");
+}
+
+function clearPasscodeSlots() {
+  const slots = document.querySelectorAll(".passcode-digit");
+  slots.forEach((s) => {
+    s.value = "";
+    s.classList.remove("border-rose-400");
+  });
+  if (slots[0]) slots[0].focus();
+}
+
 function isEditingAllowed() {
   return userRole === "admin" && !isAdminPreviewingGf;
 }
 
 function unlockGate() {
-  const inputEl = document.getElementById("gate-password-input");
+  const slots = document.querySelectorAll(".passcode-digit");
   const errorEl = document.getElementById("gate-error-msg");
-  const rawInput = inputEl.value.trim();
+  const rawInput = getPasscodeValue();
 
   if (!rawInput) return;
 
@@ -341,11 +412,12 @@ function unlockGate() {
 
   // Sai mật khẩu
   errorEl.classList.remove("hidden");
-  inputEl.classList.add("border-rose-400");
+  slots.forEach((s) => s.classList.add("border-rose-400"));
 }
 
 function enterApp() {
   document.getElementById("gate-error-msg").classList.add("hidden");
+  document.querySelectorAll(".passcode-digit").forEach((s) => s.classList.remove("border-rose-400"));
   document.getElementById("gate-screen").classList.add("hidden");
   document.getElementById("main-app-wrapper").classList.remove("hidden");
 
@@ -357,10 +429,10 @@ function enterApp() {
 function lockGate() {
   userRole = null;
   isAdminPreviewingGf = false;
-  document.getElementById("gate-password-input").value = "";
   document.getElementById("gate-error-msg").classList.add("hidden");
   document.getElementById("main-app-wrapper").classList.add("hidden");
   document.getElementById("gate-screen").classList.remove("hidden");
+  clearPasscodeSlots();
   lucide.createIcons();
 }
 
@@ -389,7 +461,6 @@ function applyRoleVisibility() {
       previewBtn.className = "px-3.5 py-1.5 rounded-full text-xs font-bold transition-all bg-pink-100 text-pink-700 hover:bg-pink-200 flex items-center gap-1.5";
     }
   } else {
-    // Giao diện dành riêng cho bạn gái: Ẩn hoàn toàn thanh Cloud & nút Của Anh
     adminNav.classList.add("hidden");
     adminControls.forEach((el) => el.classList.add("hidden"));
   }
@@ -1342,12 +1413,12 @@ async function saveProfile() {
   const rawEvent = document.getElementById("input-event-date").value.trim();
 
   if (rawStart && !parseDateVN(rawStart)) {
-    alert("Ngày bắt đầu yêu nhau chưa đúng định dạng dd/mm/yyyy (VD: 01/01/2025)");
+    alert("Ngày bắt đầu yêu nhau chưa hợp lệ (VD: 15082026 hoặc 15/08/2026)");
     return;
   }
 
   if (rawEvent && !parseDateVN(rawEvent)) {
-    alert("Ngày sự kiện đặc biệt chưa đúng định dạng dd/mm/yyyy (VD: 25/12/2026)");
+    alert("Ngày sự kiện đặc biệt chưa hợp lệ (VD: 25/12/2026)");
     return;
   }
 
