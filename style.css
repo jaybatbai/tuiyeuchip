@@ -1,161 +1,193 @@
-:root {
-  --bg-cream: #fff9fb;
-  --pink-soft: #ffe4ec;
-  --pink-accent: #ff6b9d;
-  --pink-deep: #e0487b;
-  --text-main: #4a3b42;
-  --text-muted: #8c7580;
-}
-
+/* =========================================================================
+   CẤU HÌNH CHUNG & FONT CHỮ
+   ========================================================================= */
 body {
-  font-family: 'Quicksand', sans-serif;
-  background-color: var(--bg-cream);
-  background-image: 
-    radial-gradient(#ffc2d6 1px, transparent 1px),
-    radial-gradient(#ffe0ea 1px, #fff9fb 1px);
-  background-size: 32px 32px;
-  background-position: 0 0, 16px 16px;
-  color: var(--text-main);
+  font-family: "Quicksand", sans-serif;
+  background-color: #fff6fa;
+  background-image: radial-gradient(#fbcfe8 1.35px, transparent 1.35px);
+  background-size: 22px 22px;
+  color: #374151;
   overflow-x: hidden;
 }
 
 .font-handwriting {
-  font-family: 'Dancing Script', cursive;
+  font-family: "Dancing Script", cursive;
 }
 
 .font-note {
-  font-family: 'Patrick Hand', cursive;
+  font-family: "Patrick Hand", cursive;
 }
 
-/* Floating Hearts Background */
-.floating-heart {
+/* =========================================================================
+   HIỆU ỨNG TRÁI TIM BAY & ANIMATION
+   ========================================================================= */
+#hearts-container {
   position: fixed;
-  bottom: -30px;
-  color: rgba(255, 107, 157, 0.25);
+  inset: 0;
   pointer-events: none;
+  overflow: hidden;
   z-index: 0;
-  animation: floatUp linear infinite;
 }
 
-@keyframes floatUp {
+.floating-heart {
+  position: absolute;
+  bottom: -40px;
+  user-select: none;
+  pointer-events: none;
+  animation: floatHeartUp linear forwards;
+}
+
+@keyframes floatHeartUp {
   0% {
-    transform: translateY(0) rotate(0deg) scale(0.8);
+    transform: translateY(0) scale(0.85) rotate(0deg);
     opacity: 0;
   }
   15% {
-    opacity: 0.7;
+    opacity: 0.75;
   }
   85% {
-    opacity: 0.5;
+    opacity: 0.65;
   }
   100% {
-    transform: translateY(-110vh) rotate(360deg) scale(1.2);
+    transform: translateY(-108vh) scale(1.15) rotate(18deg);
     opacity: 0;
-  }
-}
-
-/* Polaroid Card Styling */
-.polaroid-card {
-  background: #ffffff;
-  padding: 16px 16px 24px 16px;
-  border-radius: 16px;
-  box-shadow: 0 12px 30px rgba(255, 107, 157, 0.14), 0 4px 10px rgba(0, 0, 0, 0.04);
-  border: 2px solid #fff0f5;
-  position: relative;
-  transition: transform 0.35s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.35s ease;
-}
-
-.polaroid-card:hover {
-  transform: translateY(-4px) rotate(0deg) !important;
-  box-shadow: 0 18px 38px rgba(255, 107, 157, 0.22);
-}
-
-/* Washi Tape */
-.washi-tape {
-  position: absolute;
-  top: -12px;
-  left: 50%;
-  transform: translateX(-50%) rotate(-2deg);
-  width: 110px;
-  height: 26px;
-  background: rgba(255, 182, 206, 0.75);
-  backdrop-filter: blur(2px);
-  border-left: 2px dashed rgba(255, 255, 255, 0.7);
-  border-right: 2px dashed rgba(255, 255, 255, 0.7);
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.06);
-  z-index: 10;
-}
-
-/* Mystery Deck Card */
-.mystery-card {
-  background: linear-gradient(135deg, #ff7eb3 0%, #ff758c 100%);
-  border-radius: 24px;
-  box-shadow: 0 15px 35px rgba(255, 117, 140, 0.32);
-  transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
-  cursor: pointer;
-}
-
-.mystery-card:hover {
-  transform: translateY(-6px) scale(1.02);
-  box-shadow: 0 20px 42px rgba(255, 117, 140, 0.42);
-}
-
-.mystery-card:active {
-  transform: scale(0.97);
-}
-
-/* Card Reveal Animation */
-@keyframes popIn {
-  0% {
-    opacity: 0;
-    transform: scale(0.85) translateY(20px) rotate(-3deg);
-  }
-  70% {
-    transform: scale(1.02) translateY(-4px) rotate(1deg);
-  }
-  100% {
-    opacity: 1;
-    transform: scale(1) translateY(0) rotate(0deg);
   }
 }
 
 .animate-pop-in {
-  animation: popIn 0.55s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+  animation: popIn 0.35s cubic-bezier(0.22, 1, 0.36, 1) forwards;
 }
 
-/* Envelope Styling */
+@keyframes popIn {
+  0% {
+    opacity: 0;
+    transform: scale(0.95) translateY(8px);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
+/* =========================================================================
+   BỨC THƯ BÍ MẬT (ENVELOPE BOX)
+   ========================================================================= */
 .envelope-box {
-  background: linear-gradient(145deg, #fff0f5, #ffe3ec);
-  border: 2px dashed #ff9ebb;
-  border-radius: 20px;
-  transition: all 0.3s ease;
+  background: linear-gradient(135deg, #fff0f6 0%, #ffe4ef 55%, #fdf2f8 100%);
+  border: 2px dashed #f9a8d4;
+  border-radius: 28px;
+  box-shadow: 0 10px 25px -5px rgba(244, 114, 182, 0.14);
+  transition: transform 0.25s ease, box-shadow 0.25s ease;
 }
 
 .envelope-box:hover {
-  border-color: #ff6b9d;
-  box-shadow: 0 10px 25px rgba(255, 107, 157, 0.18);
+  box-shadow: 0 14px 30px -5px rgba(244, 114, 182, 0.2);
 }
 
-/* Hide scrollbar for category pills */
+/* =========================================================================
+   HỘP KỶ NIỆM BÍ MẬT & THẺ POLAROID
+   ========================================================================= */
+.mystery-card {
+  background: linear-gradient(135deg, #ec4899 0%, #f43f5e 55%, #fb7185 100%);
+  border-radius: 28px;
+  cursor: pointer;
+  box-shadow: 0 14px 30px -6px rgba(244, 63, 94, 0.35);
+  transition: transform 0.25s cubic-bezier(0.22, 1, 0.36, 1), box-shadow 0.25s ease;
+}
+
+.mystery-card:hover {
+  transform: translateY(-3px) scale(1.01);
+  box-shadow: 0 18px 36px -6px rgba(244, 63, 94, 0.42);
+}
+
+.mystery-card:active {
+  transform: scale(0.99);
+}
+
+.polaroid-card {
+  position: relative;
+  background: #ffffff;
+  border: 2px solid #fce7f3;
+  border-radius: 24px;
+  padding: 1.4rem 1.5rem;
+  box-shadow: 0 12px 28px -6px rgba(244, 114, 182, 0.18);
+}
+
+.washi-tape {
+  position: absolute;
+  top: -12px;
+  left: 50%;
+  transform: translateX(-50%) rotate(-1.5deg);
+  width: 112px;
+  height: 24px;
+  background: rgba(244, 114, 182, 0.36);
+  border-left: 2px dashed rgba(255, 255, 255, 0.65);
+  border-right: 2px dashed rgba(255, 255, 255, 0.65);
+  border-radius: 3px;
+  box-shadow: 0 2px 5px rgba(236, 72, 153, 0.12);
+  pointer-events: none;
+}
+
+/* =========================================================================
+   POKÉMON DISPLAY BINDER (3x3 SLEEVES & HOLOGRAPHIC SHINE)
+   ========================================================================= */
+.pokemon-binder-cover {
+  background: linear-gradient(145deg, #fff5f8 0%, #fff0f6 55%, #fdf4ff 100%);
+  box-shadow: 0 10px 25px -5px rgba(244, 114, 182, 0.16), inset 0 1px 0 rgba(255, 255, 255, 0.9);
+}
+
+.pokemon-sleeve-card {
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.7), 0 2px 6px rgba(244, 114, 182, 0.12);
+}
+
+.pokemon-holo-shine::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    115deg,
+    transparent 20%,
+    rgba(255, 255, 255, 0.5) 44%,
+    rgba(253, 224, 71, 0.24) 50%,
+    rgba(244, 114, 182, 0.24) 56%,
+    transparent 80%
+  );
+  transform: translateX(-125%);
+  transition: transform 0.7s ease;
+  pointer-events: none;
+}
+
+.pokemon-holo-shine:hover::after {
+  transform: translateX(125%);
+}
+
+/* =========================================================================
+   THANH CUỘN TÙY CHỈNH
+   ========================================================================= */
 .no-scrollbar::-webkit-scrollbar {
   display: none;
 }
+
 .no-scrollbar {
   -ms-overflow-style: none;
   scrollbar-width: none;
 }
 
-/* Custom Scrollbar */
 ::-webkit-scrollbar {
-  width: 8px;
+  width: 6px;
+  height: 6px;
 }
+
 ::-webkit-scrollbar-track {
-  background: #fff5f8;
+  background: #fff1f2;
+  border-radius: 9999px;
 }
+
 ::-webkit-scrollbar-thumb {
-  background: #ffb3cc;
-  border-radius: 99px;
+  background: #f9a8d4;
+  border-radius: 9999px;
 }
+
 ::-webkit-scrollbar-thumb:hover {
-  background: #ff85ad;
+  background: #f472b6;
 }
