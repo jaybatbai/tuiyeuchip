@@ -138,7 +138,7 @@ function renderRevealedCard(mem, animate = true) {
   const slot = document.getElementById("revealed-card-slot");
   stage.classList.remove("hidden");
 
-  const formattedDate = formatDateVN(mem.date);
+  const formattedDate = mem.date ? (formatDateVN(mem.date) || mem.date) : "";
 
   const imageHtml = mem.image
     ? `<div class="mb-4 rounded-xl overflow-hidden bg-pink-50 border border-pink-100">
@@ -146,7 +146,7 @@ function renderRevealedCard(mem, animate = true) {
        </div>`
     : "";
 
-  const reactions = ["🥰", "😂", "🥹", "💖"];
+  const reactions = ["🥰", "😂", "😭", "💖"];
   const reactionButtonsHtml = reactions
     .map((emo) => {
       const isSelected = mem.gfReaction === emo;
@@ -179,7 +179,7 @@ function renderRevealedCard(mem, animate = true) {
         <span class="px-3 py-1 rounded-full bg-pink-50 text-pink-600 text-xs font-bold border border-pink-100">
           ${escapeHtml(mem.tag || "Kỷ niệm")}
         </span>
-        <span class="text-xs font-semibold text-pink-400">${formattedDate}</span>
+        ${formattedDate ? `<span class="text-xs font-semibold text-pink-400">${escapeHtml(formattedDate)}</span>` : ""}
       </div>
 
       ${imageHtml}
@@ -328,7 +328,7 @@ function openMemoryModal(id = null) {
     if (!mem) return;
     document.getElementById("memory-modal-title").innerHTML = `<i data-lucide="pencil" class="w-5 h-5"></i> Chỉnh Sửa Thẻ Bí Mật`;
     document.getElementById("mem-title").value = mem.title || "";
-    document.getElementById("mem-date").value = formatDateVN(mem.date) || "";
+    document.getElementById("mem-date").value = mem.date ? (formatDateVN(mem.date) || mem.date) : "";
     document.getElementById("mem-tag").value = mem.tag || "Kỷ niệm của tụi mình";
     document.getElementById("mem-note").value = mem.note || "";
     selectSticker(mem.sticker || "💖");
@@ -336,7 +336,7 @@ function openMemoryModal(id = null) {
   } else {
     document.getElementById("memory-modal-title").innerHTML = `<i data-lucide="camera" class="w-5 h-5"></i> Thêm Thẻ Bí Mật`;
     document.getElementById("mem-title").value = "";
-    document.getElementById("mem-date").value = getTodayVN();
+    document.getElementById("mem-date").value = "";
     document.getElementById("mem-tag").value = "Thói quen đáng yêu";
     document.getElementById("mem-note").value = "";
     selectSticker("💖");
@@ -408,7 +408,7 @@ async function saveMemory() {
     return;
   }
 
-  const formattedDate = rawDate ? formatDateVN(rawDate) : getTodayVN();
+  const formattedDate = rawDate ? (formatDateVN(rawDate) || rawDate) : "";
 
   if (editId) {
     const idx = appData.memories.findIndex((m) => m.id === editId);
