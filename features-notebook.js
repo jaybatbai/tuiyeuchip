@@ -1,13 +1,13 @@
 // =========================================================================
 // CÁC MỤC CHỦ ĐỀ VỀ EM (TOPIC NOTEBOOK) & PHIẾU ĐỔI QUÀ (LOVE COUPONS)
 // =========================================================================
-const TOPIC_ICONS = ["🏷️", "🍜", "🧋", "🎮", "🎨", "🎵", "💤", "🚫", "🌸", "🧸", "✨", "💬"];
-const COUPON_ICONS = ["🧋", "🎟️", "💆‍♀️", "🛵", "🍦", "🎬", "🧸", "💐", "🫂", "👑"];
+const TOPIC_ICONS = ["🏷️", "🍜", "🍹", "🎮", "🎨", "🎵", "💤", "🚫", "🌸", "🧸", "✨", "💬"];
+const COUPON_ICONS = ["🍹", "🎟️", "💆‍♀️", "🛵", "🍦", "🎬", "🧸", "💐", "🤗", "👑"];
 
 let activeTopicId = "topic_nicknames";
 let activeSubGroupFilter = "ALL";
 let selectedTopicIcon = "🏷️";
-let selectedCouponIcon = "🧋";
+let selectedCouponIcon = "🍹";
 let expandedTopicIds = new Set();
 let topicSearchQuery = "";
 let selectedNewItemGroup = "";
@@ -617,7 +617,7 @@ async function addTopicSubGroup(topicId) {
   const dialogRes = await openCustomDialog({
     title: `Tạo nhóm nhỏ trong "${topic.name}"`,
     desc: "Bạn có thể chuyển sang tab/cửa sổ khác để copy và dán tên nhóm thoải mái mà hộp thoại không bị đóng.",
-    placeholder: "VD: 🧋 Đồ uống, 🍿 Đồ ăn vặt, 🍚 Món chính..."
+    placeholder: "VD: 🍹 Đồ uống, 🍿 Đồ ăn vặt, 🍚 Món chính..."
   });
 
   if (!dialogRes || !dialogRes.text || !dialogRes.text.trim()) return;
@@ -1023,12 +1023,12 @@ function openCouponModal(couponId = null) {
     document.getElementById("coupon-modal-title").innerHTML = `<i data-lucide="pencil" class="w-5 h-5"></i> Chỉnh Sửa Phiếu Đổi Quà`;
     document.getElementById("input-coupon-title").value = cp.title || "";
     document.getElementById("input-coupon-desc").value = cp.desc || "";
-    selectCouponIcon(cp.icon || "🧋");
+    selectCouponIcon(cp.icon || "🍹");
   } else {
     document.getElementById("coupon-modal-title").innerHTML = `<i data-lucide="ticket" class="w-5 h-5"></i> Tạo Phiếu Đổi Quà Mới`;
     document.getElementById("input-coupon-title").value = "";
     document.getElementById("input-coupon-desc").value = "";
-    selectCouponIcon("🧋");
+    selectCouponIcon("🍹");
   }
 
   document.getElementById("modal-coupon").classList.remove("hidden");
