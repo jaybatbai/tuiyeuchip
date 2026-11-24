@@ -16,6 +16,14 @@ let isRenderingTopicPanel = false;
 let topicNewItemDraft = "";
 const TOPIC_COLLAPSE_LIMIT = 6;
 
+function safeDecode(str) {
+  try {
+    return decodeURIComponent(str);
+  } catch (e) {
+    return str;
+  }
+}
+
 function normalizeTopicItem(item) {
   if (typeof item === "string") {
     return { text: item, group: "" };
@@ -24,6 +32,16 @@ function normalizeTopicItem(item) {
     text: String(item.text || ""),
     group: String(item.group || "")
   };
+}
+
+function getTopicGroupList(topic) {
+  const rawItems = topic.items || [];
+  const groupSet = new Set(Array.isArray(topic.groups) ? topic.groups : []);
+  rawItems.forEach((it) => {
+    const norm = normalizeTopicItem(it);
+    if (norm.group) groupSet.add(norm.group);
+  });
+  return Array.from(groupSet);
 }
 
 function renderSingleTopicCardHtml(topicId, entry, idx, totalInTopic, isLastOddCard, isEdit, groupList = []) {
@@ -148,11 +166,7 @@ function renderTopicsSection() {
     originalIdx
   }));
 
-  const groupSet = new Set(Array.isArray(activeTopic.groups) ? activeTopic.groups : []);
-  normalizedItems.forEach((it) => {
-    if (it.group) groupSet.add(it.group);
-  });
-  const groupList = Array.from(groupSet);
+  const groupList = getTopicGroupList(activeTopic);
 
   if (
     activeSubGroupFilter !== "ALL" &&
@@ -235,25 +249,62 @@ function renderTopicsSection() {
           Tất cả (${filteredItems.length})
         </button>
         ${groupList
-          .map((g) => {
+          .map((g, gIdx) => {
             const gCount = filteredItems.filter((it) => it.group === g).length;
             const isSelected = activeSubGroupFilter === g;
+            const encodedG = encodeURIComponent(g);
+            const canMoveLeft = gIdx > 0;
+            const canMoveRight = gIdx < groupList.length - 1;
+
             return `
               <span class="inline-flex items-center rounded-full border transition ${
                 isSelected
                   ? "bg-amber-500 text-white border-amber-500 shadow-xs"
                   : "bg-white text-amber-800 border-amber-200 hover:bg-amber-50"
               }">
+                ${
+                  isEdit
+                    ? `<button
+                        onclick="moveTopicSubGroup('${activeTopic.id}', '${encodedG}', -1)"
+                        ${!canMoveLeft ? "disabled" : ""}
+                        class="pl-2 pr-0.5 py-1 text-[10px] transition ${
+                          canMoveLeft ? "opacity-75 hover:opacity-100" : "opacity-25 cursor-not-allowed"
+                        }"
+                        title="Đưa danh mục sang trái"
+                      >◀</button>`
+                    : ""
+                }
                 <button
-                  onclick="selectSubGroupFilter('${escapeHtml(g).replace(/'/g, "\\'")}')"
-                  class="px-2.5 py-1 text-[11px] font-bold flex items-center gap-1"
+                  onclick="selectSubGroupFilter('${encodedG}')"
+                  class="${isEdit ? "px-1.5" : "px-2.5"} py-1 text-[11px] font-bold flex items-center gap-1"
                 >
                   <span>${escapeHtml(g)}</span>
                   <span class="opacity-80">(${gCount})</span>
                 </button>
                 ${
                   isEdit
-                    ? `<button onclick="removeTopicSubGroup('${activeTopic.id}', '${escapeHtml(g).replace(/'/g, "\\'")}')" class="pr-2 pl-0.5 text-[10px] opacity-70 hover:opacity-100" title="Gỡ nhóm này">✕</button>`
+                    ? `
+                      <button
+                        onclick="moveTopicSubGroup('${activeTopic.id}', '${encodedG}', 1)"
+                        ${!canMoveRight ? "disabled" : ""}
+                        class="px-0.5 py-1 text-[10px] transition ${
+                          canMoveRight ? "opacity-75 hover:opacity-100" : "opacity-25 cursor-not-allowed"
+                        }"
+                        title="Đưa danh mục sang phải"
+                      >▶</button>
+                      <button
+                        onclick="editTopicSubGroup('${activeTopic.id}', '${encodedG}')"
+                        class="px-1 py-1 opacity-75 hover:opacity-100 transition"
+                        title="Đổi tên danh mục nhỏ"
+                      >
+                        <i data-lucide="pencil" class="w-2.5 h-2.5"></i>
+                      </button>
+                      <button
+                        onclick="removeTopicSubGroup('${activeTopic.id}', '${encodedG}')"
+                        class="pr-2 pl-0.5 py-1 text-[10px] opacity-75 hover:opacity-100 transition"
+                        title="Gỡ danh mục này"
+                      >✕</button>
+                    `
                     : ""
                 }
               </span>
@@ -315,19 +366,19 @@ function renderTopicsSection() {
     if (activeSubGroupFilter === "ALL") {
       groupList.forEach((g) => {
         const bucketItems = filteredItems.filter((it) => it.group === g);
-        orderedBuckets.push({ title: g, items: bucketItems });
+        orderedBuckets.push({ title: g, items: bucketItems, isRealGroup: true });
       });
 
       const ungroupedItems = filteredItems.filter((it) => !it.group || !groupList.includes(it.group));
       if (ungroupedItems.length > 0) {
-        orderedBuckets.push({ title: "Chung", items: ungroupedItems });
+        orderedBuckets.push({ title: "Chung", items: ungroupedItems, isRealGroup: false });
       }
     } else if (activeSubGroupFilter === "__UNGROUPED__") {
       const ungroupedItems = filteredItems.filter((it) => !it.group || !groupList.includes(it.group));
-      orderedBuckets.push({ title: "Chung", items: ungroupedItems });
+      orderedBuckets.push({ title: "Chung", items: ungroupedItems, isRealGroup: false });
     } else {
       const bucketItems = filteredItems.filter((it) => it.group === activeSubGroupFilter);
-      orderedBuckets.push({ title: activeSubGroupFilter, items: bucketItems });
+      orderedBuckets.push({ title: activeSubGroupFilter, items: bucketItems, isRealGroup: true });
     }
 
     contentBodyHtml = `
@@ -357,12 +408,24 @@ function renderTopicsSection() {
                     Chưa có ghi chú nào trong nhóm này...
                   </p>`;
 
+            const editBucketBtnHtml =
+              isEdit && bucket.isRealGroup
+                ? `<button
+                    onclick="editTopicSubGroup('${activeTopic.id}', '${encodeURIComponent(bucket.title)}')"
+                    class="p-1 rounded-full text-pink-500 hover:bg-pink-100 transition"
+                    title="Đổi tên danh mục này"
+                  >
+                    <i data-lucide="pencil" class="w-3 h-3"></i>
+                  </button>`
+                : "";
+
             return `
               <div>
-                <div class="flex items-center gap-2 mb-2">
+                <div class="flex items-center gap-1.5 mb-2">
                   <span class="text-xs font-bold text-pink-600 bg-pink-100/70 px-2.5 py-0.5 rounded-full">
                     ${escapeHtml(bucket.title)} (${bucket.items.length})
                   </span>
+                  ${editBucketBtnHtml}
                   <div class="h-px flex-1 bg-pink-100"></div>
                 </div>
                 ${innerHtml}
@@ -512,7 +575,8 @@ function selectTopicTab(topicId) {
   renderTopicsSection();
 }
 
-function selectSubGroupFilter(groupFilter) {
+function selectSubGroupFilter(encodedFilter) {
+  const groupFilter = safeDecode(encodedFilter);
   activeSubGroupFilter = groupFilter;
   if (groupFilter !== "ALL" && groupFilter !== "__UNGROUPED__") {
     selectedNewItemGroup = groupFilter;
@@ -559,7 +623,7 @@ async function addTopicSubGroup(topicId) {
   if (!dialogRes || !dialogRes.text || !dialogRes.text.trim()) return;
 
   const clean = dialogRes.text.trim();
-  topic.groups = Array.isArray(topic.groups) ? topic.groups : [];
+  topic.groups = getTopicGroupList(topic);
   if (!topic.groups.includes(clean)) {
     topic.groups.push(clean);
   }
@@ -567,15 +631,85 @@ async function addTopicSubGroup(topicId) {
   await saveAppData();
 }
 
-async function removeTopicSubGroup(topicId, groupName) {
+async function editTopicSubGroup(topicId, encodedGroupName) {
   const topic = appData.topics.find((t) => t.id === topicId);
   if (!topic) return;
 
+  const oldGroupName = safeDecode(encodedGroupName);
+  const dialogRes = await openCustomDialog({
+    title: "Đổi tên danh mục nhỏ",
+    desc: "Tên mới sẽ tự động cập nhật cho toàn bộ các món/ghi chú đang nằm trong danh mục này.",
+    defaultValue: oldGroupName,
+    placeholder: "Nhập tên danh mục mới..."
+  });
+
+  if (!dialogRes || !dialogRes.text) return;
+  const newGroupName = dialogRes.text.trim();
+  if (!newGroupName || newGroupName === oldGroupName) return;
+
+  const currentGroups = getTopicGroupList(topic);
+  const alreadyExists = currentGroups.includes(newGroupName);
+
+  if (alreadyExists) {
+    if (
+      !confirm(
+        `Danh mục "${newGroupName}" đã tồn tại. Bạn có muốn gộp toàn bộ món từ "${oldGroupName}" sang "${newGroupName}" không?`
+      )
+    ) {
+      return;
+    }
+    topic.groups = currentGroups.filter((g) => g !== oldGroupName);
+  } else {
+    topic.groups = currentGroups.map((g) => (g === oldGroupName ? newGroupName : g));
+  }
+
+  topic.items = (topic.items || []).map((it) => {
+    const norm = normalizeTopicItem(it);
+    if (norm.group === oldGroupName) {
+      return { text: norm.text, group: newGroupName };
+    }
+    return it;
+  });
+
+  if (activeSubGroupFilter === oldGroupName) {
+    activeSubGroupFilter = newGroupName;
+  }
+  if (selectedNewItemGroup === oldGroupName) {
+    selectedNewItemGroup = newGroupName;
+  }
+
+  await saveAppData();
+}
+
+async function moveTopicSubGroup(topicId, encodedGroupName, direction) {
+  const topic = appData.topics.find((t) => t.id === topicId);
+  if (!topic) return;
+
+  const groupName = safeDecode(encodedGroupName);
+  const groups = getTopicGroupList(topic);
+  const idx = groups.indexOf(groupName);
+  const targetIdx = idx + direction;
+
+  if (idx === -1 || targetIdx < 0 || targetIdx >= groups.length) return;
+
+  const temp = groups[idx];
+  groups[idx] = groups[targetIdx];
+  groups[targetIdx] = temp;
+  topic.groups = groups;
+
+  await saveAppData();
+}
+
+async function removeTopicSubGroup(topicId, encodedGroupName) {
+  const topic = appData.topics.find((t) => t.id === topicId);
+  if (!topic) return;
+
+  const groupName = safeDecode(encodedGroupName);
   if (!confirm(`Gỡ nhóm "${groupName}"? (Các món bên trong vẫn giữ nguyên, chỉ chuyển về nhóm Chung)`)) {
     return;
   }
 
-  topic.groups = (topic.groups || []).filter((g) => g !== groupName);
+  topic.groups = getTopicGroupList(topic).filter((g) => g !== groupName);
   topic.items = (topic.items || []).map((it) => {
     const norm = normalizeTopicItem(it);
     if (norm.group === groupName) {
@@ -654,7 +788,7 @@ async function editTopicItem(topicId, index) {
   if (!topic || !topic.items[index]) return;
 
   const current = normalizeTopicItem(topic.items[index]);
-  const groupList = Array.isArray(topic.groups) ? topic.groups : [];
+  const groupList = getTopicGroupList(topic);
 
   const dialogRes = await openCustomDialog({
     title: "Chỉnh sửa ghi chú",
