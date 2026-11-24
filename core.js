@@ -278,7 +278,7 @@ const DEFAULT_PLAYLIST = [
   {
     id: "song_default_1",
     title: "Giai điệu nhẹ nhàng cho góc nhỏ của tụi mình",
-    artist: "Lo-fi Chill",
+    artist: "",
     type: "youtube",
     youtubeId: "jfKfPfyJRdk",
     url: "https://www.youtube.com/watch?v=jfKfPfyJRdk"
@@ -293,7 +293,9 @@ const DEFAULT_DATA = {
     startDate: "01/01/2025",
     eventName: "Kỷ niệm đặc biệt ✨",
     eventDate: "01/01/2027",
-    adminPassword: "1234"
+    adminPassword: "1234",
+    musicTitle: "Góc Nhạc Của Tụi Mình",
+    musicSubtitle: "Nhạc của tụi mình 🎵"
   },
   letter: {
     body: "Gửi Chip,\n\nAnh làm góc nhỏ này để mỗi khi em thấy mệt mỏi hay buồn chán, em có thể mở ra và thấy mình được yêu thương nhiều đến nhường nào.\n\nAnh không giỏi thể hiện tình cảm bằng lời nói, mong những thứ nhỏ bé này sẽ giúp em cảm nhận được tình cảm của anh.\n\nCảm ơn em vì đã luôn ở bên cạnh và làm cho những ngày bình thường của anh trở nên đặc biệt hơn bao giờ hết!",
@@ -427,7 +429,6 @@ function loadLocalFallback() {
 
 async function saveAppData() {
   const serialized = JSON.stringify(appData);
-  // Phòng hờ giới hạn 1MB của Firestore document (chủ yếu do ảnh base64)
   if (serialized.length > 950000) {
     alert("Dung lượng dữ liệu (ảnh) đã chạm giới hạn lưu trữ đám mây (1MB). Anh hãy xóa bớt ảnh cũ trên thẻ kỷ niệm trước khi lưu thêm nhé!");
     return false;
@@ -642,7 +643,6 @@ function enterApp() {
   applyRoleVisibility();
   refreshAllUI();
 
-  // Tự động phát bài đầu tiên nếu em mở phong bì (và trình duyệt cho phép từ cú click mở thư)
   if (userRole === "gf" && typeof startMusicOnUnlock === "function") {
     startMusicOnUnlock();
   }
