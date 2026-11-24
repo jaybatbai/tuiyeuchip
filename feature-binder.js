@@ -4,11 +4,11 @@
 let binderCurrentPage = 1;
 let currentZoomCardId = null;
 let binderEditingCardId = null;
-let stagedBinderImages = []; // Danh sách ảnh chờ lưu: [{ tempId, dataUrl, name, sizeLabel }]
+let stagedBinderImages = []; // Danh sách ảnh chờ lưu: [{ tempId, dataUrl, sizeLabel }]
 const binderImageCache = {}; // Cache ảnh trong bộ nhớ: { [cardId]: dataUrl }
 const binderLoadingIds = new Set();
 const BINDER_CARDS_PER_PAGE = 20; // Chuẩn 1 trang binder 4 cột ngang x 5 hàng dọc = 20 ô
-const MAX_FIRESTORE_IMAGE_CHARS = 960000; // Giới hạn an toàn dưới mức 1MB/document của Firestore
+const MAX_FIRESTORE_IMAGE_CHARS = 950000; // Giới hạn an toàn dưới mức 1MB/document của Firestore
 
 function getBinderFirestore() {
   if (typeof db !== "undefined" && db) return db;
@@ -426,6 +426,28 @@ function closePokemonZoomModal() {
 // =========================================================================
 // ĐỌC ẢNH TỪ CLIPBOARD / FILE GIỮ NGUYÊN CHẤT LƯỢNG GỐC 100%
 // =========================================================================
+function setBinderPasteStatus(message, isError = false) {
+  const statusEl = document.getElementById("pokemon-paste-status");
+  if (!statusEl) return;
+  if (!message) {
+    statusEl.classList.add("hidden");
+    statusEl.textContent = "";
+    return;
+  }
+  statusEl.textContent = message;
+  statusEl.className = isError
+    ? "mt-2.5 text-center text-xs font-bold text-rose-600 bg-rose-50 border border-rose-200 rounded-xl py-1.5 px-3"
+    : "mt-2.5 text-center text-xs font-bold text-emerald-700 bg-emerald-50 border border-emerald-200 rounded-xl py-1.5 px-3";
+  statusEl.classList.remove("hidden");
+}
+
+function isImageFileCandidate(file) {
+  if (!file || file.size <= 0) return false;
+  if (file.type && file.type.startsWith("image/")) return true;
+  if (file.name && /\.(png|jpe?g|webp|gif|bmp|avif)$/i.test(file.name)) return true;
+  return false;
+}
+
 function readBlobAsOriginalDataUrl(blob) {
   return new Promise((resolve, reject) => {
     const reader = new FileReader();
@@ -435,26 +457,26 @@ function readBlobAsOriginalDataUrl(blob) {
   });
 }
 
-// Chỉ chuyển đổi định dạng không mất nét nếu 1 tấm ảnh vượt trần 1MB của Firestore
+// Giữ nguyên 100% ảnh gốc; chỉ đổi sang WebP chất lượng 1.0->0.92 nếu file PNG vượt trần 1MB của Firestore
 async function ensureFirestoreSafeOriginalImage(blob) {
   const rawDataUrl = await readBlobAsOriginalDataUrl(blob);
-  if (rawDataUrl.length <= MAX_FIRESTORE_IMAGE_CHARS) {
-    return rawDataUrl; // Giữ nguyên 100% từng byte ảnh gốc
+  if (rawDataUrl && rawDataUrl.length <= MAX_FIRESTORE_IMAGE_CHARS) {
+    return rawDataUrl;
   }
 
   return new Promise((resolve) => {
     const img = new Image();
     img.onload = () => {
       const canvas = document.createElement("canvas");
-      canvas.width = img.naturalWidth;
-      canvas.height = img.naturalHeight;
+      canvas.width = img.naturalWidth || 733;
+      canvas.height = img.naturalHeight || 1024;
       const ctx = canvas.getContext("2d");
       ctx.drawImage(img, 0, 0);
 
       const qualities = [1.0, 0.96, 0.92, 0.88];
       for (const q of qualities) {
         const webpData = canvas.toDataURL("image/webp", q);
-        if (webpData.length <= MAX_FIRESTORE_IMAGE_CHARS) {
+        if (webpData && webpData.length <= MAX_FIRESTORE_IMAGE_CHARS) {
           resolve(webpData);
           return;
         }
@@ -467,34 +489,49 @@ async function ensureFirestoreSafeOriginalImage(blob) {
 }
 
 async function processIncomingImageFiles(fileList) {
-  const files = Array.from(fileList || []).filter((f) => f && f.type && f.type.startsWith("image/"));
+  const files = Array.from(fileList || []).filter(isImageFileCandidate);
   if (files.length === 0) return 0;
 
-  for (const file of files) {
-    const dataUrl = await ensureFirestoreSafeOriginalImage(file);
-    const kb = Math.round((dataUrl.length * 0.75) / 1024);
+  setBinderPasteStatus(`Đang nhận ${files.length} ảnh chất lượng gốc...`, false);
 
-    if (binderEditingCardId) {
-      // Chế độ thay ảnh cho 1 thẻ đang sửa
-      stagedBinderImages = [
-        {
-          tempId: "edit_" + Date.now(),
+  let addedCount = 0;
+  for (const file of files) {
+    try {
+      const dataUrl = await ensureFirestoreSafeOriginalImage(file);
+      if (!dataUrl || !dataUrl.startsWith("data:image/")) continue;
+
+      const kb = Math.round((dataUrl.length * 0.75) / 1024);
+
+      if (binderEditingCardId) {
+        stagedBinderImages = [
+          {
+            tempId: "edit_" + Date.now(),
+            dataUrl,
+            sizeLabel: `${kb} KB • Gốc`
+          }
+        ];
+      } else {
+        stagedBinderImages.push({
+          tempId: `stage_${Date.now()}_${Math.random().toString(36).slice(2, 7)}`,
           dataUrl,
           sizeLabel: `${kb} KB • Gốc`
-        }
-      ];
-    } else {
-      // Chế độ thêm nhiều thẻ liên tiếp
-      stagedBinderImages.push({
-        tempId: `stage_${Date.now()}_${Math.random().toString(36).slice(2, 7)}`,
-        dataUrl,
-        sizeLabel: `${kb} KB • Gốc`
-      });
+        });
+      }
+      addedCount++;
+    } catch (err) {
+      console.error("Lỗi đọc ảnh:", err);
     }
   }
 
   renderStagedBinderImages();
-  return files.length;
+
+  if (addedCount > 0) {
+    setBinderPasteStatus(`Đã nhận ${addedCount} ảnh gốc! Dán tiếp hoặc bấm "Lưu Vào Binder".`, false);
+  } else {
+    setBinderPasteStatus("Không đọc được định dạng ảnh này, anh thử copy lại ảnh nhé!", true);
+  }
+
+  return addedCount;
 }
 
 function renderStagedBinderImages() {
@@ -551,16 +588,139 @@ function renderStagedBinderImages() {
 function removeStagedBinderImage(tempId) {
   stagedBinderImages = stagedBinderImages.filter((item) => item.tempId !== tempId);
   renderStagedBinderImages();
+  setBinderPasteStatus("");
 }
 
 function clearAllStagedBinderImages() {
   stagedBinderImages = [];
   renderStagedBinderImages();
+  setBinderPasteStatus("");
+}
+
+function extractImagesFromDataTransfer(dataTransfer) {
+  if (!dataTransfer) return [];
+
+  const collected = [];
+  const seenKeys = new Set();
+
+  // Lớp 1: Đọc từ dataTransfer.files (bắt được cả file copy từ Windows Explorer / Finder)
+  if (dataTransfer.files && dataTransfer.files.length > 0) {
+    for (let i = 0; i < dataTransfer.files.length; i++) {
+      const f = dataTransfer.files[i];
+      if (isImageFileCandidate(f)) {
+        const key = `${f.name}_${f.size}_${f.type}`;
+        if (!seenKeys.has(key)) {
+          seenKeys.add(key);
+          collected.push(f);
+        }
+      }
+    }
+  }
+
+  // Lớp 2: Đọc từ dataTransfer.items (bắt ảnh copy trực tiếp từ trang web / công cụ chụp màn hình)
+  if (dataTransfer.items && dataTransfer.items.length > 0) {
+    for (let i = 0; i < dataTransfer.items.length; i++) {
+      const item = dataTransfer.items[i];
+      if (item.kind === "file") {
+        const f = item.getAsFile();
+        if (isImageFileCandidate(f)) {
+          const key = `${f.name}_${f.size}_${f.type}`;
+          if (!seenKeys.has(key)) {
+            seenKeys.add(key);
+            collected.push(f);
+          }
+        }
+      }
+    }
+  }
+
+  return collected;
+}
+
+function extractInlineBase64ImageFromHtml(dataTransfer) {
+  if (!dataTransfer || !dataTransfer.getData) return null;
+  try {
+    const html = dataTransfer.getData("text/html") || "";
+    const match = html.match(/src=["'](data:image\/[^"']+)["']/i);
+    if (!match || !match[1]) return null;
+
+    const dataUrl = match[1];
+    const parts = dataUrl.split(",");
+    if (parts.length < 2) return null;
+    const mimeMatch = parts[0].match(/data:(image\/[^;]+)/i);
+    const mime = mimeMatch ? mimeMatch[1] : "image/png";
+    const binaryStr = atob(parts[1]);
+    const len = binaryStr.length;
+    const bytes = new Uint8Array(len);
+    for (let i = 0; i < len; i++) {
+      bytes[i] = binaryStr.charCodeAt(i);
+    }
+    return new Blob([bytes], { type: mime });
+  } catch (e) {
+    return null;
+  }
+}
+
+async function handleBinderPasteEvent(event) {
+  const modal = document.getElementById("modal-pokemon-card");
+  const isModalOpen = modal && !modal.classList.contains("hidden");
+  const binderChapter = document.getElementById("chapter-binder");
+  const isBinderVisible = binderChapter && !binderChapter.classList.contains("hidden");
+
+  // Chỉ can thiệp khi đang mở modal dán thẻ hoặc đang đứng ở trang Binder
+  if (!isModalOpen && !isBinderVisible) return;
+
+  const activeEl = document.activeElement;
+  const isNormalTextField =
+    activeEl &&
+    (activeEl.tagName === "INPUT" || activeEl.tagName === "TEXTAREA") &&
+    activeEl.id !== "pokemon-paste-input";
+  if (isNormalTextField) return;
+
+  const dt = event.clipboardData || window.clipboardData;
+  let imageFiles = extractImagesFromDataTransfer(dt);
+
+  if (imageFiles.length === 0) {
+    const htmlBlob = extractInlineBase64ImageFromHtml(dt);
+    if (htmlBlob && htmlBlob.size > 0) {
+      imageFiles = [htmlBlob];
+    }
+  }
+
+  // Xóa sạch nội dung nếu người dùng dán vào ô contenteditable
+  const pasteBox = document.getElementById("pokemon-paste-input");
+  if (pasteBox) {
+    setTimeout(() => {
+      pasteBox.innerHTML = "";
+    }, 0);
+  }
+
+  if (imageFiles.length === 0) {
+    if (isModalOpen) {
+      event.preventDefault();
+      setBinderPasteStatus(
+        "Bộ nhớ tạm đang chứa chữ/link chứ chưa có hình ảnh. Anh chuột phải vào ảnh chọn 'Sao chép hình ảnh' rồi dán lại nhé!",
+        true
+      );
+    }
+    return;
+  }
+
+  event.preventDefault();
+  event.stopPropagation();
+
+  if (!isModalOpen) {
+    openBulkPokemonModal();
+  }
+
+  await processIncomingImageFiles(imageFiles);
 }
 
 async function pasteImageFromClipboardButton() {
   if (!navigator.clipboard || !navigator.clipboard.read) {
-    alert("Anh nhấn tổ hợp phím Ctrl + V (hoặc Cmd + V trên Mac) để dán ảnh vừa copy nhé!");
+    const pasteBox = document.getElementById("pokemon-paste-input");
+    if (pasteBox) pasteBox.focus();
+    setBinderPasteStatus("Anh nhấn tổ hợp phím Ctrl + V (hoặc Cmd + V) trên bàn phím để dán ảnh nhé!", true);
     return;
   }
 
@@ -571,18 +731,25 @@ async function pasteImageFromClipboardButton() {
       const imgType = item.types.find((t) => t.startsWith("image/"));
       if (imgType) {
         const blob = await item.getType(imgType);
-        imageBlobs.push(blob);
+        if (blob && blob.size > 0) {
+          imageBlobs.push(blob);
+        }
       }
     }
 
     if (imageBlobs.length === 0) {
-      alert("Trong bộ nhớ tạm chưa có ảnh nào. Anh chuột phải vào ảnh trên mạng chọn 'Sao chép hình ảnh' trước nhé!");
+      setBinderPasteStatus(
+        "Chưa thấy hình ảnh trong bộ nhớ tạm. Anh chuột phải vào ảnh chọn 'Sao chép hình ảnh' trước nhé!",
+        true
+      );
       return;
     }
 
     await processIncomingImageFiles(imageBlobs);
   } catch (err) {
-    alert("Anh nhấn trực tiếp Ctrl + V (hoặc Cmd + V) trên bàn phím để dán ảnh vào khung nhé!");
+    const pasteBox = document.getElementById("pokemon-paste-input");
+    if (pasteBox) pasteBox.focus();
+    setBinderPasteStatus("Trình duyệt chặn đọc tự động — anh nhấn trực tiếp Ctrl + V (hoặc chuột phải -> Dán) vào khung trên nhé!", true);
   }
 }
 
@@ -598,14 +765,27 @@ function handleBinderDrop(event) {
   const zone = document.getElementById("pokemon-paste-dropzone");
   if (zone) zone.classList.remove("border-pink-500", "bg-pink-100/70");
 
-  if (event.dataTransfer && event.dataTransfer.files) {
-    processIncomingImageFiles(event.dataTransfer.files);
+  const files = extractImagesFromDataTransfer(event.dataTransfer);
+  if (files.length > 0) {
+    processIncomingImageFiles(files);
+  } else {
+    setBinderPasteStatus("Không nhận diện được file ảnh vừa kéo vào, anh thử lại nhé!", true);
   }
 }
 
 // =========================================================================
 // MỞ / ĐÓNG & LƯU MODAL DÁN ẢNH THẺ POKÉMON
 // =========================================================================
+function focusBinderPasteBox() {
+  setTimeout(() => {
+    const pasteBox = document.getElementById("pokemon-paste-input");
+    if (pasteBox) {
+      pasteBox.innerHTML = "";
+      pasteBox.focus();
+    }
+  }, 50);
+}
+
 function openBulkPokemonModal() {
   binderEditingCardId = null;
   stagedBinderImages = [];
@@ -619,9 +799,11 @@ function openBulkPokemonModal() {
   const progressEl = document.getElementById("pokemon-save-progress");
   if (progressEl) progressEl.classList.add("hidden");
 
+  setBinderPasteStatus("");
   renderStagedBinderImages();
   document.getElementById("modal-pokemon-card").classList.remove("hidden");
   lucide.createIcons();
+  focusBinderPasteBox();
 }
 
 function openSinglePokemonModal(cardId) {
@@ -646,21 +828,24 @@ function openSinglePokemonModal(cardId) {
   const progressEl = document.getElementById("pokemon-save-progress");
   if (progressEl) progressEl.classList.add("hidden");
 
+  setBinderPasteStatus("");
   renderStagedBinderImages();
   document.getElementById("modal-pokemon-card").classList.remove("hidden");
   lucide.createIcons();
+  focusBinderPasteBox();
 }
 
 function closePokemonCardModal() {
   binderEditingCardId = null;
   stagedBinderImages = [];
+  setBinderPasteStatus("");
   document.getElementById("modal-pokemon-card").classList.add("hidden");
 }
 
 async function savePokemonCardsFromModal() {
   const firestore = getBinderFirestore();
   if (!firestore) {
-    alert("Chưa kết nối được Firebase Firestore, anh đợi 1-2 giây rồi thử lại nhé!");
+    setBinderPasteStatus("Chưa kết nối được Firebase Firestore, anh đợi 1-2 giây rồi thử lại nhé!", true);
     return;
   }
 
@@ -677,7 +862,7 @@ async function savePokemonCardsFromModal() {
 
     const newImage = stagedBinderImages[0] ? stagedBinderImages[0].dataUrl : "";
     if (!newImage) {
-      alert("Anh dán hoặc chọn 1 ảnh cho lá bài này nhé!");
+      setBinderPasteStatus("Anh dán hoặc chọn 1 ảnh cho lá bài này nhé!", true);
       return;
     }
 
@@ -693,7 +878,7 @@ async function savePokemonCardsFromModal() {
         .doc(`pkmn_img_${card.id}`)
         .set({ image: newImage, updatedAt: Date.now() });
 
-      delete card.image; // Chỉ giữ metadata nhẹ trong main_scrapbook
+      delete card.image;
       card.hasCloudImage = true;
       binderImageCache[card.id] = newImage;
       setLocalCachedCardImage(card.id, newImage);
@@ -702,7 +887,7 @@ async function savePokemonCardsFromModal() {
       await saveAppData();
     } catch (err) {
       console.error(err);
-      alert("Lưu ảnh chưa thành công, anh thử lại nhé!");
+      setBinderPasteStatus(`Lỗi lưu Cloud: ${err && err.message ? err.message : "Thử lại nhé!"}`, true);
     } finally {
       if (saveBtn) saveBtn.disabled = false;
     }
@@ -711,7 +896,7 @@ async function savePokemonCardsFromModal() {
 
   // Lưu hàng loạt ảnh vừa dán
   if (stagedBinderImages.length === 0) {
-    alert("Anh nhấn Ctrl + V để dán ít nhất 1 ảnh vào khung trước khi lưu nhé!");
+    setBinderPasteStatus("Anh nhấn Ctrl + V để dán ít nhất 1 ảnh vào khung trước khi lưu nhé!", true);
     return;
   }
 
@@ -751,7 +936,7 @@ async function savePokemonCardsFromModal() {
     await saveAppData();
   } catch (err) {
     console.error(err);
-    alert("Có lỗi khi tải ảnh lên Cloud, anh thử lại nhé!");
+    setBinderPasteStatus(`Lỗi lưu Cloud: ${err && err.message ? err.message : "Anh thử lại nhé!"}`, true);
   } finally {
     if (saveBtn) saveBtn.disabled = false;
   }
@@ -789,45 +974,9 @@ async function movePokemonCard(index, direction) {
 }
 
 // =========================================================================
-// LẮNG NGHE SỰ KIỆN CTRL+V / CMD+V TOÀN TRANG KHI ĐANG Ở CHẾ ĐỘ ADMIN
+// LẮNG NGHE SỰ KIỆN PASTE Ở CẤP WINDOW (CAPTURE PHASE)
 // =========================================================================
-document.addEventListener("paste", async (event) => {
-  if (typeof isEditingAllowed !== "function" || !isEditingAllowed()) return;
-
-  const items = event.clipboardData && event.clipboardData.items;
-  if (!items) return;
-
-  const imageFiles = [];
-  for (let i = 0; i < items.length; i++) {
-    if (items[i].type && items[i].type.startsWith("image/")) {
-      const file = items[i].getAsFile();
-      if (file) imageFiles.push(file);
-    }
-  }
-
-  if (imageFiles.length === 0) return;
-
-  const modal = document.getElementById("modal-pokemon-card");
-  const isModalOpen = modal && !modal.classList.contains("hidden");
-
-  if (isModalOpen) {
-    event.preventDefault();
-    await processIncomingImageFiles(imageFiles);
-    return;
-  }
-
-  // Nếu modal đang đóng nhưng anh đang mở chương Binder và nhấn Ctrl+V ảnh
-  const binderChapter = document.getElementById("chapter-binder");
-  const isBinderVisible = binderChapter && !binderChapter.classList.contains("hidden");
-  const activeTag = document.activeElement && document.activeElement.tagName;
-  const isTyping = activeTag === "INPUT" || activeTag === "TEXTAREA";
-
-  if (isBinderVisible && !isTyping) {
-    event.preventDefault();
-    openBulkPokemonModal();
-    await processIncomingImageFiles(imageFiles);
-  }
-});
+window.addEventListener("paste", handleBinderPasteEvent, true);
 
 // =========================================================================
 // TỰ ĐỘNG ĐỒNG BỘ KHI DỮ LIỆU CLOUD HOẶC CHẾ ĐỘ XEM THỬ THAY ĐỔI
