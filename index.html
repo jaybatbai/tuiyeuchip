@@ -3,6 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="referrer" content="no-referrer" />
   <title>Góc Nhỏ Bí Mật 💌</title>
   <!-- Tailwind CSS -->
   <script src="https://cdn.tailwindcss.com"></script>
@@ -308,7 +309,7 @@
       </section>
 
       <!-- ============================================================== -->
-      <!-- TRANG 2 (CHƯƠNG II): BINDER THẺ POKÉMON CỦAe EM                -->
+      <!-- TRANG 2 (CHƯƠNG II): BINDER THẺ POKÉMON CỦA EM                 -->
       <!-- ============================================================== -->
       <section id="chapter-binder" class="hidden mb-10">
         <div class="book-page-sheet p-5 sm:p-6">
@@ -594,7 +595,7 @@
         <div class="grid grid-cols-2 gap-2">
           <div>
             <label class="block text-xs font-bold text-gray-600 mb-1">Ngày (Không bắt buộc)</label>
-            <input type="text" id="mem-date" placeholder="Bỏ trống hoặc ghi tùy ý" class="w-full px-3.5 py-2 rounded-xl border border-pink-200 text-sm focus:outline-none focus:border-pink-500" />
+            <input type="text" id="mem-date" placeholder="Bỏ trống hoặc ghi tùy ý" class="w-full px-3 py-2 rounded-xl border border-pink-200 text-sm focus:outline-none focus:border-pink-500" />
           </div>
           <div>
             <label class="block text-xs font-bold text-gray-600 mb-1">Nhãn phân loại</label>
@@ -786,7 +787,7 @@
           id="input-pokemon-bulk-urls"
           rows="8"
           oninput="updateBulkUrlCounter(this.value)"
-          placeholder="https://images.pokemontcg.io/swsh7/215_hires.png&#10;https://images.pokemontcg.io/sv3pt5/199_hires.png&#10;...dán toàn bộ 34 link ảnh vào đây..."
+          placeholder="https://static.tcgcollector.com/content/images/...&#10;https://images.pokemontcg.io/swsh7/215_hires.png&#10;...dán toàn bộ 34 link ảnh vào đây..."
           class="w-full px-3.5 py-2.5 rounded-xl border border-pink-200 text-xs font-mono focus:outline-none focus:border-pink-500"
         ></textarea>
         <p class="text-[11px] text-gray-400">
@@ -816,7 +817,7 @@
           />
         </div>
         <div id="single-pokemon-preview-box" class="hidden text-center pt-1">
-          <img id="single-pokemon-preview" src="" class="h-36 w-auto mx-auto rounded-xl object-cover border border-pink-200 shadow-xs" />
+          <img id="single-pokemon-preview" referrerpolicy="no-referrer" src="" class="h-36 w-auto mx-auto rounded-xl object-cover border border-pink-200 shadow-xs" />
         </div>
       </div>
 
