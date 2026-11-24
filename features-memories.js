@@ -16,8 +16,14 @@ function renderProfile() {
   if (badgeEl) {
     badgeEl.textContent = appData.profile.badge || "✨ Sổ Tay Bí Mật Dành Riêng Cho Em ✨";
   }
-  document.getElementById("display-title").textContent = appData.profile.title || "Góc Nhỏ Về Em 💖";
-  document.getElementById("display-subtitle").textContent = appData.profile.subtitle || "";
+  const titleEl = document.getElementById("display-title");
+  if (titleEl) {
+    titleEl.textContent = appData.profile.title || "Góc Nhỏ Về Em 💖";
+  }
+  const subtitleEl = document.getElementById("display-subtitle");
+  if (subtitleEl) {
+    subtitleEl.textContent = appData.profile.subtitle || "";
+  }
 
   const now = new Date();
   const todayStart = new Date(now.getFullYear(), now.getMonth(), now.getDate());
@@ -25,8 +31,10 @@ function renderProfile() {
   const start = parseDateVN(appData.profile.startDate) || new Date(2025, 0, 1);
   const diffTime = Math.max(0, todayStart - start);
   const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
-  document.getElementById("days-counter").textContent = diffDays.toLocaleString("vi-VN");
-  document.getElementById("start-date-display").textContent = `Từ ${formatDateVN(start)}`;
+  const daysCounterEl = document.getElementById("days-counter");
+  const startDateDisplayEl = document.getElementById("start-date-display");
+  if (daysCounterEl) daysCounterEl.textContent = diffDays.toLocaleString("vi-VN");
+  if (startDateDisplayEl) startDateDisplayEl.textContent = `Từ ${formatDateVN(start)}`;
 
   const eventLabelEl = document.getElementById("special-event-label");
   const eventDaysEl = document.getElementById("special-event-days");
@@ -35,26 +43,30 @@ function renderProfile() {
   const eventName = appData.profile.eventName || "Ngày đặc biệt ✨";
   const targetDate = parseDateVN(appData.profile.eventDate);
 
-  eventLabelEl.textContent = eventName;
-  if (targetDate) {
-    eventDateDisplayEl.textContent = `Ngày ${formatDateVN(targetDate)}`;
-    const remainDays = Math.round((targetDate - todayStart) / (1000 * 60 * 60 * 24));
-    if (remainDays > 0) {
-      eventDaysEl.textContent = `Còn ${remainDays} ngày nữa`;
-    } else if (remainDays === 0) {
-      eventDaysEl.textContent = "Chính là hôm nay! 🎉";
+  if (eventLabelEl) eventLabelEl.textContent = eventName;
+  if (eventDaysEl && eventDateDisplayEl) {
+    if (targetDate) {
+      eventDateDisplayEl.textContent = `Ngày ${formatDateVN(targetDate)}`;
+      const remainDays = Math.round((targetDate - todayStart) / (1000 * 60 * 60 * 24));
+      if (remainDays > 0) {
+        eventDaysEl.textContent = `Còn ${remainDays} ngày nữa`;
+      } else if (remainDays === 0) {
+        eventDaysEl.textContent = "Chính là hôm nay! 🎉";
+      } else {
+        eventDaysEl.textContent = `Đã qua ${Math.abs(remainDays)} ngày`;
+      }
     } else {
-      eventDaysEl.textContent = `Đã qua ${Math.abs(remainDays)} ngày`;
+      eventDateDisplayEl.textContent = "";
+      eventDaysEl.textContent = "Đang chờ bật mí";
     }
-  } else {
-    eventDateDisplayEl.textContent = "";
-    eventDaysEl.textContent = "Đang chờ bật mí";
   }
 }
 
 function renderLetter() {
-  document.getElementById("letter-body-text").textContent = appData.letter.body || "";
-  document.getElementById("letter-sign-text").textContent = appData.letter.sign || "";
+  const bodyEl = document.getElementById("letter-body-text");
+  const signEl = document.getElementById("letter-sign-text");
+  if (bodyEl) bodyEl.textContent = appData.letter.body || "";
+  if (signEl) signEl.textContent = appData.letter.sign || "";
 }
 
 // =========================================================================
@@ -62,8 +74,10 @@ function renderLetter() {
 // =========================================================================
 function updateMysteryDeckStats() {
   const total = appData.memories.length;
-  document.getElementById("mystery-total-count").textContent = total;
-  document.getElementById("admin-count").textContent = total;
+  const mysteryCountEl = document.getElementById("mystery-total-count");
+  const adminCountEl = document.getElementById("admin-count");
+  if (mysteryCountEl) mysteryCountEl.textContent = total;
+  if (adminCountEl) adminCountEl.textContent = total;
 
   const validIds = new Set(appData.memories.map((m) => m.id));
   unseenIds = unseenIds.filter((id) => validIds.has(id));
@@ -385,4 +399,156 @@ function clearUploadedImage() {
 async function saveMemory() {
   const title = document.getElementById("mem-title").value.trim();
   const note = document.getElementById("mem-note").value.trim();
-  const rawDate = document.getElementById("mem-date").
+  const rawDate = document.getElementById("mem-date").value.trim();
+  const tag = document.getElementById("mem-tag").value;
+  const editId = document.getElementById("edit-memory-id").value;
+
+  if (!title || !note) {
+    alert("Anh nhớ nhập đủ Tiêu đề và Lời nhắn nhé!");
+    return;
+  }
+
+  const formattedDate = rawDate ? formatDateVN(rawDate) : getTodayVN();
+
+  if (editId) {
+    const idx = appData.memories.findIndex((m) => m.id === editId);
+    if (idx !== -1) {
+      appData.memories[idx] = {
+        ...appData.memories[idx],
+        title,
+        date: formattedDate,
+        tag,
+        sticker: selectedSticker,
+        image: uploadedImageBase64,
+        note
+      };
+    }
+  } else {
+    const newMem = {
+      id: "mem_" + Date.now(),
+      title,
+      date: formattedDate,
+      tag,
+      sticker: selectedSticker,
+      image: uploadedImageBase64,
+      note,
+      gfReaction: "",
+      gfReply: ""
+    };
+    appData.memories.unshift(newMem);
+    unseenIds.push(newMem.id);
+  }
+
+  closeMemoryModal();
+  await saveAppData();
+}
+
+async function deleteMemory(id) {
+  if (!confirm("Anh có chắc muốn xóa thẻ này không?")) return;
+  appData.memories = appData.memories.filter((m) => m.id !== id);
+  await saveAppData();
+}
+
+// =========================================================================
+// CÀI ĐẶT HỒ SƠ & BỨC THƯ BÍ MẬT
+// =========================================================================
+function openProfileModal() {
+  const badgeEl = document.getElementById("input-badge");
+  const titleEl = document.getElementById("input-title");
+  const subtitleEl = document.getElementById("input-subtitle");
+  const startEl = document.getElementById("input-start-date");
+  const eventNameEl = document.getElementById("input-event-name");
+  const eventDateEl = document.getElementById("input-event-date");
+  const passEl = document.getElementById("input-new-password");
+
+  if (badgeEl) badgeEl.value = appData.profile.badge || "✨ Sổ Tay Bí Mật Dành Riêng Cho Em ✨";
+  if (titleEl) titleEl.value = appData.profile.title || "";
+  if (subtitleEl) subtitleEl.value = appData.profile.subtitle || "";
+  if (startEl) startEl.value = formatDateVN(appData.profile.startDate) || "01/01/2025";
+  if (eventNameEl) eventNameEl.value = appData.profile.eventName || "";
+  if (eventDateEl) eventDateEl.value = formatDateVN(appData.profile.eventDate) || "";
+  if (passEl) passEl.value = appData.profile.adminPassword || "";
+
+  document.getElementById("modal-profile").classList.remove("hidden");
+  lucide.createIcons();
+}
+
+function closeProfileModal() {
+  document.getElementById("modal-profile").classList.add("hidden");
+}
+
+async function saveProfile() {
+  const startEl = document.getElementById("input-start-date");
+  const eventDateEl = document.getElementById("input-event-date");
+  const rawStart = startEl ? startEl.value.trim() : "";
+  const rawEvent = eventDateEl ? eventDateEl.value.trim() : "";
+
+  if (rawStart && !parseDateVN(rawStart)) {
+    alert("Ngày bắt đầu yêu nhau chưa hợp lệ (VD: 15082026 hoặc 15/08/2026)");
+    return;
+  }
+
+  if (rawEvent && !parseDateVN(rawEvent)) {
+    alert("Ngày sự kiện đặc biệt chưa hợp lệ (VD: 25/12/2026)");
+    return;
+  }
+
+  const badgeEl = document.getElementById("input-badge");
+  const titleEl = document.getElementById("input-title");
+  const subtitleEl = document.getElementById("input-subtitle");
+  const eventNameEl = document.getElementById("input-event-name");
+  const newPassEl = document.getElementById("input-new-password");
+
+  if (badgeEl) {
+    appData.profile.badge = badgeEl.value.trim() || "✨ Sổ Tay Bí Mật Dành Riêng Cho Em ✨";
+  }
+  if (titleEl) {
+    appData.profile.title = titleEl.value.trim() || "Góc Nhỏ Về Em 💖";
+  }
+  if (subtitleEl) {
+    appData.profile.subtitle = subtitleEl.value.trim();
+  }
+  appData.profile.startDate = rawStart ? formatDateVN(rawStart) : "01/01/2025";
+  if (eventNameEl) {
+    appData.profile.eventName = eventNameEl.value.trim() || "Ngày đặc biệt ✨";
+  }
+  appData.profile.eventDate = rawEvent ? formatDateVN(rawEvent) : "";
+
+  const newPass = newPassEl ? newPassEl.value.trim() : "";
+  if (newPass) {
+    appData.profile.adminPassword = newPass;
+  }
+
+  closeProfileModal();
+  await saveAppData();
+}
+
+function toggleSecretLetter() {
+  const box = document.getElementById("secret-letter-content");
+  const btn = document.getElementById("btn-toggle-letter");
+  if (box.classList.contains("hidden")) {
+    box.classList.remove("hidden");
+    btn.textContent = "Gấp Thư Lại";
+    triggerHeartConfetti();
+  } else {
+    box.classList.add("hidden");
+    btn.textContent = "Mở Phong Bì";
+  }
+}
+
+function openLetterModal() {
+  document.getElementById("input-letter-body").value = appData.letter.body || "";
+  document.getElementById("input-letter-sign").value = appData.letter.sign || "";
+  document.getElementById("modal-letter").classList.remove("hidden");
+}
+
+function closeLetterModal() {
+  document.getElementById("modal-letter").classList.add("hidden");
+}
+
+async function saveLetter() {
+  appData.letter.body = document.getElementById("input-letter-body").value;
+  appData.letter.sign = document.getElementById("input-letter-sign").value;
+  closeLetterModal();
+  await saveAppData();
+}
