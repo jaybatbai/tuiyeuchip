@@ -10,6 +10,18 @@ function getPokemonCards() {
   return Array.isArray(appData.pokemonCards) ? appData.pokemonCards : [];
 }
 
+function handlePokemonImgError(imgEl) {
+  const originalUrl = imgEl.getAttribute("data-orig-src") || "";
+  if (!imgEl.dataset.retried && originalUrl && /^https?:\/\//i.test(originalUrl)) {
+    imgEl.dataset.retried = "1";
+    imgEl.src = `https://wsrv.nl/?url=${encodeURIComponent(originalUrl)}`;
+    return;
+  }
+  imgEl.onerror = null;
+  imgEl.src =
+    "data:image/svg+xml;utf8,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 250 350%22><rect width=%22250%22 height=%22350%22 fill=%22%23fdf2f8%22/><text x=%2250%25%22 y=%2250%25%22 dominant-baseline=%22middle%22 text-anchor=%22middle%22 fill=%22%23db2777%22 font-family=%22sans-serif%22 font-size=%2214%22>Lỗi tải ảnh</text></svg>";
+}
+
 function renderBinderSection() {
   const grid = document.getElementById("pokemon-binder-grid");
   const statsEl = document.getElementById("binder-stats-badge");
@@ -37,13 +49,16 @@ function renderBinderSection() {
     if (card) {
       const globalIndex = startIdx + i;
       const cardLabel = card.name ? escapeHtml(card.name) : `Lá #${globalIndex + 1}`;
+      const safeUrl = escapeHtml(card.image || "");
 
       const imageContent = card.image
         ? `<img
-             src="${escapeHtml(card.image)}"
+             src="${safeUrl}"
+             data-orig-src="${safeUrl}"
              alt="${cardLabel}"
+             referrerpolicy="no-referrer"
              loading="lazy"
-             onerror="this.onerror=null; this.src='data:image/svg+xml;utf8,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 250 350%22><rect width=%22250%22 height=%22350%22 fill=%22%23fdf2f8%22/><text x=%2250%25%22 y=%2250%25%22 dominant-baseline=%22middle%22 text-anchor=%22middle%22 fill=%22%23db2777%22 font-family=%22sans-serif%22 font-size=%2214%22>Lỗi tải ảnh</text></svg>';"
+             onerror="handlePokemonImgError(this)"
              class="w-full h-full object-cover transition-transform duration-300 group-hover:scale-[1.04]"
            />`
         : `<div class="w-full h-full bg-gradient-to-br from-pink-100 via-rose-50 to-amber-50 flex flex-col items-center justify-center p-1.5 text-center">
@@ -224,9 +239,17 @@ function openPokemonZoomModal(cardId) {
 
   const hasPrev = idx > 0;
   const hasNext = idx < allCards.length - 1;
+  const safeUrl = escapeHtml(card.image || "");
 
   const imgHtml = card.image
-    ? `<img src="${escapeHtml(card.image)}" alt="${escapeHtml(card.name || "Pokémon Card")}" class="w-full h-full object-cover" />`
+    ? `<img
+         src="${safeUrl}"
+         data-orig-src="${safeUrl}"
+         alt="${escapeHtml(card.name || "Pokémon Card")}"
+         referrerpolicy="no-referrer"
+         onerror="handlePokemonImgError(this)"
+         class="w-full h-full object-cover"
+       />`
     : `<div class="w-full h-full bg-gradient-to-br from-pink-100 via-rose-50 to-amber-50 flex flex-col items-center justify-center p-4 text-center">
          <span class="text-5xl mb-2">🎴</span>
        </div>`;
@@ -402,6 +425,11 @@ function previewSinglePokemonUrl(url) {
   const img = document.getElementById("single-pokemon-preview");
   const clean = url.trim();
   if (clean) {
+    delete img.dataset.retried;
+    img.setAttribute("data-orig-src", clean);
+    img.onerror = function () {
+      handlePokemonImgError(this);
+    };
     img.src = clean;
     box.classList.remove("hidden");
   } else {
