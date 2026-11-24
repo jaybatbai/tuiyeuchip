@@ -1,922 +1,680 @@
-// =========================================================================
-// CÁC MỤC CHỦ ĐỀ VỀ EM (TOPIC NOTEBOOK) & PHIẾU ĐỔI QUÀ (LOVE COUPONS)
-// =========================================================================
-const TOPIC_ICONS = ["🏷️", "🍜", "🧋", "🎮", "🎨", "🎵", "💤", "🚫", "🌸", "🧸", "✨", "💬"];
-const COUPON_ICONS = ["🧋", "🎟️", "💆‍♀️", "🛵", "🍦", "🎬", "🧸", "💐", "🫂", "👑"];
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Góc Nhỏ Bí Mật 💌</title>
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Google Fonts (Hỗ trợ đầy đủ tiếng Việt) -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Dancing+Script:wght@600;700&family=Patrick+Hand&family=Quicksand:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <!-- Canvas Confetti -->
+  <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.2/dist/confetti.browser.min.js"></script>
+  <!-- Lucide Icons -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <!-- Custom CSS -->
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body class="min-h-screen relative pb-28">
 
-let activeTopicId = "topic_nicknames";
-let activeSubGroupFilter = "ALL";
-let selectedTopicIcon = "🏷️";
-let selectedCouponIcon = "🧋";
-let expandedTopicIds = new Set();
-let topicSearchQuery = "";
-let selectedNewItemGroup = "";
-const TOPIC_COLLAPSE_LIMIT = 6;
+  <!-- Floating Hearts Container -->
+  <div id="hearts-container"></div>
 
-function normalizeTopicItem(item) {
-  if (typeof item === "string") {
-    return { text: item, group: "" };
-  }
-  return {
-    text: String(item.text || ""),
-    group: String(item.group || "")
-  };
-}
+  <!-- ========================================== -->
+  <!-- MÀN HÌNH CHÀO: PHONG BÌ NIÊM PHONG         -->
+  <!-- ========================================== -->
+  <section id="gate-screen" class="relative z-20 min-h-screen flex items-center justify-center p-4">
+    <div class="max-w-md w-full animate-pop-in">
+      <!-- Sealed Envelope Card -->
+      <div class="bg-white/95 backdrop-blur-md rounded-[32px] p-7 sm:p-9 shadow-2xl border-2 border-pink-200 text-center relative overflow-hidden">
+        <!-- Decorative Top Flap Line -->
+        <div class="absolute top-0 left-0 right-0 h-2 bg-gradient-to-r from-pink-400 via-rose-400 to-pink-400"></div>
 
-function renderSingleTopicCardHtml(topicId, entry, idx, totalInTopic, isLastOddCard, isEdit, groupList = []) {
-  const canMoveUp = idx > 0;
-  const canMoveDown = idx < totalInTopic - 1;
-  const spanClass = isLastOddCard ? "sm:col-span-2" : "";
+        <!-- Wax Seal Icon -->
+        <div class="w-20 h-20 mx-auto mb-4 rounded-full bg-gradient-to-br from-rose-400 to-pink-600 text-white flex items-center justify-center shadow-lg ring-4 ring-pink-100">
+          <i data-lucide="heart" class="w-10 h-10 fill-white"></i>
+        </div>
 
-  const quickGroupSelectHtml =
-    isEdit && Array.isArray(groupList) && groupList.length > 0
-      ? `
-        <select
-          onchange="quickAssignTopicItemGroup('${topicId}', ${idx}, this.value)"
-          class="max-w-[105px] px-1.5 py-0.5 rounded-lg bg-white border border-pink-200 text-[10px] font-semibold text-pink-700 focus:outline-none focus:border-pink-400"
-          title="Đổi nhanh nhóm nhỏ"
-        >
-          <option value="">Chung</option>
-          ${groupList
-            .map(
-              (g) =>
-                `<option value="${escapeHtml(g)}" ${entry.group === g ? "selected" : ""}>${escapeHtml(g)}</option>`
-            )
-            .join("")}
-        </select>
-      `
-      : "";
+        <span class="inline-block px-3.5 py-1 rounded-full bg-pink-50 text-pink-500 text-[11px] font-bold uppercase tracking-wider mb-2 border border-pink-100">
+          Bức Thư Được Niêm Phong
+        </span>
 
-  return `
-    <li class="${spanClass} flex items-start justify-between gap-2 px-3 py-2.5 rounded-2xl bg-pink-50/55 border border-pink-100/80 hover:bg-pink-50 transition">
-      <div class="flex items-start gap-2 min-w-0">
-        <span class="text-pink-400 font-bold text-xs mt-0.5 shrink-0">✦</span>
-        <span class="text-xs sm:text-[13px] text-gray-700 font-medium leading-snug break-words">${escapeHtml(entry.text)}</span>
-      </div>
-      ${
-        isEdit
-          ? `
-        <div class="flex items-center gap-0.5 shrink-0">
-          ${quickGroupSelectHtml}
+        <h1 class="font-handwriting text-4xl sm:text-5xl font-bold text-pink-600 mb-2">
+          Gửi Riêng Cho Em ✨
+        </h1>
+
+        <p class="text-xs sm:text-sm text-gray-500 leading-relaxed mb-6">
+          Có một góc nhỏ bí mật đang chờ em bên trong.<br />
+          Hãy nhập <strong class="text-pink-600">ngày đầu tiên tụi mình yêu nhau</strong> để mở phong bì nhé!
+        </p>
+
+        <!-- 8 Ô Trống Nhập Mật Khẩu -->
+        <div class="space-y-4">
+          <div id="passcode-slots" class="flex items-center justify-center gap-1.5 sm:gap-2">
+            <input type="text" inputmode="numeric" maxlength="1" autocomplete="off" placeholder="_" class="passcode-digit w-9 h-12 sm:w-10 sm:h-14 rounded-xl border-2 border-pink-200 focus:outline-none focus:border-pink-500 text-center text-lg sm:text-xl font-bold text-pink-700 bg-pink-50/40 transition" />
+            <input type="text" inputmode="numeric" maxlength="1" autocomplete="off" placeholder="_" class="passcode-digit w-9 h-12 sm:w-10 sm:h-14 rounded-xl border-2 border-pink-200 focus:outline-none focus:border-pink-500 text-center text-lg sm:text-xl font-bold text-pink-700 bg-pink-50/40 transition" />
+            <input type="text" inputmode="numeric" maxlength="1" autocomplete="off" placeholder="_" class="passcode-digit w-9 h-12 sm:w-10 sm:h-14 rounded-xl border-2 border-pink-200 focus:outline-none focus:border-pink-500 text-center text-lg sm:text-xl font-bold text-pink-700 bg-pink-50/40 transition" />
+            <input type="text" inputmode="numeric" maxlength="1" autocomplete="off" placeholder="_" class="passcode-digit w-9 h-12 sm:w-10 sm:h-14 rounded-xl border-2 border-pink-200 focus:outline-none focus:border-pink-500 text-center text-lg sm:text-xl font-bold text-pink-700 bg-pink-50/40 transition" />
+            <input type="text" inputmode="numeric" maxlength="1" autocomplete="off" placeholder="_" class="passcode-digit w-9 h-12 sm:w-10 sm:h-14 rounded-xl border-2 border-pink-200 focus:outline-none focus:border-pink-500 text-center text-lg sm:text-xl font-bold text-pink-700 bg-pink-50/40 transition" />
+            <input type="text" inputmode="numeric" maxlength="1" autocomplete="off" placeholder="_" class="passcode-digit w-9 h-12 sm:w-10 sm:h-14 rounded-xl border-2 border-pink-200 focus:outline-none focus:border-pink-500 text-center text-lg sm:text-xl font-bold text-pink-700 bg-pink-50/40 transition" />
+            <input type="text" inputmode="numeric" maxlength="1" autocomplete="off" placeholder="_" class="passcode-digit w-9 h-12 sm:w-10 sm:h-14 rounded-xl border-2 border-pink-200 focus:outline-none focus:border-pink-500 text-center text-lg sm:text-xl font-bold text-pink-700 bg-pink-50/40 transition" />
+            <input type="text" inputmode="numeric" maxlength="1" autocomplete="off" placeholder="_" class="passcode-digit w-9 h-12 sm:w-10 sm:h-14 rounded-xl border-2 border-pink-200 focus:outline-none focus:border-pink-500 text-center text-lg sm:text-xl font-bold text-pink-700 bg-pink-50/40 transition" />
+          </div>
+
+          <p id="gate-error-msg" class="hidden text-xs text-rose-500 font-semibold">
+            Mật khẩu chưa chính xác rồi, thử nhớ lại xem nào! 🥺
+          </p>
+
           <button
-            onclick="moveTopicItem('${topicId}', ${idx}, -1)"
-            ${!canMoveUp ? "disabled" : ""}
-            class="p-1 rounded-md transition ${
-              canMoveUp ? "text-pink-500 hover:bg-pink-100" : "text-gray-300 cursor-not-allowed"
-            }"
-            title="Đưa lên trước"
+            onclick="unlockGate()"
+            class="w-full py-3.5 rounded-2xl bg-gradient-to-r from-pink-500 to-rose-500 text-white text-sm font-bold shadow-lg hover:shadow-xl hover:opacity-95 transition flex items-center justify-center gap-2"
           >
-            <i data-lucide="arrow-up" class="w-3 h-3"></i>
-          </button>
-          <button
-            onclick="moveTopicItem('${topicId}', ${idx}, 1)"
-            ${!canMoveDown ? "disabled" : ""}
-            class="p-1 rounded-md transition ${
-              canMoveDown ? "text-pink-500 hover:bg-pink-100" : "text-gray-300 cursor-not-allowed"
-            }"
-            title="Đưa xuống sau"
-          >
-            <i data-lucide="arrow-down" class="w-3 h-3"></i>
-          </button>
-          <button onclick="editTopicItem('${topicId}', ${idx})" class="p-1 rounded-md text-pink-500 hover:bg-pink-100" title="Sửa / Đổi nhóm dòng này">
-            <i data-lucide="edit-2" class="w-3 h-3"></i>
-          </button>
-          <button onclick="deleteTopicItem('${topicId}', ${idx})" class="p-1 rounded-md text-rose-400 hover:bg-rose-100" title="Xóa dòng này">
-            <i data-lucide="x" class="w-3 h-3"></i>
+            <i data-lucide="sparkles" class="w-4 h-4"></i>
+            <span>Mở Phong Bì</span>
           </button>
         </div>
-      `
-          : ""
-      }
-    </li>
-  `;
-}
 
-function renderTopicsSection() {
-  const topics = appData.topics || [];
-  const tabsBar = document.getElementById("topic-tabs-bar");
-  const panel = document.getElementById("active-topic-panel");
-  const isEdit = isEditingAllowed();
-
-  if (topics.length === 0) {
-    tabsBar.innerHTML = "";
-    panel.innerHTML = `
-      <div class="text-center py-8 text-gray-400 text-xs">
-        Chưa có mục ghi chép nào. ${isEdit ? "Bấm '+ Thêm Mục Mới' ở góc trên để tạo nhé!" : ""}
-      </div>
-    `;
-    return;
-  }
-
-  let activeIndex = topics.findIndex((t) => t.id === activeTopicId);
-  if (activeIndex === -1) {
-    activeIndex = 0;
-    activeTopicId = topics[0].id;
-    activeSubGroupFilter = "ALL";
-  }
-
-  tabsBar.innerHTML = topics
-    .map((t) => {
-      const isActive = t.id === activeTopicId;
-      const count = (t.items || []).length;
-      return `
-        <button
-          onclick="selectTopicTab('${t.id}')"
-          class="shrink-0 px-3.5 py-2 rounded-2xl text-xs font-bold transition-all flex items-center gap-1.5 ${
-            isActive
-              ? "bg-pink-500 text-white shadow-sm"
-              : "bg-pink-50/80 text-pink-700 hover:bg-pink-100"
-          }"
-        >
-          <span>${t.icon || "💖"}</span>
-          <span>${escapeHtml(t.name)}</span>
-          <span class="text-[10px] px-1.5 py-0.2 rounded-full ${
-            isActive ? "bg-white/25 text-white" : "bg-pink-200/60 text-pink-600"
-          }">${count}</span>
-        </button>
-      `;
-    })
-    .join("");
-
-  const activeTopic = topics[activeIndex];
-  const rawItems = activeTopic.items || [];
-  const normalizedItems = rawItems.map((it, originalIdx) => ({
-    ...normalizeTopicItem(it),
-    originalIdx
-  }));
-
-  const groupSet = new Set(Array.isArray(activeTopic.groups) ? activeTopic.groups : []);
-  normalizedItems.forEach((it) => {
-    if (it.group) groupSet.add(it.group);
-  });
-  const groupList = Array.from(groupSet);
-
-  if (
-    activeSubGroupFilter !== "ALL" &&
-    activeSubGroupFilter !== "__UNGROUPED__" &&
-    !groupList.includes(activeSubGroupFilter)
-  ) {
-    activeSubGroupFilter = "ALL";
-  }
-
-  const canMoveTabLeft = activeIndex > 0;
-  const canMoveTabRight = activeIndex < topics.length - 1;
-
-  const queryNorm = topicSearchQuery.trim().toLowerCase();
-  const filteredItems = normalizedItems.filter(
-    (entry) =>
-      !queryNorm ||
-      entry.text.toLowerCase().includes(queryNorm) ||
-      entry.group.toLowerCase().includes(queryNorm)
-  );
-
-  const hasSubGroups = groupList.length > 0;
-
-  const adminHeaderControls = isEdit
-    ? `
-      <div class="flex flex-wrap items-center gap-1">
-        <button
-          onclick="addTopicSubGroup('${activeTopic.id}')"
-          class="px-2.5 py-1.5 rounded-lg bg-amber-50 text-amber-700 hover:bg-amber-100 border border-amber-200 text-[11px] font-bold flex items-center gap-1 transition"
-          title="Tạo nhóm nhỏ phân loại bên trong mục này"
-        >
-          <i data-lucide="folder-plus" class="w-3.5 h-3.5"></i>
-          <span>+ Chia nhóm</span>
-        </button>
-        <button
-          onclick="moveTopic(${activeIndex}, -1)"
-          ${!canMoveTabLeft ? "disabled" : ""}
-          class="p-1.5 rounded-lg border transition ${
-            canMoveTabLeft
-              ? "bg-white text-pink-600 hover:bg-pink-100 border-pink-200"
-              : "bg-gray-50 text-gray-300 border-gray-100 cursor-not-allowed"
-          }"
-          title="Di chuyển mục sang trái"
-        >
-          <i data-lucide="arrow-left" class="w-3.5 h-3.5"></i>
-        </button>
-        <button
-          onclick="moveTopic(${activeIndex}, 1)"
-          ${!canMoveTabRight ? "disabled" : ""}
-          class="p-1.5 rounded-lg border transition ${
-            canMoveTabRight
-              ? "bg-white text-pink-600 hover:bg-pink-100 border-pink-200"
-              : "bg-gray-50 text-gray-300 border-gray-100 cursor-not-allowed"
-          }"
-          title="Di chuyển mục sang phải"
-        >
-          <i data-lucide="arrow-right" class="w-3.5 h-3.5"></i>
-        </button>
-        <button onclick="openTopicModal('${activeTopic.id}')" class="p-1.5 rounded-lg bg-pink-50 text-pink-600 hover:bg-pink-100 border border-pink-200" title="Đổi tên / icon mục">
-          <i data-lucide="pencil" class="w-3.5 h-3.5"></i>
-        </button>
-        <button onclick="deleteTopic('${activeTopic.id}')" class="p-1.5 rounded-lg bg-rose-50 text-rose-500 hover:bg-rose-100 border border-rose-200" title="Xóa mục này">
-          <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
-        </button>
-      </div>
-    `
-    : "";
-
-  const ungroupedCount = filteredItems.filter((it) => !it.group || !groupList.includes(it.group)).length;
-  const subGroupsNavHtml = hasSubGroups
-    ? `
-      <div class="flex flex-wrap items-center gap-1.5 mb-3 p-2.5 rounded-2xl bg-pink-50/70 border border-pink-100">
-        <button
-          onclick="selectSubGroupFilter('ALL')"
-          class="px-2.5 py-1 rounded-full text-[11px] font-bold transition ${
-            activeSubGroupFilter === "ALL"
-              ? "bg-pink-500 text-white shadow-xs"
-              : "bg-white text-pink-700 border border-pink-200 hover:bg-pink-100"
-          }"
-        >
-          Tất cả (${filteredItems.length})
-        </button>
-        ${groupList
-          .map((g) => {
-            const gCount = filteredItems.filter((it) => it.group === g).length;
-            const isSelected = activeSubGroupFilter === g;
-            return `
-              <span class="inline-flex items-center rounded-full border transition ${
-                isSelected
-                  ? "bg-amber-500 text-white border-amber-500 shadow-xs"
-                  : "bg-white text-amber-800 border-amber-200 hover:bg-amber-50"
-              }">
-                <button
-                  onclick="selectSubGroupFilter('${escapeHtml(g).replace(/'/g, "\\'")}')"
-                  class="px-2.5 py-1 text-[11px] font-bold flex items-center gap-1"
-                >
-                  <span>${escapeHtml(g)}</span>
-                  <span class="opacity-80">(${gCount})</span>
-                </button>
-                ${
-                  isEdit
-                    ? `<button onclick="removeTopicSubGroup('${activeTopic.id}', '${escapeHtml(g).replace(/'/g, "\\'")}')" class="pr-2 pl-0.5 text-[10px] opacity-70 hover:opacity-100" title="Gỡ nhóm này">✕</button>`
-                    : ""
-                }
-              </span>
-            `;
-          })
-          .join("")}
-        ${
-          ungroupedCount > 0
-            ? `
-              <button
-                onclick="selectSubGroupFilter('__UNGROUPED__')"
-                class="px-2.5 py-1 rounded-full text-[11px] font-bold transition ${
-                  activeSubGroupFilter === "__UNGROUPED__"
-                    ? "bg-gray-600 text-white shadow-xs"
-                    : "bg-white text-gray-600 border border-gray-200 hover:bg-gray-100"
-                }"
-              >
-                Chung (${ungroupedCount})
-              </button>
-            `
-            : ""
-        }
-      </div>
-    `
-    : "";
-
-  const searchBarHtml =
-    normalizedItems.length >= 6
-      ? `
-      <div class="relative mb-3">
-        <i data-lucide="search" class="w-3.5 h-3.5 text-pink-400 absolute left-3 top-1/2 -translate-y-1/2"></i>
-        <input
-          type="text"
-          id="topic-quick-search"
-          value="${escapeHtml(topicSearchQuery)}"
-          oninput="handleTopicSearch(this.value)"
-          placeholder="Tìm nhanh trong ${normalizedItems.length} điều của mục này..."
-          class="w-full pl-8 pr-8 py-1.5 rounded-xl bg-pink-50/60 border border-pink-100 text-xs text-gray-700 focus:outline-none focus:border-pink-400 focus:bg-white transition"
-        />
-        ${
-          topicSearchQuery
-            ? `<button onclick="handleTopicSearch('')" class="absolute right-2.5 top-1/2 -translate-y-1/2 text-gray-400 hover:text-pink-500 text-xs font-bold">✕</button>`
-            : ""
-        }
-      </div>
-    `
-      : "";
-
-  let contentBodyHtml = "";
-  let expandToggleHtml = "";
-
-  if (filteredItems.length === 0) {
-    contentBodyHtml = `<p class="text-xs text-gray-400 italic py-4 text-center">${
-      queryNorm ? "Không tìm thấy dòng nào khớp từ khóa..." : "Mục này chưa có ghi chú nào..."
-    }</p>`;
-  } else if (hasSubGroups) {
-    const orderedBuckets = [];
-
-    if (activeSubGroupFilter === "ALL") {
-      groupList.forEach((g) => {
-        const bucketItems = filteredItems.filter((it) => it.group === g);
-        orderedBuckets.push({ title: g, items: bucketItems });
-      });
-
-      const ungroupedItems = filteredItems.filter((it) => !it.group || !groupList.includes(it.group));
-      if (ungroupedItems.length > 0) {
-        orderedBuckets.push({ title: "Chung", items: ungroupedItems });
-      }
-    } else if (activeSubGroupFilter === "__UNGROUPED__") {
-      const ungroupedItems = filteredItems.filter((it) => !it.group || !groupList.includes(it.group));
-      orderedBuckets.push({ title: "Chung", items: ungroupedItems });
-    } else {
-      const bucketItems = filteredItems.filter((it) => it.group === activeSubGroupFilter);
-      orderedBuckets.push({ title: activeSubGroupFilter, items: bucketItems });
-    }
-
-    contentBodyHtml = `
-      <div class="space-y-4">
-        ${orderedBuckets
-          .map((bucket) => {
-            const innerHtml =
-              bucket.items.length > 0
-                ? `<ul class="grid grid-cols-1 sm:grid-cols-2 gap-2">
-                    ${bucket.items
-                      .map((entry, idxInBucket) => {
-                        const isLastOdd =
-                          bucket.items.length % 2 === 1 && idxInBucket === bucket.items.length - 1;
-                        return renderSingleTopicCardHtml(
-                          activeTopic.id,
-                          entry,
-                          entry.originalIdx,
-                          normalizedItems.length,
-                          isLastOdd,
-                          isEdit,
-                          groupList
-                        );
-                      })
-                      .join("")}
-                  </ul>`
-                : `<p class="text-[11px] text-gray-400 italic px-3 py-2 rounded-xl bg-gray-50/70 border border-dashed border-gray-200">
-                    Chưa có ghi chú nào trong nhóm này...
-                  </p>`;
-
-            return `
-              <div>
-                <div class="flex items-center gap-2 mb-2">
-                  <span class="text-xs font-bold text-pink-600 bg-pink-100/70 px-2.5 py-0.5 rounded-full">
-                    ${escapeHtml(bucket.title)} (${bucket.items.length})
-                  </span>
-                  <div class="h-px flex-1 bg-pink-100"></div>
-                </div>
-                ${innerHtml}
-              </div>
-            `;
-          })
-          .join("")}
-      </div>
-    `;
-  } else {
-    const isExpanded = expandedTopicIds.has(activeTopic.id) || Boolean(queryNorm);
-    const hasMoreToShow = !isExpanded && filteredItems.length > TOPIC_COLLAPSE_LIMIT;
-    const visibleItems = isExpanded
-      ? filteredItems
-      : filteredItems.slice(0, TOPIC_COLLAPSE_LIMIT);
-    const hiddenCount = filteredItems.length - visibleItems.length;
-
-    contentBodyHtml = `
-      <ul class="grid grid-cols-1 sm:grid-cols-2 gap-2">
-        ${visibleItems
-          .map((entry, idxInList) => {
-            const isLastOdd =
-              visibleItems.length % 2 === 1 && idxInList === visibleItems.length - 1;
-            return renderSingleTopicCardHtml(
-              activeTopic.id,
-              entry,
-              entry.originalIdx,
-              normalizedItems.length,
-              isLastOdd,
-              isEdit,
-              groupList
-            );
-          })
-          .join("")}
-      </ul>
-    `;
-
-    if (!queryNorm && filteredItems.length > TOPIC_COLLAPSE_LIMIT) {
-      expandToggleHtml = `
-        <div class="mt-3 text-center">
-          <button
-            onclick="toggleTopicExpand('${activeTopic.id}')"
-            class="inline-flex items-center gap-1.5 px-4 py-1.5 rounded-full bg-pink-50 hover:bg-pink-100 text-pink-600 border border-pink-200/80 text-xs font-bold transition"
-          >
-            ${
-              hasMoreToShow
-                ? `<i data-lucide="chevron-down" class="w-3.5 h-3.5"></i><span>Xem thêm (${hiddenCount} điều nữa)</span>`
-                : `<i data-lucide="chevron-up" class="w-3.5 h-3.5"></i><span>Thu gọn bớt</span>`
-            }
-          </button>
+        <div class="mt-6 pt-4 border-t border-pink-100/80 text-[11px] text-pink-400 font-medium">
+          Made with ❤️ just for you
         </div>
-      `;
-    }
-  }
-
-  const groupSelectHtml =
-    groupList.length > 0
-      ? `
-      <select
-        id="new-topic-item-group"
-        onchange="selectedNewItemGroup = this.value"
-        class="px-2.5 py-2 rounded-xl border border-pink-200 text-xs font-semibold text-pink-700 bg-pink-50/60 focus:outline-none focus:border-pink-500 shrink-0"
-      >
-        <option value="">Nhóm: Chung</option>
-        ${groupList
-          .map(
-            (g) =>
-              `<option value="${escapeHtml(g)}" ${
-                selectedNewItemGroup === g ? "selected" : ""
-              }>${escapeHtml(g)}</option>`
-          )
-          .join("")}
-      </select>
-    `
-      : "";
-
-  const addItemFormHtml = isEdit
-    ? `
-      <div class="mt-4 pt-3 border-t border-pink-100 flex flex-wrap sm:flex-nowrap items-center gap-2">
-        ${groupSelectHtml}
-        <input
-          type="text"
-          id="new-topic-item-input"
-          placeholder="Thêm một điều mới vào '${escapeHtml(activeTopic.name)}'..."
-          class="flex-1 min-w-[160px] px-3.5 py-2 rounded-xl border border-pink-200 text-xs sm:text-sm focus:outline-none focus:border-pink-500"
-          onkeydown="if(event.key==='Enter') addTopicItem('${activeTopic.id}')"
-        />
-        <button
-          onclick="addTopicItem('${activeTopic.id}')"
-          class="px-4 py-2 rounded-xl bg-pink-500 text-white text-xs font-bold hover:bg-pink-600 transition shrink-0"
-        >
-          + Thêm
-        </button>
       </div>
-    `
-    : "";
-
-  panel.innerHTML = `
-    <div class="animate-pop-in">
-      <div class="flex flex-wrap items-center justify-between gap-2 mb-3">
-        <div class="flex items-center gap-2">
-          <span class="text-2xl">${activeTopic.icon || "💖"}</span>
-          <h4 class="font-bold text-base sm:text-lg text-gray-800">${escapeHtml(activeTopic.name)}</h4>
-          <span class="text-[11px] font-bold px-2 py-0.5 rounded-full bg-pink-100 text-pink-600">${normalizedItems.length}</span>
-        </div>
-        ${adminHeaderControls}
-      </div>
-
-      ${subGroupsNavHtml}
-      ${searchBarHtml}
-      ${contentBodyHtml}
-      ${expandToggleHtml}
-      ${addItemFormHtml}
     </div>
-  `;
-  lucide.createIcons();
+  </section>
 
-  if (topicSearchQuery) {
-    const searchEl = document.getElementById("topic-quick-search");
-    if (searchEl) {
-      searchEl.focus();
-      searchEl.setSelectionRange(searchEl.value.length, searchEl.value.length);
-    }
-  }
-}
+  <!-- ========================================== -->
+  <!-- NỘI DUNG CHÍNH (ẨN CHO ĐẾN KHI MỞ KHÓA)    -->
+  <!-- ========================================== -->
+  <div id="main-app-wrapper" class="hidden">
 
-function selectTopicTab(topicId) {
-  activeTopicId = topicId;
-  activeSubGroupFilter = "ALL";
-  topicSearchQuery = "";
-  selectedNewItemGroup = "";
-  renderTopicsSection();
-}
+    <!-- Top Navigation Bar (CHỈ HIỆN KHI ĐĂNG NHẬP BẰNG MẬT KHẨU CỦA ANH) -->
+    <nav id="admin-top-nav" class="admin-only hidden sticky top-0 z-40 bg-white/85 backdrop-blur-md border-b border-pink-100 px-4 py-3">
+      <div class="max-w-3xl mx-auto flex flex-wrap items-center justify-between gap-2">
+        <!-- Cloud Status Badge -->
+        <div id="cloud-status" class="flex items-center gap-1.5 text-xs font-semibold px-3 py-1.5 rounded-full bg-pink-50 text-pink-600 border border-pink-200">
+          <span class="w-2 h-2 rounded-full bg-amber-400 animate-pulse" id="cloud-dot"></span>
+          <span id="cloud-text">Đang kết nối Cloud...</span>
+        </div>
 
-function selectSubGroupFilter(groupFilter) {
-  activeSubGroupFilter = groupFilter;
-  if (groupFilter !== "ALL" && groupFilter !== "__UNGROUPED__") {
-    selectedNewItemGroup = groupFilter;
-  } else {
-    selectedNewItemGroup = "";
-  }
-  renderTopicsSection();
-}
+        <!-- Admin Preview / Lock Controls -->
+        <div class="flex items-center gap-2">
+          <button id="btn-preview-gf" onclick="toggleAdminPreview()" class="px-3.5 py-1.5 rounded-full text-xs font-bold transition-all bg-pink-100 text-pink-700 hover:bg-pink-200 flex items-center gap-1.5">
+            <i data-lucide="eye" class="w-3.5 h-3.5"></i> Xem Thử Giao Diện Của Em
+          </button>
+          <button onclick="lockGate()" class="px-3.5 py-1.5 rounded-full text-xs font-bold transition-all bg-gray-100 text-gray-600 hover:bg-gray-200 flex items-center gap-1.5" title="Đóng lại phong bì">
+            <i data-lucide="lock" class="w-3.5 h-3.5"></i> Khóa Lại
+          </button>
+        </div>
+      </div>
+    </nav>
 
-function toggleTopicExpand(topicId) {
-  if (expandedTopicIds.has(topicId)) {
-    expandedTopicIds.delete(topicId);
-  } else {
-    expandedTopicIds.add(topicId);
-  }
-  renderTopicsSection();
-}
+    <!-- Main Content Wrapper -->
+    <main class="relative z-10 max-w-2xl mx-auto px-4 pt-8">
 
-function handleTopicSearch(val) {
-  topicSearchQuery = val;
-  renderTopicsSection();
-}
+      <!-- Header Profile Section -->
+      <header class="text-center mb-8">
+        <div class="inline-flex items-center gap-2 px-4 py-1 rounded-full bg-pink-100/80 text-pink-600 text-xs font-bold mb-3 shadow-sm">
+          <span id="display-badge">✨ Sổ Tay Bí Mật Dành Riêng Cho Em ✨</span>
+        </div>
 
-async function quickAssignTopicItemGroup(topicId, index, newGroup) {
-  const topic = appData.topics.find((t) => t.id === topicId);
-  if (!topic || !topic.items[index]) return;
+        <div class="flex items-center justify-center gap-2">
+          <h1 id="display-title" class="font-handwriting text-4xl sm:text-5xl font-bold text-pink-600 drop-shadow-sm">
+            Góc Nhỏ Về Chip 💖
+          </h1>
+          <button onclick="openProfileModal()" class="admin-control hidden p-2 rounded-full bg-white text-pink-500 hover:bg-pink-50 shadow-sm border border-pink-100 transition" title="Chỉnh sửa thông tin & mật khẩu">
+            <i data-lucide="pencil" class="w-4 h-4"></i>
+          </button>
+        </div>
 
-  const current = normalizeTopicItem(topic.items[index]);
-  topic.items[index] = newGroup ? { text: current.text, group: newGroup } : current.text;
-  await saveAppData();
-}
+        <p id="display-subtitle" class="text-sm sm:text-base text-pink-800/75 mt-2 font-medium">
+          Nơi lưu giữ những điều đáng yêu nhất về em mỗi ngày
+        </p>
 
-async function addTopicSubGroup(topicId) {
-  const topic = appData.topics.find((t) => t.id === topicId);
-  if (!topic) return;
-
-  const dialogRes = await openCustomDialog({
-    title: `Tạo nhóm nhỏ trong "${topic.name}"`,
-    desc: "Bạn có thể chuyển sang tab/cửa sổ khác để copy và dán tên nhóm thoải mái mà hộp thoại không bị đóng.",
-    placeholder: "VD: 🧋 Đồ uống, 🍿 Đồ ăn vặt, 🍚 Món chính..."
-  });
-
-  if (!dialogRes || !dialogRes.text || !dialogRes.text.trim()) return;
-
-  const clean = dialogRes.text.trim();
-  topic.groups = Array.isArray(topic.groups) ? topic.groups : [];
-  if (!topic.groups.includes(clean)) {
-    topic.groups.push(clean);
-  }
-  selectedNewItemGroup = clean;
-  await saveAppData();
-}
-
-async function removeTopicSubGroup(topicId, groupName) {
-  const topic = appData.topics.find((t) => t.id === topicId);
-  if (!topic) return;
-
-  if (!confirm(`Gỡ nhóm "${groupName}"? (Các món bên trong vẫn giữ nguyên, chỉ chuyển về nhóm Chung)`)) {
-    return;
-  }
-
-  topic.groups = (topic.groups || []).filter((g) => g !== groupName);
-  topic.items = (topic.items || []).map((it) => {
-    const norm = normalizeTopicItem(it);
-    if (norm.group === groupName) {
-      return norm.text;
-    }
-    return it;
-  });
-
-  if (selectedNewItemGroup === groupName) {
-    selectedNewItemGroup = "";
-  }
-  if (activeSubGroupFilter === groupName) {
-    activeSubGroupFilter = "ALL";
-  }
-  await saveAppData();
-}
-
-async function moveTopic(index, direction) {
-  const topics = appData.topics || [];
-  const targetIndex = index + direction;
-  if (targetIndex < 0 || targetIndex >= topics.length) return;
-
-  const temp = topics[index];
-  topics[index] = topics[targetIndex];
-  topics[targetIndex] = temp;
-
-  await saveAppData();
-}
-
-async function moveTopicItem(topicId, index, direction) {
-  const topic = appData.topics.find((t) => t.id === topicId);
-  if (!topic || !Array.isArray(topic.items)) return;
-
-  const targetIndex = index + direction;
-  if (targetIndex < 0 || targetIndex >= topic.items.length) return;
-
-  const temp = topic.items[index];
-  topic.items[index] = topic.items[targetIndex];
-  topic.items[targetIndex] = temp;
-
-  await saveAppData();
-}
-
-async function addTopicItem(topicId) {
-  const input = document.getElementById("new-topic-item-input");
-  const groupSelect = document.getElementById("new-topic-item-group");
-  if (!input) return;
-
-  const text = input.value.trim();
-  if (!text) return;
-
-  const group = groupSelect ? groupSelect.value : "";
-
-  const topic = appData.topics.find((t) => t.id === topicId);
-  if (!topic) return;
-
-  topic.items = topic.items || [];
-  if (group) {
-    topic.items.push({ text, group });
-  } else {
-    topic.items.push(text);
-  }
-
-  expandedTopicIds.add(topicId);
-  input.value = "";
-  await saveAppData();
-}
-
-async function editTopicItem(topicId, index) {
-  const topic = appData.topics.find((t) => t.id === topicId);
-  if (!topic || !topic.items[index]) return;
-
-  const current = normalizeTopicItem(topic.items[index]);
-  const groupList = Array.isArray(topic.groups) ? topic.groups : [];
-
-  const dialogRes = await openCustomDialog({
-    title: "Chỉnh sửa ghi chú",
-    desc: groupList.length > 0 ? "Sửa nội dung hoặc chọn lại nhóm phân loại bên dưới:" : "",
-    defaultValue: current.text,
-    groups: groupList,
-    selectedGroup: current.group
-  });
-
-  if (!dialogRes) return;
-  const trimmedText = dialogRes.text.trim();
-  if (!trimmedText) return;
-
-  const chosenGroup = dialogRes.group || "";
-  topic.items[index] = chosenGroup ? { text: trimmedText, group: chosenGroup } : trimmedText;
-  await saveAppData();
-}
-
-async function deleteTopicItem(topicId, index) {
-  const topic = appData.topics.find((t) => t.id === topicId);
-  if (!topic) return;
-  topic.items.splice(index, 1);
-  await saveAppData();
-}
-
-function renderTopicIconPicker() {
-  const picker = document.getElementById("topic-icon-picker");
-  if (!picker) return;
-  picker.innerHTML = TOPIC_ICONS.map(
-    (ic) => `
-    <button type="button" onclick="selectTopicIcon('${ic}')" data-ticon="${ic}" class="ticon-btn w-8 h-8 rounded-lg flex items-center justify-center text-lg hover:bg-white transition ${
-      ic === selectedTopicIcon ? "bg-white ring-2 ring-pink-400 shadow-sm" : ""
-    }">
-      ${ic}
-    </button>
-  `
-  ).join("");
-}
-
-function selectTopicIcon(ic) {
-  selectedTopicIcon = ic;
-  document.querySelectorAll(".ticon-btn").forEach((btn) => {
-    btn.className =
-      btn.dataset.ticon === ic
-        ? "ticon-btn w-8 h-8 rounded-lg flex items-center justify-center text-lg bg-white ring-2 ring-pink-400 shadow-sm"
-        : "ticon-btn w-8 h-8 rounded-lg flex items-center justify-center text-lg hover:bg-white transition";
-  });
-}
-
-function openTopicModal(topicId = null) {
-  document.getElementById("edit-topic-id").value = topicId || "";
-  if (topicId) {
-    const topic = appData.topics.find((t) => t.id === topicId);
-    if (!topic) return;
-    document.getElementById("topic-modal-title").innerHTML = `<i data-lucide="pencil" class="w-5 h-5"></i> Chỉnh Sửa Mục`;
-    document.getElementById("input-topic-name").value = topic.name || "";
-    selectTopicIcon(topic.icon || "🏷️");
-  } else {
-    document.getElementById("topic-modal-title").innerHTML = `<i data-lucide="folder-heart" class="w-5 h-5"></i> Thêm Mục Ghi Chép Mới`;
-    document.getElementById("input-topic-name").value = "";
-    selectTopicIcon("🏷️");
-  }
-  document.getElementById("modal-topic").classList.remove("hidden");
-  lucide.createIcons();
-}
-
-function closeTopicModal() {
-  document.getElementById("modal-topic").classList.add("hidden");
-}
-
-async function saveTopic() {
-  const name = document.getElementById("input-topic-name").value.trim();
-  const editId = document.getElementById("edit-topic-id").value;
-  if (!name) {
-    alert("Anh nhớ nhập tên mục nhé!");
-    return;
-  }
-
-  if (editId) {
-    const topic = appData.topics.find((t) => t.id === editId);
-    if (topic) {
-      topic.name = name;
-      topic.icon = selectedTopicIcon;
-    }
-  } else {
-    const newId = "topic_" + Date.now();
-    appData.topics.push({
-      id: newId,
-      name,
-      icon: selectedTopicIcon,
-      groups: [],
-      items: []
-    });
-    activeTopicId = newId;
-    activeSubGroupFilter = "ALL";
-  }
-
-  closeTopicModal();
-  await saveAppData();
-}
-
-async function deleteTopic(topicId) {
-  if (!confirm("Xóa mục này sẽ xóa toàn bộ ghi chú bên trong nó. Anh chắc chắn chứ?")) return;
-  appData.topics = appData.topics.filter((t) => t.id !== topicId);
-  await saveAppData();
-}
-
-// =========================================================================
-// PHIẾU ĐỔI QUÀ TÌNH YÊU (LOVE COUPONS)
-// =========================================================================
-function renderCouponsSection() {
-  const grid = document.getElementById("coupons-grid");
-  const coupons = appData.coupons || [];
-  const isEdit = isEditingAllowed();
-
-  if (coupons.length === 0) {
-    grid.innerHTML = `<p class="col-span-full text-center text-xs text-gray-400 py-4">Chưa có phiếu đổi quà nào.</p>`;
-    return;
-  }
-
-  grid.innerHTML = coupons
-    .map((cp) => {
-      const isUsed = Boolean(cp.used);
-      return `
-        <div class="relative rounded-2xl p-4 border-2 border-dashed transition-all ${
-          isUsed
-            ? "bg-gray-50 border-gray-200 opacity-80"
-            : "bg-gradient-to-br from-pink-50/90 to-purple-50/80 border-pink-300 shadow-sm hover:shadow-md"
-        }">
-          <div class="flex items-start justify-between gap-2">
-            <div class="flex items-center gap-2.5">
-              <span class="text-2xl select-none">${cp.icon || "🎟️"}</span>
-              <div>
-                <h4 class="font-bold text-sm text-gray-800 ${isUsed ? "line-through text-gray-500" : ""}">
-                  ${escapeHtml(cp.title)}
-                </h4>
-                <p class="text-[11px] text-gray-500 mt-0.5">${escapeHtml(cp.desc || "")}</p>
-              </div>
+        <!-- Counters Row: Love Day Counter + Special Event Countdown -->
+        <div class="mt-5 flex flex-wrap items-center justify-center gap-3">
+          <!-- Love Day Counter Pill -->
+          <div class="inline-flex items-center gap-3 bg-white px-5 py-2.5 rounded-2xl shadow-sm border border-pink-100">
+            <div class="w-9 h-9 rounded-full bg-pink-100 flex items-center justify-center text-pink-500">
+              <i data-lucide="heart" class="w-5 h-5 fill-pink-500"></i>
             </div>
-
-            ${
-              isEdit
-                ? `<div class="flex items-center gap-1 shrink-0">
-                     <button onclick="openCouponModal('${cp.id}')" class="p-1.5 rounded-lg text-purple-600 hover:bg-purple-100 transition" title="Chỉnh sửa phiếu">
-                       <i data-lucide="pencil" class="w-3.5 h-3.5"></i>
-                     </button>
-                     <button onclick="deleteCoupon('${cp.id}')" class="p-1.5 rounded-lg text-rose-400 hover:bg-rose-100 transition" title="Xóa phiếu">
-                       <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
-                     </button>
-                   </div>`
-                : ""
-            }
+            <div class="text-left">
+              <div class="text-[11px] uppercase tracking-wider text-pink-400 font-bold">Bên nhau được</div>
+              <div class="text-base sm:text-lg font-bold text-pink-600">
+                <span id="days-counter">0</span> ngày ngọt ngào
+              </div>
+              <div id="start-date-display" class="text-[10px] text-gray-400 font-semibold">Từ 01/01/2025</div>
+            </div>
           </div>
 
-          <div class="mt-3 pt-2.5 border-t border-pink-200/60 flex items-center justify-between gap-2">
-            ${
-              isUsed
-                ? `<span class="text-[11px] font-bold text-emerald-600 flex items-center gap-1">
-                     <i data-lucide="check-circle-2" class="w-3.5 h-3.5"></i> Đã dùng (${escapeHtml(formatDateVN(cp.usedAt) || "Vừa xong")})
-                   </span>
-                   ${
-                     isEdit
-                       ? `<button onclick="toggleCouponStatus('${cp.id}', false)" class="px-2.5 py-1 rounded-lg bg-white text-purple-600 border border-purple-200 text-[11px] font-bold hover:bg-purple-50">
-                            Tặng lại
-                          </button>`
-                       : ""
-                   }`
-                : `<span class="text-[11px] font-semibold text-pink-500">Chưa sử dụng</span>
-                   <button onclick="redeemCoupon('${cp.id}')" class="px-3 py-1 rounded-full bg-pink-500 text-white text-[11px] font-bold shadow-sm hover:bg-pink-600 transition">
-                     Sử Dụng Ngay ✨
-                   </button>`
-            }
+          <!-- Special Event Countdown Pill -->
+          <div id="special-countdown-pill" class="inline-flex items-center gap-3 bg-white px-5 py-2.5 rounded-2xl shadow-sm border border-amber-100">
+            <div class="w-9 h-9 rounded-full bg-amber-100 flex items-center justify-center text-amber-500">
+              <i data-lucide="calendar-heart" class="w-5 h-5"></i>
+            </div>
+            <div class="text-left">
+              <div id="special-event-label" class="text-[11px] uppercase tracking-wider text-amber-500 font-bold">Ngày đặc biệt ✨</div>
+              <div id="special-event-days" class="text-base sm:text-lg font-bold text-amber-600">
+                Còn 0 ngày
+              </div>
+              <div id="special-event-date-display" class="text-[10px] text-gray-400 font-semibold"></div>
+            </div>
           </div>
         </div>
-      `;
-    })
-    .join("");
-  lucide.createIcons();
-}
+      </header>
 
-async function redeemCoupon(couponId) {
-  const cp = appData.coupons.find((c) => c.id === couponId);
-  if (!cp || cp.used) return;
+      <!-- ADMIN TOOLBAR (CHỈ HIỆN Ở CHẾ ĐỘ CỦA ANH) -->
+      <section id="admin-dashboard-panel" class="admin-control hidden mb-8 bg-white/95 rounded-3xl p-5 shadow-md border-2 border-pink-200">
+        <div class="flex flex-wrap items-center justify-between gap-3 mb-3 pb-3 border-b border-pink-100">
+          <div>
+            <h2 class="font-bold text-pink-700 text-base flex items-center gap-2">
+              <i data-lucide="sparkles" class="w-4 h-4 text-pink-500"></i> Bảng Điều Khiển Của Anh
+            </h2>
+            <p class="text-xs text-gray-500">Mọi thay đổi tự động lưu lên Cloud để em xem bất cứ lúc nào.</p>
+          </div>
+          <div class="flex flex-wrap items-center gap-2">
+            <button onclick="openMemoryModal()" class="px-3.5 py-2 rounded-xl bg-gradient-to-r from-pink-500 to-rose-500 text-white text-xs font-bold shadow hover:opacity-95 transition flex items-center gap-1.5">
+              <i data-lucide="plus-circle" class="w-4 h-4"></i> Thêm Thẻ Bí Mật
+            </button>
+            <button onclick="openTopicModal()" class="px-3.5 py-2 rounded-xl bg-amber-50 text-amber-700 border border-amber-200 text-xs font-bold hover:bg-amber-100 transition flex items-center gap-1.5">
+              <i data-lucide="folder-plus" class="w-4 h-4"></i> Thêm Mục Ghi Chép
+            </button>
+            <button onclick="openCouponModal()" class="px-3.5 py-2 rounded-xl bg-purple-50 text-purple-700 border border-purple-200 text-xs font-bold hover:bg-purple-100 transition flex items-center gap-1.5">
+              <i data-lucide="ticket" class="w-4 h-4"></i> Tạo Phiếu Đổi Quà
+            </button>
+            <button onclick="openAddMusicModal()" class="px-3.5 py-2 rounded-xl bg-sky-50 text-sky-700 border border-sky-200 text-xs font-bold hover:bg-sky-100 transition flex items-center gap-1.5">
+              <i data-lucide="music" class="w-4 h-4"></i> Thêm Nhạc
+            </button>
+            <button onclick="toggleManageDrawer()" class="px-3.5 py-2 rounded-xl bg-pink-100 text-pink-700 text-xs font-bold hover:bg-pink-200 transition flex items-center gap-1.5">
+              <i data-lucide="list" class="w-4 h-4"></i> Quản Lý Thẻ (<span id="admin-count">0</span>)
+            </button>
+            <button onclick="toggleNotificationsDrawer()" class="relative px-3.5 py-2 rounded-xl bg-rose-50 text-rose-700 border border-rose-200 text-xs font-bold hover:bg-rose-100 transition flex items-center gap-1.5">
+              <i data-lucide="bell" class="w-4 h-4"></i> Hoạt Động Của Em
+              <span id="admin-notif-badge" class="hidden px-1.5 py-0.2 rounded-full bg-rose-500 text-white text-[10px] font-bold">0</span>
+            </button>
+          </div>
+        </div>
 
-  if (!confirm(`Em muốn kích hoạt phiếu "${cp.title}" ngay bây giờ chứ?`)) return;
+        <!-- Private Drawer 1: Activity Notifications from Girlfriend -->
+        <div id="admin-notif-drawer" class="hidden space-y-2.5 mt-3 mb-3 p-3.5 rounded-2xl bg-rose-50/70 border border-rose-200/80 max-h-72 overflow-y-auto">
+          <div class="flex items-center justify-between gap-2">
+            <span class="text-xs font-bold text-rose-700 uppercase tracking-wider">💌 Nhật ký tương tác của em:</span>
+            <button onclick="markAllNotificationsRead()" class="text-[11px] font-bold text-rose-600 hover:underline">
+              Đánh dấu đã xem tất cả
+            </button>
+          </div>
+          <div id="admin-notif-list" class="space-y-2"></div>
+        </div>
 
-  cp.used = true;
-  cp.usedAt = getTodayVN();
-  pushGfActivity("coupon", `Em vừa sử dụng phiếu đổi quà "${cp.title}" ${cp.icon || "🎟️"}`);
-  triggerHeartConfetti();
-  await saveAppData();
-}
+        <!-- Private Drawer 2: Manage All Memories -->
+        <div id="admin-manage-drawer" class="hidden space-y-3 mt-3 max-h-96 overflow-y-auto pr-1">
+          <div class="text-xs font-bold text-pink-500 uppercase tracking-wider">Danh sách toàn bộ thẻ bí mật & phản hồi của em:</div>
+          <div id="admin-memories-list" class="space-y-2.5"></div>
+        </div>
+      </section>
 
-async function toggleCouponStatus(couponId, usedState) {
-  const cp = appData.coupons.find((c) => c.id === couponId);
-  if (!cp) return;
-  cp.used = usedState;
-  cp.usedAt = usedState ? getTodayVN() : "";
-  await saveAppData();
-}
+      <!-- ========================================== -->
+      <!-- 1. SECRET LOVE LETTER ENVELOPE (ĐẦU TIÊN)  -->
+      <!-- ========================================== -->
+      <section class="mb-10">
+        <div class="envelope-box p-6 text-center">
+          <div class="w-12 h-12 mx-auto mb-2 rounded-full bg-pink-100 text-pink-500 flex items-center justify-center">
+            <i data-lucide="mail" class="w-6 h-6"></i>
+          </div>
+          <h3 class="font-handwriting text-3xl font-bold text-pink-600 mb-1">
+            Bức Thư Nhỏ Gửi Em 💌
+          </h3>
+          <p class="text-xs text-pink-700/70 mb-4">
+            Một vài lời nhắn nhủ anh viết riêng cho em trước khi khám phá góc nhỏ này...
+          </p>
 
-function renderCouponIconPicker() {
-  const picker = document.getElementById("coupon-icon-picker");
-  if (!picker) return;
-  picker.innerHTML = COUPON_ICONS.map(
-    (ic) => `
-    <button type="button" onclick="selectCouponIcon('${ic}')" data-cicon="${ic}" class="cicon-btn w-8 h-8 rounded-lg flex items-center justify-center text-lg hover:bg-white transition ${
-      ic === selectedCouponIcon ? "bg-white ring-2 ring-purple-400 shadow-sm" : ""
-    }">
-      ${ic}
-    </button>
-  `
-  ).join("");
-}
+          <div class="flex items-center justify-center gap-2">
+            <button id="btn-toggle-letter" onclick="toggleSecretLetter()" class="px-5 py-2 rounded-full bg-white text-pink-600 border border-pink-200 text-xs sm:text-sm font-bold shadow-sm hover:bg-pink-50 transition">
+              Mở Phong Bì
+            </button>
+            <button onclick="openLetterModal()" class="admin-control hidden px-4 py-2 rounded-full bg-pink-500 text-white text-xs font-bold shadow-sm hover:bg-pink-600 transition flex items-center gap-1">
+              <i data-lucide="edit-3" class="w-3.5 h-3.5"></i> Sửa Thư
+            </button>
+          </div>
 
-function selectCouponIcon(ic) {
-  selectedCouponIcon = ic;
-  document.querySelectorAll(".cicon-btn").forEach((btn) => {
-    btn.className =
-      btn.dataset.cicon === ic
-        ? "cicon-btn w-8 h-8 rounded-lg flex items-center justify-center text-lg bg-white ring-2 ring-purple-400 shadow-sm"
-        : "cicon-btn w-8 h-8 rounded-lg flex items-center justify-center text-lg hover:bg-white transition";
-  });
-}
+          <!-- Letter Content -->
+          <div id="secret-letter-content" class="hidden mt-5 bg-white/95 rounded-2xl p-6 text-left shadow-inner border border-pink-100 animate-pop-in">
+            <p id="letter-body-text" class="font-note text-xl sm:text-2xl leading-relaxed text-gray-700 whitespace-pre-line"></p>
+            <div class="mt-4 text-right font-handwriting text-2xl text-pink-500 font-bold" id="letter-sign-text">
+              — Thương em thật nhiều ❤️
+            </div>
+          </div>
+        </div>
+      </section>
 
-function openCouponModal(couponId = null) {
-  document.getElementById("edit-coupon-id").value = couponId || "";
+      <!-- ========================================== -->
+      <!-- 2. TOPIC NOTEBOOK SECTION (THỨ HAI)        -->
+      <!-- ========================================== -->
+      <section class="mb-10">
+        <div class="bg-white/95 rounded-3xl p-5 sm:p-6 shadow-md border-2 border-pink-100 relative">
+          <div class="flex flex-wrap items-center justify-between gap-2 mb-4">
+            <div>
+              <h3 class="font-handwriting text-3xl font-bold text-pink-600 flex items-center gap-2">
+                Tất Tần Tật Về Em 📖
+              </h3>
+              <p class="text-xs text-pink-800/70">Những mảnh ghép nhỏ tạo nên cô gái của anh</p>
+            </div>
+            <button onclick="openTopicModal()" class="admin-control hidden px-3.5 py-1.5 rounded-full bg-pink-500 text-white text-xs font-bold shadow-sm hover:bg-pink-600 transition flex items-center gap-1">
+              <i data-lucide="plus" class="w-3.5 h-3.5"></i> Thêm Mục Mới
+            </button>
+          </div>
 
-  if (couponId) {
-    const cp = (appData.coupons || []).find((c) => c.id === couponId);
-    if (!cp) return;
-    document.getElementById("coupon-modal-title").innerHTML = `<i data-lucide="pencil" class="w-5 h-5"></i> Chỉnh Sửa Phiếu Đổi Quà`;
-    document.getElementById("input-coupon-title").value = cp.title || "";
-    document.getElementById("input-coupon-desc").value = cp.desc || "";
-    selectCouponIcon(cp.icon || "🧋");
-  } else {
-    document.getElementById("coupon-modal-title").innerHTML = `<i data-lucide="ticket" class="w-5 h-5"></i> Tạo Phiếu Đổi Quà Mới`;
-    document.getElementById("input-coupon-title").value = "";
-    document.getElementById("input-coupon-desc").value = "";
-    selectCouponIcon("🧋");
-  }
+          <!-- Topic Tabs Bar -->
+          <div id="topic-tabs-bar" class="flex items-center gap-2 overflow-x-auto no-scrollbar pb-2 mb-4 border-b border-pink-100"></div>
 
-  document.getElementById("modal-coupon").classList.remove("hidden");
-  lucide.createIcons();
-}
+          <!-- Active Topic Content Card -->
+          <div id="active-topic-panel" class="min-h-[160px]"></div>
+        </div>
+      </section>
 
-function closeCouponModal() {
-  document.getElementById("modal-coupon").classList.add("hidden");
-}
+      <!-- ========================================== -->
+      <!-- 3. LOVE COUPONS SECTION (THỨ BA)           -->
+      <!-- ========================================== -->
+      <section class="mb-10">
+        <div class="bg-white/95 rounded-3xl p-5 sm:p-6 shadow-md border-2 border-pink-100 relative">
+          <div class="flex flex-wrap items-center justify-between gap-2 mb-4">
+            <div>
+              <h3 class="font-handwriting text-3xl font-bold text-pink-600 flex items-center gap-2">
+                Phiếu Đổi Quà Độc Quyền 🎟️
+              </h3>
+              <p class="text-xs text-pink-800/70">Bấm sử dụng bất cứ khi nào em muốn nhé (có hiệu lực vô thời hạn)</p>
+            </div>
+            <button onclick="openCouponModal()" class="admin-control hidden px-3.5 py-1.5 rounded-full bg-purple-500 text-white text-xs font-bold shadow-sm hover:bg-purple-600 transition flex items-center gap-1">
+              <i data-lucide="plus" class="w-3.5 h-3.5"></i> Thêm Phiếu Mới
+            </button>
+          </div>
 
-async function saveCoupon() {
-  const title = document.getElementById("input-coupon-title").value.trim();
-  const desc = document.getElementById("input-coupon-desc").value.trim();
-  const editId = document.getElementById("edit-coupon-id").value;
+          <div id="coupons-grid" class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <!-- Coupons rendered via JS -->
+          </div>
+        </div>
+      </section>
 
-  if (!title) {
-    alert("Anh nhớ nhập tên phiếu quà tặng nhé!");
-    return;
-  }
+      <!-- ========================================== -->
+      <!-- 4. MYSTERY CARD STAGE (CUỐI CÙNG)          -->
+      <!-- ========================================== -->
+      <section class="mb-8">
+        <div id="mystery-box-container" class="mystery-card p-7 text-center text-white relative overflow-hidden" onclick="drawRandomMemory()">
+          <div class="absolute -right-6 -top-6 w-28 h-28 bg-white/10 rounded-full blur-xl"></div>
+          <div class="absolute -left-6 -bottom-6 w-28 h-28 bg-white/10 rounded-full blur-xl"></div>
 
-  appData.coupons = appData.coupons || [];
+          <div class="w-16 h-16 mx-auto mb-3 rounded-2xl bg-white/20 backdrop-blur-sm flex items-center justify-center shadow-inner">
+            <i data-lucide="sparkles" class="w-8 h-8 text-white"></i>
+          </div>
+          <h2 class="font-handwriting text-3xl sm:text-4xl font-bold mb-1">
+            Hộp Kỷ Niệm Bí Mật ✨
+          </h2>
+          <p class="text-xs sm:text-sm text-pink-50 max-w-md mx-auto mb-4">
+            Có <strong id="mystery-total-count" class="underline decoration-wavy">0</strong> điều thú vị về em được giấu ở đây. Chạm để mở ngẫu nhiên từng thẻ nhé!
+          </p>
+          <div class="inline-flex items-center gap-2 bg-white text-pink-600 px-5 py-2 rounded-full text-xs sm:text-sm font-bold shadow-md">
+            <i data-lucide="shuffle" class="w-4 h-4"></i>
+            <span id="draw-btn-label">Mở Một Điều Bất Ngờ</span>
+          </div>
+        </div>
 
-  if (editId) {
-    const cp = appData.coupons.find((c) => c.id === editId);
-    if (cp) {
-      cp.title = title;
-      cp.desc = desc;
-      cp.icon = selectedCouponIcon;
-    }
-  } else {
-    appData.coupons.push({
-      id: "cp_" + Date.now(),
-      icon: selectedCouponIcon,
-      title,
-      desc,
-      used: false,
-      usedAt: ""
-    });
-  }
+        <!-- Revealed Polaroid Stage -->
+        <div id="revealed-stage" class="hidden mt-6">
+          <div id="revealed-card-slot"></div>
 
-  closeCouponModal();
-  await saveAppData();
-}
+          <div class="mt-5 flex items-center justify-center gap-3">
+            <button onclick="drawRandomMemory()" class="px-5 py-2.5 rounded-full bg-gradient-to-r from-pink-500 to-rose-500 text-white text-xs sm:text-sm font-bold shadow-md hover:shadow-lg transition flex items-center gap-2">
+              <i data-lucide="sparkles" class="w-4 h-4"></i> Mở Thẻ Tiếp Theo
+            </button>
+            <button onclick="triggerHeartConfetti()" class="p-2.5 rounded-full bg-white text-pink-500 border border-pink-200 shadow-sm hover:bg-pink-50 transition" title="Thả tim">
+              <i data-lucide="heart" class="w-4 h-4 fill-pink-500"></i>
+            </button>
+          </div>
+          <p id="seen-progress-text" class="text-center text-xs text-pink-500/80 font-semibold mt-2.5"></p>
+        </div>
+      </section>
 
-async function deleteCoupon(couponId) {
-  if (!confirm("Anh muốn xóa phiếu quà tặng này?")) return;
-  appData.coupons = appData.coupons.filter((c) => c.id !== couponId);
-  await saveAppData();
-}
+    </main>
+
+    <!-- ========================================== -->
+    <!-- MINI MUSIC PLAYER NỔI GÓC DƯỚI             -->
+    <!-- ========================================== -->
+    <div id="music-player-widget" class="fixed bottom-4 right-4 z-40 max-w-[calc(100vw-2rem)]">
+      <!-- Hidden YouTube Audio Container -->
+      <div class="fixed -left-[9999px] -top-[9999px] w-1 h-1 overflow-hidden pointer-events-none">
+        <div id="yt-hidden-player"></div>
+      </div>
+
+      <!-- Compact Floating Bar -->
+      <div id="music-compact-bar" class="bg-white/95 backdrop-blur-md border-2 border-pink-200 rounded-full px-3 py-2 shadow-xl flex items-center gap-2.5">
+        <button
+          onclick="togglePlayPause()"
+          id="music-play-btn-compact"
+          class="w-9 h-9 rounded-full bg-gradient-to-r from-pink-500 to-rose-500 text-white flex items-center justify-center shadow-sm hover:opacity-95 transition shrink-0"
+          title="Phát / Tạm dừng"
+        >
+          <i data-lucide="play" class="w-4 h-4 fill-white"></i>
+        </button>
+
+        <div onclick="toggleMusicDrawer()" class="cursor-pointer min-w-0 max-w-[155px] sm:max-w-[200px]">
+          <div id="music-current-title" class="text-xs font-bold text-gray-800 truncate">Chưa có bài hát</div>
+          <div id="music-current-artist" class="text-[10px] text-pink-500 font-semibold truncate">Nhạc của tụi mình 🎵</div>
+        </div>
+
+        <button onclick="nextTrack()" class="p-1.5 rounded-full text-pink-500 hover:bg-pink-50 transition shrink-0" title="Bài tiếp theo">
+          <i data-lucide="skip-forward" class="w-4 h-4"></i>
+        </button>
+
+        <button onclick="toggleMusicDrawer()" class="p-1.5 rounded-full bg-pink-50 text-pink-600 hover:bg-pink-100 transition shrink-0" title="Mở danh sách phát">
+          <i data-lucide="list-music" class="w-4 h-4"></i>
+        </button>
+      </div>
+
+      <!-- Expanded Playlist Card -->
+      <div id="music-expanded-card" class="hidden w-80 sm:w-96 bg-white/98 backdrop-blur-md border-2 border-pink-200 rounded-3xl p-4 shadow-2xl animate-pop-in">
+        <div class="flex items-center justify-between gap-2 pb-2.5 mb-3 border-b border-pink-100">
+          <div class="flex items-center gap-2 min-w-0">
+            <span id="music-disc-icon" class="text-xl inline-block shrink-0">💿</span>
+            <div class="min-w-0">
+              <div class="flex items-center gap-1">
+                <div id="music-widget-title" class="text-xs font-bold text-pink-600 truncate">Góc Nhạc Của Tụi Mình</div>
+                <button onclick="openMusicSettingsModal()" class="admin-control hidden p-1 rounded-full text-pink-500 hover:bg-pink-100 transition shrink-0" title="Sửa tên góc nhạc & dòng 'Nhạc của tụi mình 🎵'">
+                  <i data-lucide="pencil" class="w-3 h-3"></i>
+                </button>
+              </div>
+              <div id="music-playlist-count" class="text-[10px] text-gray-400 font-semibold">0 bài hát</div>
+            </div>
+          </div>
+          <div class="flex items-center gap-1 shrink-0">
+            <button onclick="openAddMusicModal()" class="admin-control hidden px-2.5 py-1 rounded-full bg-pink-500 text-white text-[11px] font-bold hover:bg-pink-600 transition flex items-center gap-1">
+              <i data-lucide="plus" class="w-3 h-3"></i> Thêm bài
+            </button>
+            <button onclick="toggleMusicDrawer()" class="p-1.5 rounded-full text-gray-400 hover:bg-pink-50 hover:text-pink-500 transition" title="Thu gọn">
+              <i data-lucide="chevron-down" class="w-4 h-4"></i>
+            </button>
+          </div>
+        </div>
+
+        <!-- Now Playing Box -->
+        <div class="p-3 rounded-2xl bg-gradient-to-br from-pink-50 to-rose-50/70 border border-pink-100 mb-3">
+          <div id="music-full-title" class="text-xs sm:text-sm font-bold text-gray-800 truncate">Chưa chọn bài hát</div>
+          <div class="flex items-center justify-between gap-1 mt-0.5">
+            <div id="music-full-artist" class="text-[11px] text-pink-600 font-medium truncate">Nhạc của tụi mình 🎵</div>
+            <button onclick="openMusicSettingsModal()" class="admin-control hidden text-[10px] text-pink-500 hover:underline shrink-0">
+              Sửa dòng này
+            </button>
+          </div>
+
+          <div id="music-error-banner" class="hidden mt-1.5 text-[10px] text-rose-600 bg-rose-50 border border-rose-200 rounded-lg px-2 py-1"></div>
+
+          <!-- Progress Bar -->
+          <div class="mt-2.5">
+            <input
+              type="range"
+              id="music-progress-bar"
+              min="0"
+              max="100"
+              value="0"
+              oninput="seekMusic(this.value)"
+              class="w-full h-1.5 bg-pink-200 rounded-lg appearance-none cursor-pointer accent-pink-500"
+            />
+            <div class="flex justify-between text-[10px] text-gray-400 font-semibold mt-0.5">
+              <span id="music-time-current">0:00</span>
+              <span id="music-time-total">0:00</span>
+            </div>
+          </div>
+
+          <!-- Transport Controls -->
+          <div class="mt-2 flex items-center justify-center gap-3">
+            <button onclick="prevTrack()" class="p-2 rounded-full bg-white text-pink-600 border border-pink-100 hover:bg-pink-50 transition" title="Bài trước">
+              <i data-lucide="skip-back" class="w-4 h-4"></i>
+            </button>
+            <button onclick="togglePlayPause()" id="music-play-btn-full" class="w-10 h-10 rounded-full bg-gradient-to-r from-pink-500 to-rose-500 text-white flex items-center justify-center shadow-md hover:opacity-95 transition" title="Phát / Tạm dừng">
+              <i data-lucide="play" class="w-4 h-4 fill-white"></i>
+            </button>
+            <button onclick="nextTrack()" class="p-2 rounded-full bg-white text-pink-600 border border-pink-100 hover:bg-pink-50 transition" title="Bài tiếp theo">
+              <i data-lucide="skip-forward" class="w-4 h-4"></i>
+            </button>
+            <button onclick="toggleLoopMode()" id="music-loop-btn" class="p-2 rounded-full bg-pink-100 text-pink-600 border border-pink-200 transition" title="Lặp lại danh sách">
+              <i data-lucide="repeat" class="w-4 h-4"></i>
+            </button>
+          </div>
+        </div>
+
+        <!-- Playlist Tracks -->
+        <div id="music-playlist-list" class="max-h-48 overflow-y-auto space-y-1.5 pr-1"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODALS -->
+  <!-- 1. Profile, Countdown & Password Settings Modal -->
+  <div id="modal-profile" class="fixed inset-0 z-50 hidden bg-black/40 backdrop-blur-sm flex items-center justify-center p-4 overflow-y-auto">
+    <div class="bg-white rounded-3xl max-w-md w-full p-6 shadow-2xl border-2 border-pink-100 my-8 animate-pop-in">
+      <h3 class="text-lg font-bold text-pink-600 mb-4 flex items-center gap-2">
+        <i data-lucide="settings" class="w-5 h-5"></i> Cài Đặt Sổ Tay & Mật Khẩu
+      </h3>
+      <div class="space-y-3 text-left">
+        <div>
+          <label class="block text-xs font-bold text-gray-600 mb-1">Dòng nhãn nhỏ phía trên tiêu đề</label>
+          <input type="text" id="input-badge" placeholder="VD: ✨ Sổ Tay Bí Mật Dành Riêng Cho Em ✨" class="w-full px-3.5 py-2 rounded-xl border border-pink-200 text-sm focus:outline-none focus:border-pink-500" />
+        </div>
+        <div>
+          <label class="block text-xs font-bold text-gray-600 mb-1">Tiêu đề trang web</label>
+          <input type="text" id="input-title" class="w-full px-3.5 py-2 rounded-xl border border-pink-200 text-sm focus:outline-none focus:border-pink-500" />
+        </div>
+        <div>
+          <label class="block text-xs font-bold text-gray-600 mb-1">Dòng mô tả nhỏ</label>
+          <input type="text" id="input-subtitle" class="w-full px-3.5 py-2 rounded-xl border border-pink-200 text-sm focus:outline-none focus:border-pink-500" />
+        </div>
+        <div>
+          <label class="block text-xs font-bold text-pink-600 mb-1">Ngày bắt đầu yêu nhau (Mật khẩu mở thư của em - 8 số ddmmyyyy)</label>
+          <input type="text" id="input-start-date" placeholder="VD: 15082026" class="w-full px-3.5 py-2 rounded-xl border border-pink-200 text-sm focus:outline-none focus:border-pink-500" />
+        </div>
+        <div class="p-3 rounded-2xl bg-amber-50/70 border border-amber-100 space-y-2">
+          <div class="text-xs font-bold text-amber-700">Sự kiện đếm ngược (Sinh nhật em / Kỷ niệm)</div>
+          <input type="text" id="input-event-name" placeholder="VD: Sinh nhật Chip 🎂" class="w-full px-3 py-1.5 rounded-xl border border-amber-200 text-xs focus:outline-none focus:border-amber-500 bg-white" />
+          <input type="text" id="input-event-date" placeholder="Nhập ngày theo dạng dd/mm/yyyy (VD: 25/12/2026)" class="w-full px-3 py-1.5 rounded-xl border border-amber-200 text-xs focus:outline-none focus:border-amber-500 bg-white" />
+        </div>
+        <div>
+          <label class="block text-xs font-bold text-gray-600 mb-1">Mật khẩu riêng của anh (Mở Bảng Điều Khiển)</label>
+          <input type="text" id="input-new-password" placeholder="Nhập mật khẩu riêng của anh..." class="w-full px-3.5 py-2 rounded-xl border border-pink-200 text-sm focus:outline-none focus:border-pink-500" />
+        </div>
+      </div>
+      <div class="flex gap-2 mt-5">
+        <button onclick="closeProfileModal()" class="flex-1 py-2.5 rounded-xl bg-gray-100 text-gray-600 text-xs font-bold">Đóng</button>
+        <button onclick="saveProfile()" class="flex-1 py-2.5 rounded-xl bg-pink-500 text-white text-xs font-bold hover:bg-pink-600">Lưu Thay Đổi</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 2. Add / Edit Memory Modal -->
+  <div id="modal-memory" class="fixed inset-0 z-50 hidden bg-black/40 backdrop-blur-sm flex items-center justify-center p-4 overflow-y-auto">
+    <div class="bg-white rounded-3xl max-w-md w-full p-6 shadow-2xl border-2 border-pink-100 my-8 animate-pop-in">
+      <h3 id="memory-modal-title" class="text-lg font-bold text-pink-600 mb-4 flex items-center gap-2">
+        <i data-lucide="camera" class="w-5 h-5"></i> Thêm Kỷ Niệm Bí Mật
+      </h3>
+      <input type="hidden" id="edit-memory-id" />
+
+      <div class="space-y-3 text-left">
+        <div>
+          <label class="block text-xs font-bold text-gray-600 mb-1">Tiêu đề / Điều thú vị về em *</label>
+          <input type="text" id="mem-title" placeholder="VD: Lúc em ngủ gật trên xe..." class="w-full px-3.5 py-2 rounded-xl border border-pink-200 text-sm focus:outline-none focus:border-pink-500" />
+        </div>
+
+        <div class="grid grid-cols-2 gap-2">
+          <div>
+            <label class="block text-xs font-bold text-gray-600 mb-1">Ngày (dd/mm/yyyy)</label>
+            <input type="text" id="mem-date" placeholder="dd/mm/yyyy" class="w-full px-3 py-2 rounded-xl border border-pink-200 text-sm focus:outline-none focus:border-pink-500" />
+          </div>
+          <div>
+            <label class="block text-xs font-bold text-gray-600 mb-1">Nhãn phân loại</label>
+            <select id="mem-tag" class="w-full px-3 py-2 rounded-xl border border-pink-200 text-sm focus:outline-none focus:border-pink-500 bg-white">
+              <option value="Thói quen đáng yêu">🥰 Thói quen đáng yêu</option>
+              <option value="Món em thích">🧋 Món em thích</option>
+              <option value="Kỷ niệm của tụi mình">📸 Kỷ niệm của tụi mình</option>
+              <option value="Câu nói bất hủ">💬 Câu nói bất hủ</option>
+              <option value="Điều anh thương">💖 Điều anh thương</option>
+            </select>
+          </div>
+        </div>
+
+        <div>
+          <label class="block text-xs font-bold text-gray-600 mb-1">Chọn Sticker trang trí</label>
+          <div id="sticker-picker" class="flex flex-wrap gap-1.5 bg-pink-50/70 p-2 rounded-xl border border-pink-100"></div>
+        </div>
+
+        <div>
+          <label class="block text-xs font-bold text-gray-600 mb-1">Ảnh Polaroid (Tùy chọn)</label>
+          <input type="file" id="mem-image-file" accept="image/*" onchange="handleImageUpload(event)" class="w-full text-xs text-gray-500 file:mr-3 file:py-1.5 file:px-3 file:rounded-full file:border-0 file:text-xs file:font-bold file:bg-pink-100 file:text-pink-600 hover:file:bg-pink-200" />
+          <div id="mem-image-preview-box" class="hidden mt-2 relative inline-block">
+            <img id="mem-image-preview" src="" class="h-28 w-auto rounded-xl object-cover border border-pink-200" />
+            <button type="button" onclick="clearUploadedImage()" class="absolute -top-2 -right-2 w-6 h-6 rounded-full bg-rose-500 text-white text-xs flex items-center justify-center shadow">✕</button>
+          </div>
+        </div>
+
+        <div>
+          <label class="block text-xs font-bold text-gray-600 mb-1">Lời nhắn / Ghi chú chi tiết *</label>
+          <textarea id="mem-note" rows="3" placeholder="Kể lại khoảnh khắc đó hoặc điều anh muốn nhắn cho em..." class="w-full px-3.5 py-2 rounded-xl border border-pink-200 text-sm focus:outline-none focus:border-pink-500"></textarea>
+        </div>
+      </div>
+
+      <div class="flex gap-2 mt-5">
+        <button onclick="closeMemoryModal()" class="flex-1 py-2.5 rounded-xl bg-gray-100 text-gray-600 text-xs font-bold">Hủy</button>
+        <button onclick="saveMemory()" class="flex-1 py-2.5 rounded-xl bg-pink-500 text-white text-xs font-bold hover:bg-pink-600">Lưu Kỷ Niệm</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 3. Add / Edit Topic Category Modal -->
+  <div id="modal-topic" class="fixed inset-0 z-50 hidden bg-black/40 backdrop-blur-sm flex items-center justify-center p-4">
+    <div class="bg-white rounded-3xl max-w-md w-full p-6 shadow-2xl border-2 border-pink-100 animate-pop-in">
+      <h3 id="topic-modal-title" class="text-lg font-bold text-pink-600 mb-4 flex items-center gap-2">
+        <i data-lucide="folder-heart" class="w-5 h-5"></i> Thêm Mục Ghi Chép Mới
+      </h3>
+      <input type="hidden" id="edit-topic-id" />
+
+      <div class="space-y-3 text-left">
+        <div>
+          <label class="block text-xs font-bold text-gray-600 mb-1">Tên mục (VD: Sở thích ăn uống, Tên gọi, Thú vui...)</label>
+          <input type="text" id="input-topic-name" placeholder="Nhập tên mục..." class="w-full px-3.5 py-2 rounded-xl border border-pink-200 text-sm focus:outline-none focus:border-pink-500" />
+        </div>
+
+        <div>
+          <label class="block text-xs font-bold text-gray-600 mb-1">Chọn biểu tượng cho mục</label>
+          <div id="topic-icon-picker" class="flex flex-wrap gap-1.5 bg-pink-50/70 p-2 rounded-xl border border-pink-100"></div>
+        </div>
+      </div>
+
+      <div class="flex gap-2 mt-5">
+        <button onclick="closeTopicModal()" class="flex-1 py-2.5 rounded-xl bg-gray-100 text-gray-600 text-xs font-bold">Hủy</button>
+        <button onclick="saveTopic()" class="flex-1 py-2.5 rounded-xl bg-pink-500 text-white text-xs font-bold hover:bg-pink-600">Lưu Mục</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 4. Add / Edit Coupon Modal -->
+  <div id="modal-coupon" class="fixed inset-0 z-50 hidden bg-black/40 backdrop-blur-sm flex items-center justify-center p-4">
+    <div class="bg-white rounded-3xl max-w-md w-full p-6 shadow-2xl border-2 border-pink-100 animate-pop-in">
+      <h3 id="coupon-modal-title" class="text-lg font-bold text-purple-600 mb-4 flex items-center gap-2">
+        <i data-lucide="ticket" class="w-5 h-5"></i> Tạo Phiếu Đổi Quà Mới
+      </h3>
+      <input type="hidden" id="edit-coupon-id" />
+      <div class="space-y-3 text-left">
+        <div>
+          <label class="block text-xs font-bold text-gray-600 mb-1">Tên phiếu quà tặng *</label>
+          <input type="text" id="input-coupon-title" placeholder="VD: 1 ly trà sữa full topping bất kể giờ giấc" class="w-full px-3.5 py-2 rounded-xl border border-pink-200 text-sm focus:outline-none focus:border-pink-500" />
+        </div>
+        <div>
+          <label class="block text-xs font-bold text-gray-600 mb-1">Mô tả ngắn / Điều kiện dễ thương</label>
+          <input type="text" id="input-coupon-desc" placeholder="VD: Áp dụng ngay lập tức khi em thèm ngọt" class="w-full px-3.5 py-2 rounded-xl border border-pink-200 text-sm focus:outline-none focus:border-pink-500" />
+        </div>
+        <div>
+          <label class="block text-xs font-bold text-gray-600 mb-1">Biểu tượng</label>
+          <div id="coupon-icon-picker" class="flex flex-wrap gap-1.5 bg-purple-50/70 p-2 rounded-xl border border-purple-100"></div>
+        </div>
+      </div>
+      <div class="flex gap-2 mt-5">
+        <button onclick="closeCouponModal()" class="flex-1 py-2.5 rounded-xl bg-gray-100 text-gray-600 text-xs font-bold">Hủy</button>
+        <button onclick="saveCoupon()" class="flex-1 py-2.5 rounded-xl bg-purple-500 text-white text-xs font-bold hover:bg-purple-600">Lưu Phiếu</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 5. Edit Secret Letter Modal -->
+  <div id="modal-letter" class="fixed inset-0 z-50 hidden bg-black/40 backdrop-blur-sm flex items-center justify-center p-4">
+    <div class="bg-white rounded-3xl max-w-md w-full p-6 shadow-2xl border-2 border-pink-100 animate-pop-in">
+      <h3 class="text-lg font-bold text-pink-600 mb-3 flex items-center gap-2">
+        <i data-lucide="heart" class="w-5 h-5"></i> Viết Bức Thư Bí Mật
+      </h3>
+      <textarea id="input-letter-body" rows="6" class="w-full px-3.5 py-2.5 rounded-xl border border-pink-200 text-sm focus:outline-none focus:border-pink-500 mb-3" placeholder="Viết tâm tư gửi em..."></textarea>
+      <input type="text" id="input-letter-sign" class="w-full px-3.5 py-2 rounded-xl border border-pink-200 text-sm focus:outline-none focus:border-pink-500" placeholder="Chữ ký cuối thư..." />
+      <div class="flex gap-2 mt-4">
+        <button onclick="closeLetterModal()" class="flex-1 py-2.5 rounded-xl bg-gray-100 text-gray-600 text-xs font-bold">Hủy</button>
+        <button onclick="saveLetter()" class="flex-1 py-2.5 rounded-xl bg-pink-500 text-white text-xs font-bold hover:bg-pink-600">Lưu Thư</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 6. Add / Edit Music Track Modal -->
+  <div id="modal-music" class="fixed inset-0 z-50 hidden bg-black/40 backdrop-blur-sm flex items-center justify-center p-4">
+    <div class="bg-white rounded-3xl max-w-md w-full p-6 shadow-2xl border-2 border-pink-100 animate-pop-in">
+      <h3 id="music-modal-title" class="text-lg font-bold text-pink-600 mb-3 flex items-center gap-2">
+        <i data-lucide="music" class="w-5 h-5"></i> Thêm Bài Hát Vào Playlist
+      </h3>
+      <input type="hidden" id="edit-music-id" />
+      <div class="space-y-3 text-left">
+        <div>
+          <label class="block text-xs font-bold text-gray-600 mb-1">Link YouTube hoặc Link nhạc (.mp3 / .m4a) *</label>
+          <input type="text" id="input-music-url" placeholder="VD: https://www.youtube.com/watch?v=..." class="w-full px-3.5 py-2 rounded-xl border border-pink-200 text-sm focus:outline-none focus:border-pink-500" />
+          <p class="text-[11px] text-gray-400 mt-1">Mẹo: Dán link YouTube xong để trống tên bài hát, hệ thống sẽ tự lấy tên gốc của video!</p>
+        </div>
+        <div>
+          <label class="block text-xs font-bold text-gray-600 mb-1">Tên bài hát (Tùy chọn)</label>
+          <input type="text" id="input-music-title" placeholder="Để trống để tự động nhận diện từ YouTube..." class="w-full px-3.5 py-2 rounded-xl border border-pink-200 text-sm focus:outline-none focus:border-pink-500" />
+        </div>
+        <div>
+          <label class="block text-xs font-bold text-gray-600 mb-1">Ghi chú nhỏ / Tên ca sĩ (Tùy chọn)</label>
+          <input type="text" id="input-music-artist" placeholder="Để trống để hiển thị dòng mặc định của góc nhạc..." class="w-full px-3.5 py-2 rounded-xl border border-pink-200 text-sm focus:outline-none focus:border-pink-500" />
+        </div>
+      </div>
+      <div class="flex gap-2 mt-5">
+        <button onclick="closeAddMusicModal()" class="flex-1 py-2.5 rounded-xl bg-gray-100 text-gray-600 text-xs font-bold">Hủy</button>
+        <button id="btn-save-music" onclick="saveMusicTrack()" class="flex-1 py-2.5 rounded-xl bg-pink-500 text-white text-xs font-bold hover:bg-pink-600">Lưu Bài Hát</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 7. Edit Music Corner Title & Subtitle Modal -->
+  <div id="modal-music-settings" class="fixed inset-0 z-50 hidden bg-black/40 backdrop-blur-sm flex items-center justify-center p-4">
+    <div class="bg-white rounded-3xl max-w-md w-full p-6 shadow-2xl border-2 border-pink-100 animate-pop-in">
+      <h3 class="text-lg font-bold text-pink-600 mb-3 flex items-center gap-2">
+        <i data-lucide="disc-3" class="w-5 h-5"></i> Tùy Chỉnh Góc Nhạc
+      </h3>
+      <div class="space-y-3 text-left">
+        <div>
+          <label class="block text-xs font-bold text-gray-600 mb-1">Tiêu đề khung nhạc</label>
+          <input type="text" id="input-music-widget-title" placeholder="VD: Góc Nhạc Của Tụi Mình" class="w-full px-3.5 py-2 rounded-xl border border-pink-200 text-sm focus:outline-none focus:border-pink-500" />
+        </div>
+        <div>
+          <label class="block text-xs font-bold text-gray-600 mb-1">Dòng chữ hiển thị dưới tên bài hát</label>
+          <input type="text" id="input-music-widget-subtitle" placeholder="VD: Nhạc của tụi mình 🎵" class="w-full px-3.5 py-2 rounded-xl border border-pink-200 text-sm focus:outline-none focus:border-pink-500" />
+        </div>
+      </div>
+      <div class="flex gap-2 mt-5">
+        <button onclick="closeMusicSettingsModal()" class="flex-1 py-2.5 rounded-xl bg-gray-100 text-gray-600 text-xs font-bold">Hủy</button>
+        <button onclick="saveMusicSettings()" class="flex-1 py-2.5 rounded-xl bg-pink-500 text-white text-xs font-bold hover:bg-pink-600">Lưu Thay Đổi</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Firebase SDK (Compat v10) -->
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+  <!-- Modular App Scripts -->
+  <script src="core.js"></script>
+  <script src="features-notebook.js"></script>
+  <script src="features-memories.js"></script>
+  <script src="feature-music.js"></script>
+</body>
+</html>
