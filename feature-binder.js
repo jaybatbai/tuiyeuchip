@@ -1,10 +1,10 @@
 // =========================================================================
-// BINDER TRƯNG BÀY THẺ POKÉMON (3x3 DISPLAY BINDER)
+// BINDER TRƯNG BÀY THẺ POKÉMON (4x5 DISPLAY BINDER - 20 Ô / TRANG)
 // =========================================================================
 let binderCurrentPage = 1;
 let currentZoomCardId = null;
 let binderModalMode = "BULK"; // "BULK" | "SINGLE"
-const BINDER_CARDS_PER_PAGE = 9; // Chuẩn 1 trang binder 3x3 = 9 ô
+const BINDER_CARDS_PER_PAGE = 20; // Chuẩn 1 trang binder 4 cột ngang x 5 hàng dọc = 20 ô
 
 function getPokemonCards() {
   return Array.isArray(appData.pokemonCards) ? appData.pokemonCards : [];
@@ -19,18 +19,18 @@ function renderBinderSection() {
   const allCards = getPokemonCards();
   const isEdit = isEditingAllowed();
 
-  if (statsEl) {
-    statsEl.textContent = `${allCards.length} lá bài`;
-  }
-
   const totalPages = Math.max(1, Math.ceil(allCards.length / BINDER_CARDS_PER_PAGE));
   if (binderCurrentPage > totalPages) binderCurrentPage = totalPages;
   if (binderCurrentPage < 1) binderCurrentPage = 1;
 
+  if (statsEl) {
+    statsEl.textContent = `${allCards.length} lá • ${totalPages} trang`;
+  }
+
   const startIdx = (binderCurrentPage - 1) * BINDER_CARDS_PER_PAGE;
   const pageCards = allCards.slice(startIdx, startIdx + BINDER_CARDS_PER_PAGE);
 
-  // Luôn render đủ 9 ô túi nhựa (3x3) trên mỗi trang binder
+  // Luôn render đủ 20 ô túi nhựa (4x5) trên mỗi trang binder
   const slotsHtml = [];
   for (let i = 0; i < BINDER_CARDS_PER_PAGE; i++) {
     const card = pageCards[i];
@@ -46,45 +46,45 @@ function renderBinderSection() {
              onerror="this.onerror=null; this.src='data:image/svg+xml;utf8,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 250 350%22><rect width=%22250%22 height=%22350%22 fill=%22%23fdf2f8%22/><text x=%2250%25%22 y=%2250%25%22 dominant-baseline=%22middle%22 text-anchor=%22middle%22 fill=%22%23db2777%22 font-family=%22sans-serif%22 font-size=%2214%22>Lỗi tải ảnh</text></svg>';"
              class="w-full h-full object-cover transition-transform duration-300 group-hover:scale-[1.04]"
            />`
-        : `<div class="w-full h-full bg-gradient-to-br from-pink-100 via-rose-50 to-amber-50 flex flex-col items-center justify-center p-2 text-center">
-             <span class="text-3xl mb-1">🎴</span>
-             <span class="text-[11px] font-bold text-pink-700 line-clamp-2">${cardLabel}</span>
+        : `<div class="w-full h-full bg-gradient-to-br from-pink-100 via-rose-50 to-amber-50 flex flex-col items-center justify-center p-1.5 text-center">
+             <span class="text-2xl mb-1">🎴</span>
+             <span class="text-[10px] font-bold text-pink-700 line-clamp-2">${cardLabel}</span>
            </div>`;
 
       const adminBarHtml = isEdit
         ? `
-          <div class="mt-1.5 flex items-center justify-between gap-0.5 bg-pink-50/90 rounded-lg px-1 py-0.5 border border-pink-100">
+          <div class="mt-1 flex items-center justify-between bg-pink-50/95 rounded-lg px-0.5 sm:px-1 py-0.5 border border-pink-100">
             <button
               onclick="movePokemonCard(${globalIndex}, -1)"
               ${globalIndex <= 0 ? "disabled" : ""}
-              class="p-1 rounded text-pink-600 hover:bg-pink-100 disabled:opacity-25"
+              class="p-0.5 sm:p-1 rounded text-pink-600 hover:bg-pink-100 disabled:opacity-25"
               title="Chuyển sang trái"
             >
-              <i data-lucide="arrow-left" class="w-3 h-3"></i>
+              <i data-lucide="arrow-left" class="w-2.5 h-2.5 sm:w-3 sm:h-3"></i>
             </button>
-            <span class="text-[10px] font-bold text-pink-400 select-none">#${globalIndex + 1}</span>
-            <div class="flex items-center gap-0.5">
+            <span class="text-[9px] sm:text-[10px] font-bold text-pink-400 select-none">#${globalIndex + 1}</span>
+            <div class="flex items-center">
               <button
                 onclick="openSinglePokemonModal('${card.id}')"
-                class="p-1 rounded text-pink-600 hover:bg-pink-100"
+                class="p-0.5 sm:p-1 rounded text-pink-600 hover:bg-pink-100"
                 title="Đổi link / ghi chú"
               >
-                <i data-lucide="pencil" class="w-3 h-3"></i>
+                <i data-lucide="pencil" class="w-2.5 h-2.5 sm:w-3 sm:h-3"></i>
               </button>
               <button
                 onclick="deletePokemonCard('${card.id}')"
-                class="p-1 rounded text-rose-500 hover:bg-rose-100"
+                class="p-0.5 sm:p-1 rounded text-rose-500 hover:bg-rose-100"
                 title="Xóa lá này"
               >
-                <i data-lucide="trash-2" class="w-3 h-3"></i>
+                <i data-lucide="trash-2" class="w-2.5 h-2.5 sm:w-3 sm:h-3"></i>
               </button>
               <button
                 onclick="movePokemonCard(${globalIndex}, 1)"
                 ${globalIndex >= allCards.length - 1 ? "disabled" : ""}
-                class="p-1 rounded text-pink-600 hover:bg-pink-100 disabled:opacity-25"
+                class="p-0.5 sm:p-1 rounded text-pink-600 hover:bg-pink-100 disabled:opacity-25"
                 title="Chuyển sang phải"
               >
-                <i data-lucide="arrow-right" class="w-3 h-3"></i>
+                <i data-lucide="arrow-right" class="w-2.5 h-2.5 sm:w-3 sm:h-3"></i>
               </button>
             </div>
           </div>
@@ -92,17 +92,17 @@ function renderBinderSection() {
         : "";
 
       slotsHtml.push(`
-        <div class="pokemon-pocket group relative rounded-2xl p-1.5 bg-white/85 border border-pink-200/80 shadow-xs hover:shadow-md transition-all flex flex-col">
+        <div class="pokemon-pocket group relative rounded-xl sm:rounded-2xl p-1 sm:p-1.5 bg-white/85 border border-pink-200/80 shadow-xs hover:shadow-md transition-all flex flex-col">
           <!-- Túi nhựa đựng thẻ chuẩn tỉ lệ 5:7 -->
           <div
             onclick="openPokemonZoomModal('${card.id}')"
-            class="pokemon-sleeve-card pokemon-holo-shine relative w-full aspect-[5/7] rounded-xl overflow-hidden bg-pink-50 cursor-pointer"
+            class="pokemon-sleeve-card pokemon-holo-shine relative w-full aspect-[5/7] rounded-lg sm:rounded-xl overflow-hidden bg-pink-50 cursor-pointer"
           >
             ${imageContent}
 
             ${
               card.gfLiked
-                ? `<span class="absolute top-1.5 right-1.5 w-6 h-6 rounded-full bg-rose-500/95 text-white text-xs flex items-center justify-center shadow-md pointer-events-none">💖</span>`
+                ? `<span class="absolute top-1 right-1 w-5 h-5 sm:w-6 sm:h-6 rounded-full bg-rose-500/95 text-white text-[10px] sm:text-xs flex items-center justify-center shadow-md pointer-events-none">💖</span>`
                 : ""
             }
           </div>
@@ -114,14 +114,14 @@ function renderBinderSection() {
       slotsHtml.push(`
         <div
           ${isEdit ? `onclick="openSinglePokemonModal()"` : ""}
-          class="rounded-2xl p-1.5 bg-white/35 border border-dashed border-pink-200/80 flex flex-col ${
+          class="rounded-xl sm:rounded-2xl p-1 sm:p-1.5 bg-white/35 border border-dashed border-pink-200/80 flex flex-col ${
             isEdit ? "cursor-pointer hover:bg-pink-50/70 hover:border-pink-400 transition" : ""
           }"
         >
-          <div class="w-full aspect-[5/7] rounded-xl bg-pink-50/30 flex flex-col items-center justify-center text-center p-2">
-            <span class="text-pink-300 text-lg mb-1">${isEdit ? "+" : "✨"}</span>
-            <span class="text-[10px] font-semibold text-pink-300 leading-tight">
-              ${isEdit ? "Ô trống\n(Bấm thêm)" : "Ô trống"}
+          <div class="w-full aspect-[5/7] rounded-lg sm:rounded-xl bg-pink-50/30 flex flex-col items-center justify-center text-center p-1">
+            <span class="text-pink-300 text-sm sm:text-base mb-0.5">${isEdit ? "+" : "✨"}</span>
+            <span class="text-[9px] sm:text-[10px] font-semibold text-pink-300 leading-tight">
+              ${isEdit ? "Thêm thẻ" : "Trống"}
             </span>
           </div>
         </div>
