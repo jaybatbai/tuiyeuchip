@@ -12,7 +12,6 @@ let musicProgressTimer = null;
 const htmlAudio = new Audio();
 
 function initMusicPlayer() {
-  // Nạp YouTube IFrame API
   if (!window.YT) {
     const tag = document.createElement("script");
     tag.src = "https://www.youtube.com/iframe_api";
@@ -23,7 +22,6 @@ function initMusicPlayer() {
     createYouTubePlayer();
   }
 
-  // Lắng nghe sự kiện từ HTML5 Audio (dùng cho link .mp3 / .m4a)
   htmlAudio.addEventListener("ended", () => {
     handleTrackEnded();
   });
@@ -35,7 +33,6 @@ function initMusicPlayer() {
     }
   });
 
-  // Cập nhật thanh tiến trình mỗi giây
   if (musicProgressTimer) clearInterval(musicProgressTimer);
   musicProgressTimer = setInterval(updateMusicProgressUI, 500);
 
@@ -55,16 +52,22 @@ function createYouTubePlayer() {
   const firstYt = playlist.find((t) => t.type === "youtube" && t.youtubeId);
   const initialVideoId = firstYt ? firstYt.youtubeId : "jfKfPfyJRdk";
 
+  const playerVars = {
+    autoplay: 0,
+    controls: 0,
+    playsinline: 1,
+    rel: 0,
+    enablejsapi: 1
+  };
+  if (window.location && window.location.origin && window.location.origin.startsWith("http")) {
+    playerVars.origin = window.location.origin;
+  }
+
   ytPlayer = new YT.Player("yt-hidden-player", {
-    height: "1",
-    width: "1",
+    height: "200",
+    width: "200",
     videoId: initialVideoId,
-    playerVars: {
-      autoplay: 0,
-      controls: 0,
-      playsinline: 1,
-      rel: 0
-    },
+    playerVars,
     events: {
       onReady: () => {
         if (pendingAutoPlay) {
@@ -79,17 +82,38 @@ function createYouTubePlayer() {
           isMusicPlaying = true;
           clearMusicError();
           updatePlayButtonsUI();
+        } else if (event.data === YT.PlayerState.BUFFERING) {
+          clearMusicError();
         } else if (event.data === YT.PlayerState.PAUSED) {
           isMusicPlaying = false;
           updatePlayButtonsUI();
         }
       },
-      onError: () => {
-        showMusicError("Video YouTube này chặn phát nhúng ngoài. Hãy thử link YouTube khác nhé!");
-        isMusicPlaying = false;
-        updatePlayButtonsUI();
-        if (getPlaylist().length > 1) {
-          setTimeout(() => nextTrack(), 1800);
+      onError: (event) => {
+        const activeTrack = getPlaylist()[currentTrackIndex];
+        if (!activeTrack || activeTrack.type !== "youtube") return;
+
+        // Bỏ qua lỗi cũ từ video mặc định trước khi load bài thật của người dùng
+        try {
+          const loadedVid = ytPlayer && ytPlayer.getVideoData ? ytPlayer.getVideoData().video_id : "";
+          if (loadedVid && loadedVid !== activeTrack.youtubeId) return;
+        } catch (e) {}
+
+        const errCode = event ? event.data : 0;
+        if (errCode === 101 || errCode === 150) {
+          showMusicError("Chủ kênh YouTube này tắt tính năng phát nhúng ngoài. Hãy thử link bản lyric/cover khác nhé!");
+          isMusicPlaying = false;
+          updatePlayButtonsUI();
+          if (getPlaylist().length > 1) {
+            setTimeout(() => nextTrack(), 1800);
+          }
+        } else if (errCode === 100) {
+          showMusicError("Video YouTube này không tồn tại hoặc đang ở chế độ riêng tư.");
+          isMusicPlaying = false;
+          updatePlayButtonsUI();
+        } else {
+          isMusicPlaying = false;
+          updatePlayButtonsUI();
         }
       }
     }
@@ -137,7 +161,6 @@ function playTrackAt(index) {
   const track = playlist[currentTrackIndex];
   clearMusicError();
 
-  // Dừng cả 2 nguồn trước khi phát bài mới
   htmlAudio.pause();
   if (ytPlayer && typeof ytPlayer.pauseVideo === "function") {
     try {
@@ -181,6 +204,7 @@ function togglePlayPause() {
   }
 
   const track = playlist[currentTrackIndex];
+  clearMusicError();
 
   if (isMusicPlaying) {
     pauseMusic();
@@ -358,6 +382,12 @@ function syncMusicPlaylistUI() {
     currentTrackIndex = Math.max(0, playlist.length - 1);
   }
 
+  const headerTitleText = (appData.profile && appData.profile.musicTitle) || "Góc Nhạc Của Tụi Mình";
+  const defaultSubText = (appData.profile && appData.profile.musicSubtitle) || "Nhạc của tụi mình 🎵";
+
+  const headerTitleEl = document.getElementById("music-header-title");
+  if (headerTitleEl) headerTitleEl.textContent = headerTitleText;
+
   const currentTrack = playlist[currentTrackIndex];
   const compactTitle = document.getElementById("music-current-title");
   const compactArtist = document.getElementById("music-current-artist");
@@ -370,14 +400,14 @@ function syncMusicPlaylistUI() {
 
   if (currentTrack) {
     if (compactTitle) compactTitle.textContent = currentTrack.title;
-    if (compactArtist) compactArtist.textContent = currentTrack.artist || "Nhạc của tụi mình 🎵";
+    if (compactArtist) compactArtist.textContent = currentTrack.artist || defaultSubText;
     if (fullTitle) fullTitle.textContent = currentTrack.title;
-    if (fullArtist) fullArtist.textContent = currentTrack.artist || "Nhạc của tụi mình 🎵";
+    if (fullArtist) fullArtist.textContent = currentTrack.artist || defaultSubText;
   } else {
     if (compactTitle) compactTitle.textContent = "Chưa có bài hát";
-    if (compactArtist) compactArtist.textContent = "Thêm nhạc để cùng nghe nhé 🎵";
+    if (compactArtist) compactArtist.textContent = defaultSubText;
     if (fullTitle) fullTitle.textContent = "Danh sách phát trống";
-    if (fullArtist) fullArtist.textContent = "—";
+    if (fullArtist) fullArtist.textContent = defaultSubText;
   }
 
   if (listEl) {
@@ -428,6 +458,41 @@ function syncMusicPlaylistUI() {
   }
 
   updatePlayButtonsUI();
+}
+
+// =========================================================================
+// CHỈNH SỬA TIÊU ĐỀ & DÒNG MÔ TẢ GÓC NHẠC
+// =========================================================================
+function openMusicSettingsModal() {
+  const titleInput = document.getElementById("input-music-corner-title");
+  const subInput = document.getElementById("input-music-corner-subtitle");
+  if (titleInput) {
+    titleInput.value = (appData.profile && appData.profile.musicTitle) || "Góc Nhạc Của Tụi Mình";
+  }
+  if (subInput) {
+    subInput.value = (appData.profile && appData.profile.musicSubtitle) || "Nhạc của tụi mình 🎵";
+  }
+  const modal = document.getElementById("modal-music-settings");
+  if (modal) modal.classList.remove("hidden");
+  lucide.createIcons();
+}
+
+function closeMusicSettingsModal() {
+  const modal = document.getElementById("modal-music-settings");
+  if (modal) modal.classList.add("hidden");
+}
+
+async function saveMusicSettings() {
+  const titleInput = document.getElementById("input-music-corner-title");
+  const subInput = document.getElementById("input-music-corner-subtitle");
+  if (titleInput) {
+    appData.profile.musicTitle = titleInput.value.trim() || "Góc Nhạc Của Tụi Mình";
+  }
+  if (subInput) {
+    appData.profile.musicSubtitle = subInput.value.trim() || "Nhạc của tụi mình 🎵";
+  }
+  closeMusicSettingsModal();
+  await saveAppData();
 }
 
 // =========================================================================
