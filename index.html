@@ -340,8 +340,8 @@
     <!-- MINI MUSIC PLAYER NỔI GÓC DƯỚI             -->
     <!-- ========================================== -->
     <div id="music-player-widget" class="fixed bottom-4 right-4 z-40 max-w-[calc(100vw-2rem)]">
-      <!-- Hidden YouTube Audio Container -->
-      <div class="fixed -left-[9999px] -top-[9999px] w-1 h-1 overflow-hidden pointer-events-none">
+      <!-- Hidden YouTube Audio Container (200x200px để tránh lỗi nhúng YouTube) -->
+      <div class="fixed -left-[9999px] -top-[9999px] w-[200px] h-[200px] opacity-0 overflow-hidden pointer-events-none">
         <div id="yt-hidden-player"></div>
       </div>
 
@@ -373,14 +373,19 @@
       <!-- Expanded Playlist Card -->
       <div id="music-expanded-card" class="hidden w-80 sm:w-96 bg-white/98 backdrop-blur-md border-2 border-pink-200 rounded-3xl p-4 shadow-2xl animate-pop-in">
         <div class="flex items-center justify-between gap-2 pb-2.5 mb-3 border-b border-pink-100">
-          <div class="flex items-center gap-2">
-            <span id="music-disc-icon" class="text-xl inline-block">💿</span>
-            <div>
-              <div class="text-xs font-bold text-pink-600">Góc Nhạc Của Tụi Mình</div>
+          <div class="flex items-center gap-2 min-w-0">
+            <span id="music-disc-icon" class="text-xl inline-block shrink-0">💿</span>
+            <div class="min-w-0">
+              <div class="flex items-center gap-1">
+                <div id="music-header-title" class="text-xs font-bold text-pink-600 truncate">Góc Nhạc Của Tụi Mình</div>
+                <button onclick="openMusicSettingsModal()" class="admin-control hidden p-1 rounded-full text-pink-500 hover:bg-pink-100 transition shrink-0" title="Đổi tên góc nhạc & dòng mô tả">
+                  <i data-lucide="pencil" class="w-3 h-3"></i>
+                </button>
+              </div>
               <div id="music-playlist-count" class="text-[10px] text-gray-400 font-semibold">0 bài hát</div>
             </div>
           </div>
-          <div class="flex items-center gap-1">
+          <div class="flex items-center gap-1 shrink-0">
             <button onclick="openAddMusicModal()" class="admin-control hidden px-2.5 py-1 rounded-full bg-pink-500 text-white text-[11px] font-bold hover:bg-pink-600 transition flex items-center gap-1">
               <i data-lucide="plus" class="w-3 h-3"></i> Thêm bài
             </button>
@@ -631,6 +636,30 @@
       <div class="flex gap-2 mt-5">
         <button onclick="closeAddMusicModal()" class="flex-1 py-2.5 rounded-xl bg-gray-100 text-gray-600 text-xs font-bold">Hủy</button>
         <button id="btn-save-music" onclick="saveMusicTrack()" class="flex-1 py-2.5 rounded-xl bg-pink-500 text-white text-xs font-bold hover:bg-pink-600">Lưu Bài Hát</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 7. Edit Music Corner Header & Default Subtitle Modal -->
+  <div id="modal-music-settings" class="fixed inset-0 z-50 hidden bg-black/40 backdrop-blur-sm flex items-center justify-center p-4">
+    <div class="bg-white rounded-3xl max-w-md w-full p-6 shadow-2xl border-2 border-pink-100 animate-pop-in">
+      <h3 class="text-lg font-bold text-pink-600 mb-3 flex items-center gap-2">
+        <i data-lucide="edit-3" class="w-5 h-5"></i> Chỉnh Sửa Tiêu Đề Góc Nhạc
+      </h3>
+      <div class="space-y-3 text-left">
+        <div>
+          <label class="block text-xs font-bold text-gray-600 mb-1">Tên góc nhạc (Tiêu đề khung phát nhạc)</label>
+          <input type="text" id="input-music-corner-title" placeholder="VD: Góc Nhạc Của Tụi Mình" class="w-full px-3.5 py-2 rounded-xl border border-pink-200 text-sm focus:outline-none focus:border-pink-500" />
+        </div>
+        <div>
+          <label class="block text-xs font-bold text-gray-600 mb-1">Dòng mô tả mặc định dưới tên bài hát</label>
+          <input type="text" id="input-music-corner-subtitle" placeholder="VD: Nhạc của tụi mình 🎵" class="w-full px-3.5 py-2 rounded-xl border border-pink-200 text-sm focus:outline-none focus:border-pink-500" />
+          <p class="text-[11px] text-gray-400 mt-1">Hiển thị dưới tên bài hát khi bài đó không ghi chú thích riêng.</p>
+        </div>
+      </div>
+      <div class="flex gap-2 mt-5">
+        <button onclick="closeMusicSettingsModal()" class="flex-1 py-2.5 rounded-xl bg-gray-100 text-gray-600 text-xs font-bold">Hủy</button>
+        <button onclick="saveMusicSettings()" class="flex-1 py-2.5 rounded-xl bg-pink-500 text-white text-xs font-bold hover:bg-pink-600">Lưu Thay Đổi</button>
       </div>
     </div>
   </div>
