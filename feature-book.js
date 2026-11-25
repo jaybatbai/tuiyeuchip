@@ -10,7 +10,8 @@ const BOOK_CHAPTERS = [
     icon: "📖",
     title: "Tất Tần Tật Về Em",
     shortTitle: "Tất Tần Tật Về Em 📖",
-    desc: "Những thói quen, sở thích ăn uống và mảnh ghép nhỏ tạo nên em",
+    mysteryLabel: "Bí mật #1",
+    desc: "Một cuốn sổ nhỏ ghi chép những điều anh luôn âm thầm để ý ở em...",
     accentBg: "from-pink-50 to-rose-50",
     accentBorder: "border-pink-200 hover:border-pink-400",
     badgeClass: "bg-pink-100 text-pink-700"
@@ -23,7 +24,8 @@ const BOOK_CHAPTERS = [
     icon: "🎴",
     title: "Binder Thẻ Pokémon Của Em",
     shortTitle: "Binder Thẻ Pokémon 🎴",
-    desc: "Bộ sưu tập những lá bài yêu thích trong túi nhựa ánh kim",
+    mysteryLabel: "Bí mật #2",
+    desc: "Một góc lấp lánh ánh kim anh cất giữ riêng dành cho em...",
     accentBg: "from-fuchsia-50 to-pink-50",
     accentBorder: "border-fuchsia-200 hover:border-fuchsia-400",
     badgeClass: "bg-fuchsia-100 text-fuchsia-700"
@@ -36,7 +38,8 @@ const BOOK_CHAPTERS = [
     icon: "🎟️",
     title: "Phiếu Đổi Quà Độc Quyền",
     shortTitle: "Phiếu Đổi Quà 🎟️",
-    desc: "Những đặc quyền dễ thương có hiệu lực vô thời hạn dành cho em",
+    mysteryLabel: "Đặc quyền #3",
+    desc: "Những tấm vé nhỏ chỉ có hiệu lực vô thời hạn với riêng mình em...",
     accentBg: "from-purple-50 to-pink-50",
     accentBorder: "border-purple-200 hover:border-purple-400",
     badgeClass: "bg-purple-100 text-purple-700"
@@ -49,7 +52,8 @@ const BOOK_CHAPTERS = [
     icon: "✨",
     title: "Hộp Kỷ Niệm Bí Mật",
     shortTitle: "Hộp Kỷ Niệm Bí Mật ✨",
-    desc: "Rút ngẫu nhiên những khoảnh khắc đáng nhớ & câu nói bất hủ",
+    mysteryLabel: "Hộp bí ẩn #4",
+    desc: "Chạm để rút ngẫu nhiên một mảnh ký ức được giấu kín bên trong...",
     accentBg: "from-amber-50 to-rose-50",
     accentBorder: "border-amber-200 hover:border-amber-400",
     badgeClass: "bg-amber-100 text-amber-800"
@@ -58,8 +62,9 @@ const BOOK_CHAPTERS = [
 
 let currentBookView = "HOME"; // "HOME" | "notebook" | "binder" | "coupons" | "memories"
 let hasOpenedLetterInSession = false;
+const visitedChaptersInSession = new Set();
 
-function getChapterCountLabel(chapterId) {
+function getAdminChapterStats(chapterId) {
   if (typeof appData === "undefined" || !appData) return "";
 
   if (chapterId === "notebook") {
@@ -74,13 +79,23 @@ function getChapterCountLabel(chapterId) {
   if (chapterId === "coupons") {
     const coupons = Array.isArray(appData.coupons) ? appData.coupons : [];
     const unused = coupons.filter((c) => !c.used).length;
-    return `${unused}/${coupons.length} phiếu sẵn sàng`;
+    return `${unused}/${coupons.length} phiếu`;
   }
   if (chapterId === "memories") {
     const memories = Array.isArray(appData.memories) ? appData.memories : [];
-    return `${memories.length} thẻ bí mật`;
+    return `${memories.length} thẻ`;
   }
   return "";
+}
+
+function getChapterBadgeText(chapter, isEdit) {
+  if (isEdit) {
+    return getAdminChapterStats(chapter.id);
+  }
+  if (visitedChaptersInSession.has(chapter.id)) {
+    return "Đã mở ✨";
+  }
+  return `${chapter.mysteryLabel} 🔒`;
 }
 
 function updateBookTocVisibility() {
@@ -104,8 +119,12 @@ function renderBookToc() {
   const grid = document.getElementById("book-toc-grid");
   if (!grid) return;
 
+  const isEdit = typeof isEditingAllowed === "function" && isEditingAllowed();
+
   grid.innerHTML = BOOK_CHAPTERS.map((ch) => {
-    const countText = getChapterCountLabel(ch.id);
+    const badgeText = getChapterBadgeText(ch, isEdit);
+    const isVisited = !isEdit && visitedChaptersInSession.has(ch.id);
+
     return `
       <button
         type="button"
@@ -117,8 +136,10 @@ function renderBookToc() {
             <span class="text-[11px] font-bold uppercase tracking-wider text-pink-500">
               ${ch.roman} • Trang ${ch.pageNumber}
             </span>
-            <span class="px-2.5 py-0.5 rounded-full text-[10px] font-bold ${ch.badgeClass}">
-              ${escapeHtml(countText)}
+            <span class="px-2.5 py-0.5 rounded-full text-[10px] font-bold ${
+              isVisited ? "bg-emerald-100 text-emerald-700" : ch.badgeClass
+            }">
+              ${escapeHtml(badgeText)}
             </span>
           </div>
 
@@ -136,10 +157,9 @@ function renderBookToc() {
           </p>
         </div>
 
-        <div class="mt-3 pt-2 border-t border-pink-200/50 flex items-center justify-between text-[11px] font-bold text-pink-600">
-          <span>Mở trang ${ch.pageNumber}</span>
+        <div class="mt-3 pt-2 border-t border-pink-200/50 flex items-center justify-end text-[11px] font-bold text-pink-600">
           <span class="inline-flex items-center gap-1 group-hover:translate-x-1 transition-transform">
-            Đọc ngay <i data-lucide="arrow-right" class="w-3.5 h-3.5"></i>
+            Lật trang <i data-lucide="arrow-right" class="w-3.5 h-3.5"></i>
           </span>
         </div>
       </button>
@@ -184,7 +204,7 @@ function renderChapterNavBars(chapterIdx) {
     `;
   }
 
-  // 2. Thanh lật trang cuối trang sách (hiển thị rõ tên trang trước & trang tiếp theo)
+  // 2. Thanh lật trang cuối trang sách
   const bottomBar = document.getElementById(`book-bottom-bar-${currentCh.id}`);
   if (bottomBar) {
     const prevBtnHtml = prevCh
@@ -269,6 +289,7 @@ function openBookChapter(chapterId) {
 
   currentBookView = chapterId;
   hasOpenedLetterInSession = true;
+  visitedChaptersInSession.add(chapterId);
 
   const homeView = document.getElementById("book-home-view");
   if (homeView) homeView.classList.add("hidden");
@@ -279,7 +300,7 @@ function openBookChapter(chapterId) {
     if (idx === chapterIdx) {
       el.classList.remove("hidden");
       el.classList.remove("animate-page-turn");
-      void el.offsetWidth; // trigger reflow for smooth page-turn animation
+      void el.offsetWidth;
       el.classList.add("animate-page-turn");
       renderChapterNavBars(idx);
     } else {
@@ -332,7 +353,6 @@ function revealBookTocFromLetter() {
 // TỰ ĐỘNG KẾT NỐI VỚI BỨC THƯ, DỮ LIỆU CLOUD & KHÓA SÁCH
 // =========================================================================
 (function initBookLifecycleHooks() {
-  // 1. Khi mở Bức Thư Nhỏ Gửi Em -> tự động mở ra Mục Lục Cuốn Sách bên dưới
   const origToggleSecretLetter = window.toggleSecretLetter;
   if (typeof origToggleSecretLetter === "function") {
     window.toggleSecretLetter = function (...args) {
@@ -353,7 +373,6 @@ function revealBookTocFromLetter() {
     };
   }
 
-  // 2. Cập nhật số lượng trên Mục Lục mỗi khi dữ liệu thay đổi
   const origRenderTopics = window.renderTopicsSection;
   if (typeof origRenderTopics === "function") {
     window.renderTopicsSection = function (...args) {
@@ -378,7 +397,6 @@ function revealBookTocFromLetter() {
     };
   }
 
-  // 3. Khi chuyển đổi chế độ Xem Thử Giao Diện Của Em
   const origToggleAdminPreview = window.toggleAdminPreview;
   if (typeof origToggleAdminPreview === "function") {
     window.toggleAdminPreview = function (...args) {
@@ -387,11 +405,11 @@ function revealBookTocFromLetter() {
     };
   }
 
-  // 4. Khi bấm Khóa Lại phong bì -> đưa sách về trạng thái ban đầu
   const origLockGate = window.lockGate;
   if (typeof origLockGate === "function") {
     window.lockGate = function (...args) {
       hasOpenedLetterInSession = false;
+      visitedChaptersInSession.clear();
       const letterBox = document.getElementById("secret-letter-content");
       const letterBtn = document.getElementById("btn-toggle-letter");
       if (letterBox) letterBox.classList.add("hidden");
