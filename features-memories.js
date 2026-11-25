@@ -74,10 +74,20 @@ function renderLetter() {
 // =========================================================================
 function updateMysteryDeckStats() {
   const total = appData.memories.length;
+  const isEdit = typeof isEditingAllowed === "function" && isEditingAllowed();
   const mysteryCountEl = document.getElementById("mystery-total-count");
   const adminCountEl = document.getElementById("admin-count");
-  if (mysteryCountEl) mysteryCountEl.textContent = total;
+
   if (adminCountEl) adminCountEl.textContent = total;
+
+  if (mysteryCountEl && mysteryCountEl.parentElement) {
+    const descEl = mysteryCountEl.parentElement;
+    if (isEdit) {
+      descEl.innerHTML = `Có <strong id="mystery-total-count" class="underline decoration-wavy">${total}</strong> điều thú vị về em được giấu ở đây. Chạm để mở ngẫu nhiên từng thẻ nhé!`;
+    } else {
+      descEl.innerHTML = `<span id="mystery-total-count" class="hidden">${total}</span>Vô số điều thú vị về em đang được giấu kín bên trong. Chạm để rút ngẫu nhiên từng mảnh ký ức nhé!`;
+    }
+  }
 
   const validIds = new Set(appData.memories.map((m) => m.id));
   unseenIds = unseenIds.filter((id) => validIds.has(id));
@@ -121,13 +131,19 @@ function drawRandomMemory() {
   renderRevealedCard(memory, true);
   triggerHeartConfetti();
 
+  const isEdit = typeof isEditingAllowed === "function" && isEditingAllowed();
   const seenCount = total - unseenIds.length;
   const progressEl = document.getElementById("seen-progress-text");
+
   if (unseenIds.length === 0) {
-    progressEl.textContent = `✨ Em đã mở hết ${total}/${total} bí mật rồi! Bấm tiếp để xáo lại từ đầu nhé.`;
+    progressEl.textContent = isEdit
+      ? `✨ Em đã mở hết ${total}/${total} bí mật rồi! Bấm tiếp để xáo lại từ đầu nhé.`
+      : `✨ Em đã khám phá trọn vẹn mọi bí mật trong hộp rồi! Bấm tiếp để xáo lại từ đầu nhé.`;
     document.getElementById("draw-btn-label").textContent = "Xáo Lại Hộp Kỷ Niệm";
   } else {
-    progressEl.textContent = `Đã mở ${seenCount}/${total} kỷ niệm bí mật`;
+    progressEl.textContent = isEdit
+      ? `Đã mở ${seenCount}/${total} kỷ niệm bí mật`
+      : `Đã mở ${seenCount} điều bí mật ✨ (vẫn còn bất ngờ đang chờ em...)`;
     document.getElementById("draw-btn-label").textContent = "Mở Một Điều Bất Ngờ Khác";
   }
 }
