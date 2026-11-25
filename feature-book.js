@@ -229,7 +229,7 @@ function renderBookToc() {
     `;
   }).join("");
 
-  // Thanh trạng thái & lời chúc hoàn thành 4/4 chương ở Mục Lục (không dùng nút bấm)
+  // Chỉ hiện khung chúc mừng khi đã đọc trọn vẹn cả 4/4 chương
   let footerEl = document.getElementById("book-toc-completion-footer");
   if (!footerEl && grid.parentElement) {
     footerEl = document.createElement("div");
@@ -238,9 +238,7 @@ function renderBookToc() {
   }
 
   if (footerEl) {
-    if (isEdit) {
-      footerEl.innerHTML = "";
-    } else if (allExplored) {
+    if (allExplored) {
       footerEl.innerHTML = `
         <div class="mt-4 p-4 rounded-2xl bg-gradient-to-r from-pink-50 via-rose-50 to-amber-50 border border-pink-200 flex items-center gap-3 animate-pop-in">
           <span class="text-2xl shrink-0">🎆</span>
@@ -252,12 +250,6 @@ function renderBookToc() {
               Cảm ơn em vì đã dành thời gian khám phá hết những tâm tư nhỏ anh viết riêng cho em ❤️
             </div>
           </div>
-        </div>
-      `;
-    } else if (visitedCount > 0) {
-      footerEl.innerHTML = `
-        <div class="mt-4 text-center text-[11px] font-bold text-pink-500">
-          ✨ Em đã khám phá ${visitedCount}/${totalChapters} chương (đọc hết cả ${totalChapters} chương sẽ có bất ngờ nhé!)
         </div>
       `;
     } else {
@@ -355,8 +347,8 @@ function renderChapterNavBars(chapterIdx) {
           class="flex-1 sm:flex-initial text-right px-4 py-2.5 rounded-2xl bg-gradient-to-r from-pink-500 to-rose-500 hover:opacity-95 text-white shadow-md transition flex items-center justify-end gap-2 min-w-0"
         >
           <div class="min-w-0">
-            <div class="text-[10px] font-bold uppercase text-pink-100">Hoàn thành cuốn sách</div>
-            <div class="text-xs font-bold text-white truncate">Quay về Mục Lục 🎆</div>
+            <div class="text-[10px] font-bold uppercase text-pink-100">Trang cuối cuốn sách</div>
+            <div class="text-xs font-bold text-white truncate">Quay về Mục Lục 📖</div>
           </div>
           <i data-lucide="book-open" class="w-4 h-4 shrink-0"></i>
         </button>
@@ -450,7 +442,6 @@ function backToBookToc() {
 // TỰ ĐỘNG KẾT NỐI VỚI BỨC THƯ, DỮ LIỆU CLOUD & KHÓA SÁCH
 // =========================================================================
 (function initBookLifecycleHooks() {
-  // 1. Khi mở Bức Thư -> hiện Mục Lục nhẹ nhàng bên dưới, KHÔNG tự cuộn làm lệch bức thư
   const origToggleSecretLetter = window.toggleSecretLetter;
   if (typeof origToggleSecretLetter === "function") {
     window.toggleSecretLetter = function (...args) {
