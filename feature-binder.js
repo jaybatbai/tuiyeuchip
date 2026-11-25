@@ -7,6 +7,7 @@ let binderEditingCardId = null;
 let stagedBinderImages = []; // Danh sách ảnh chờ lưu: [{ tempId, dataUrl, sizeLabel }]
 const binderImageCache = {}; // Cache ảnh trong bộ nhớ: { [cardId]: dataUrl }
 const binderLoadingIds = new Set();
+const binderFailedIds = new Set();
 const BINDER_CARDS_PER_PAGE = 20; // Chuẩn 1 trang binder 4 cột ngang x 5 hàng dọc = 20 ô
 const MAX_FIRESTORE_IMAGE_CHARS = 950000; // Giới hạn an toàn dưới mức 1MB/document của Firestore
 
@@ -61,7 +62,12 @@ async function syncBinderImagesFromCloud(cards) {
   if (!firestore || !Array.isArray(cards) || cards.length === 0) return;
 
   const missingCards = cards.filter(
-    (c) => c && !c.image && !binderImageCache[c.id] && !binderLoadingIds.has(c.id)
+    (c) =>
+      c &&
+      !c.image &&
+      !binderImageCache[c.id] &&
+      !binderLoadingIds.has(c.id) &&
+      !binderFailedIds.has(c.id)
   );
   if (missingCards.length === 0) return;
 
@@ -74,15 +80,16 @@ async function syncBinderImagesFromCloud(cards) {
           .collection("scrapbooks")
           .doc(`pkmn_img_${card.id}`)
           .get();
-        if (snap.exists) {
-          const data = snap.data();
-          if (data && data.image) {
-            binderImageCache[card.id] = data.image;
-            setLocalCachedCardImage(card.id, data.image);
-          }
+        if (snap.exists && snap.data() && snap.data().image) {
+          const imgData = snap.data().image;
+          binderImageCache[card.id] = imgData;
+          setLocalCachedCardImage(card.id, imgData);
+        } else {
+          binderFailedIds.add(card.id);
         }
       } catch (err) {
         console.error("Lỗi tải ảnh thẻ Pokémon:", card.id, err);
+        binderFailedIds.add(card.id);
       } finally {
         binderLoadingIds.delete(card.id);
       }
@@ -277,6 +284,9 @@ function renderBinderSection() {
     `;
   }
 
+  if (typeof renderBookToc === "function") {
+    renderBookToc();
+  }
   lucide.createIcons();
 }
 
@@ -839,6 +849,8 @@ function closePokemonCardModal() {
   binderEditingCardId = null;
   stagedBinderImages = [];
   setBinderPasteStatus("");
+  const progressEl = document.getElementById("pokemon-save-progress");
+  if (progressEl) progressEl.classList.add("hidden");
   document.getElementById("modal-pokemon-card").classList.add("hidden");
 }
 
@@ -880,6 +892,7 @@ async function savePokemonCardsFromModal() {
 
       delete card.image;
       card.hasCloudImage = true;
+      binderFailedIds.delete(card.id);
       binderImageCache[card.id] = newImage;
       setLocalCachedCardImage(card.id, newImage);
 
@@ -920,6 +933,7 @@ async function savePokemonCardsFromModal() {
         .doc(`pkmn_img_${cardId}`)
         .set({ image: item.dataUrl, updatedAt: Date.now() });
 
+      binderFailedIds.delete(cardId);
       binderImageCache[cardId] = item.dataUrl;
       setLocalCachedCardImage(cardId, item.dataUrl);
 
@@ -947,6 +961,7 @@ async function deletePokemonCard(cardId) {
 
   appData.pokemonCards = getPokemonCards().filter((c) => c.id !== cardId);
   delete binderImageCache[cardId];
+  binderFailedIds.delete(cardId);
   removeLocalCachedCardImage(cardId);
 
   const firestore = getBinderFirestore();
@@ -978,20 +993,8 @@ async function movePokemonCard(index, direction) {
 // =========================================================================
 window.addEventListener("paste", handleBinderPasteEvent, true);
 
-// =========================================================================
-// TỰ ĐỘNG ĐỒNG BỘ KHI DỮ LIỆU CLOUD HOẶC CHẾ ĐỘ XEM THỬ THAY ĐỔI
-// =========================================================================
-(function hookBinderLifecycle() {
-  const origRenderCoupons = window.renderCouponsSection;
-  if (typeof origRenderCoupons === "function") {
-    window.renderCouponsSection = function (...args) {
-      origRenderCoupons.apply(this, args);
-      renderBinderSection();
-    };
-  }
-  if (document.readyState === "loading") {
-    document.addEventListener("DOMContentLoaded", renderBinderSection);
-  } else {
-    renderBinderSection();
-  }
-})();
+if (document.readyState === "loading") {
+  document.addEventListener("DOMContentLoaded", renderBinderSection);
+} else {
+  renderBinderSection();
+}
