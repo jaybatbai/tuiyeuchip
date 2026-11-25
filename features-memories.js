@@ -7,6 +7,7 @@ let unseenIds = [];
 let currentRevealedId = null;
 let selectedSticker = "💖";
 let uploadedImageBase64 = "";
+let hasCelebratedLetterOpen = false;
 
 // =========================================================================
 // RENDER HỒ SƠ & BỨC THƯ
@@ -545,7 +546,10 @@ function toggleSecretLetter() {
   if (box.classList.contains("hidden")) {
     box.classList.remove("hidden");
     btn.textContent = "Gấp Thư Lại";
-    triggerHeartConfetti();
+    if (!hasCelebratedLetterOpen) {
+      hasCelebratedLetterOpen = true;
+      triggerHeartConfetti();
+    }
   } else {
     box.classList.add("hidden");
     btn.textContent = "Mở Phong Bì";
