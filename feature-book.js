@@ -1,16 +1,15 @@
 // =========================================================================
-// ĐIỀU HƯỚNG DẠNG CUỐN SÁCH (MỤC LỤC & LẬT TRANG CHƯƠNG)
+// ĐIỀU HƯỚNG DẠNG CUỐN SÁCH (MỤC LỤC & CHUYỂN CHƯƠNG)
 // =========================================================================
 const BOOK_CHAPTERS = [
   {
     id: "notebook",
     elementId: "chapter-notebook",
     roman: "Chương I",
-    pageNumber: 1,
+    chapterNumber: 1,
     icon: "📖",
     title: "Tất Tần Tật Về Em",
     shortTitle: "Tất Tần Tật Về Em 📖",
-    mysteryLabel: "Bí mật #1",
     desc: "Một cuốn sổ nhỏ ghi chép những điều anh luôn âm thầm để ý ở em...",
     accentBg: "from-pink-50 to-rose-50",
     accentBorder: "border-pink-200 hover:border-pink-400",
@@ -20,11 +19,10 @@ const BOOK_CHAPTERS = [
     id: "binder",
     elementId: "chapter-binder",
     roman: "Chương II",
-    pageNumber: 2,
+    chapterNumber: 2,
     icon: "🎴",
     title: "Binder Thẻ Pokémon Của Em",
     shortTitle: "Binder Thẻ Pokémon 🎴",
-    mysteryLabel: "Bí mật #2",
     desc: "Một góc lấp lánh ánh kim anh cất giữ riêng dành cho em...",
     accentBg: "from-fuchsia-50 to-pink-50",
     accentBorder: "border-fuchsia-200 hover:border-fuchsia-400",
@@ -34,11 +32,10 @@ const BOOK_CHAPTERS = [
     id: "coupons",
     elementId: "chapter-coupons",
     roman: "Chương III",
-    pageNumber: 3,
+    chapterNumber: 3,
     icon: "🎟️",
     title: "Phiếu Đổi Quà Độc Quyền",
     shortTitle: "Phiếu Đổi Quà 🎟️",
-    mysteryLabel: "Đặc quyền #3",
     desc: "Những tấm vé nhỏ chỉ có hiệu lực vô thời hạn với riêng mình em...",
     accentBg: "from-purple-50 to-pink-50",
     accentBorder: "border-purple-200 hover:border-purple-400",
@@ -48,11 +45,10 @@ const BOOK_CHAPTERS = [
     id: "memories",
     elementId: "chapter-memories",
     roman: "Chương IV",
-    pageNumber: 4,
+    chapterNumber: 4,
     icon: "✨",
     title: "Hộp Kỷ Niệm Bí Mật",
     shortTitle: "Hộp Kỷ Niệm Bí Mật ✨",
-    mysteryLabel: "Hộp bí ẩn #4",
     desc: "Chạm để rút ngẫu nhiên một mảnh ký ức được giấu kín bên trong...",
     accentBg: "from-amber-50 to-rose-50",
     accentBorder: "border-amber-200 hover:border-amber-400",
@@ -148,16 +144,6 @@ function getAdminChapterStats(chapterId) {
   return "";
 }
 
-function getChapterBadgeText(chapter, isEdit) {
-  if (isEdit) {
-    return getAdminChapterStats(chapter.id);
-  }
-  if (visitedChaptersInSession.has(chapter.id)) {
-    return "Đã đọc ✨";
-  }
-  return `${chapter.mysteryLabel} 🔒`;
-}
-
 function updateBookTocVisibility() {
   const tocSection = document.getElementById("book-toc-section");
   const letterHint = document.getElementById("letter-unlock-toc-hint");
@@ -185,8 +171,17 @@ function renderBookToc() {
   const allExplored = !isEdit && visitedCount >= totalChapters;
 
   grid.innerHTML = BOOK_CHAPTERS.map((ch) => {
-    const badgeText = getChapterBadgeText(ch, isEdit);
     const isVisited = !isEdit && visitedChaptersInSession.has(ch.id);
+    let badgeHtml = "";
+
+    if (isEdit) {
+      const statsText = getAdminChapterStats(ch.id);
+      if (statsText) {
+        badgeHtml = `<span class="px-2.5 py-0.5 rounded-full text-[10px] font-bold ${ch.badgeClass}">${escapeHtml(statsText)}</span>`;
+      }
+    } else if (isVisited) {
+      badgeHtml = `<span class="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-emerald-100 text-emerald-700">Đã đọc ✨</span>`;
+    }
 
     return `
       <button
@@ -195,15 +190,11 @@ function renderBookToc() {
         class="group text-left p-4 rounded-2xl bg-gradient-to-br ${ch.accentBg} border-2 ${ch.accentBorder} shadow-xs hover:shadow-md transition-all flex flex-col justify-between relative overflow-hidden"
       >
         <div>
-          <div class="flex items-center justify-between gap-2 mb-2">
+          <div class="flex items-center justify-between gap-2 mb-2 min-h-[20px]">
             <span class="text-[11px] font-bold uppercase tracking-wider text-pink-500">
-              ${ch.roman} • Trang ${ch.pageNumber}
+              ${ch.roman}
             </span>
-            <span class="px-2.5 py-0.5 rounded-full text-[10px] font-bold ${
-              isVisited ? "bg-emerald-100 text-emerald-700" : ch.badgeClass
-            }">
-              ${escapeHtml(badgeText)}
-            </span>
+            ${badgeHtml}
           </div>
 
           <div class="flex items-center gap-2.5 mb-1.5">
@@ -222,7 +213,7 @@ function renderBookToc() {
 
         <div class="mt-3 pt-2 border-t border-pink-200/50 flex items-center justify-end text-[11px] font-bold text-pink-600">
           <span class="inline-flex items-center gap-1 group-hover:translate-x-1 transition-transform">
-            Lật trang <i data-lucide="arrow-right" class="w-3.5 h-3.5"></i>
+            Mở chương <i data-lucide="arrow-right" class="w-3.5 h-3.5"></i>
           </span>
         </div>
       </button>
@@ -267,9 +258,9 @@ function renderChapterNavBars(chapterIdx) {
 
   const prevCh = chapterIdx > 0 ? BOOK_CHAPTERS[chapterIdx - 1] : null;
   const nextCh = chapterIdx < BOOK_CHAPTERS.length - 1 ? BOOK_CHAPTERS[chapterIdx + 1] : null;
-  const totalPages = BOOK_CHAPTERS.length;
+  const totalChapters = BOOK_CHAPTERS.length;
 
-  // 1. Thanh điều hướng đầu trang sách
+  // 1. Thanh điều hướng đầu chương
   const topBar = document.getElementById(`book-top-bar-${currentCh.id}`);
   if (topBar) {
     topBar.innerHTML = `
@@ -283,19 +274,14 @@ function renderChapterNavBars(chapterIdx) {
           <span>Về Mục Lục</span>
         </button>
 
-        <div class="flex items-center gap-2">
-          <span class="text-[11px] font-bold text-pink-500 uppercase tracking-wider">
-            ${currentCh.roman}
-          </span>
-          <span class="px-3 py-1 rounded-full bg-pink-500 text-white text-xs font-bold shadow-2xs">
-            Trang ${currentCh.pageNumber} / ${totalPages}
-          </span>
-        </div>
+        <span class="px-3 py-1 rounded-full bg-pink-500 text-white text-xs font-bold shadow-2xs">
+          Chương ${currentCh.chapterNumber} / ${totalChapters}
+        </span>
       </div>
     `;
   }
 
-  // 2. Thanh lật trang cuối trang sách
+  // 2. Thanh chuyển chương ở cuối nội dung
   const bottomBar = document.getElementById(`book-bottom-bar-${currentCh.id}`);
   if (bottomBar) {
     const prevBtnHtml = prevCh
@@ -307,7 +293,7 @@ function renderChapterNavBars(chapterIdx) {
         >
           <i data-lucide="arrow-left" class="w-4 h-4 shrink-0 text-pink-500"></i>
           <div class="min-w-0">
-            <div class="text-[10px] font-bold uppercase text-pink-400">Trang trước (${prevCh.pageNumber}/${totalPages})</div>
+            <div class="text-[10px] font-bold uppercase text-pink-400">Chương trước</div>
             <div class="text-xs font-bold text-gray-700 truncate">${escapeHtml(prevCh.shortTitle)}</div>
           </div>
         </button>
@@ -334,7 +320,7 @@ function renderChapterNavBars(chapterIdx) {
           class="flex-1 sm:flex-initial text-right px-4 py-2.5 rounded-2xl bg-gradient-to-r from-pink-500 to-rose-500 hover:opacity-95 text-white shadow-md transition flex items-center justify-end gap-2 min-w-0"
         >
           <div class="min-w-0">
-            <div class="text-[10px] font-bold uppercase text-pink-100">Trang tiếp theo (${nextCh.pageNumber}/${totalPages})</div>
+            <div class="text-[10px] font-bold uppercase text-pink-100">Chương tiếp theo</div>
             <div class="text-xs font-bold text-white truncate">${escapeHtml(nextCh.shortTitle)}</div>
           </div>
           <i data-lucide="arrow-right" class="w-4 h-4 shrink-0"></i>
@@ -347,7 +333,7 @@ function renderChapterNavBars(chapterIdx) {
           class="flex-1 sm:flex-initial text-right px-4 py-2.5 rounded-2xl bg-gradient-to-r from-pink-500 to-rose-500 hover:opacity-95 text-white shadow-md transition flex items-center justify-end gap-2 min-w-0"
         >
           <div class="min-w-0">
-            <div class="text-[10px] font-bold uppercase text-pink-100">Trang cuối cuốn sách</div>
+            <div class="text-[10px] font-bold uppercase text-pink-100">Chương cuối cuốn sổ</div>
             <div class="text-xs font-bold text-white truncate">Quay về Mục Lục 📖</div>
           </div>
           <i data-lucide="book-open" class="w-4 h-4 shrink-0"></i>
