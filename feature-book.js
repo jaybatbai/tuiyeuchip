@@ -65,46 +65,63 @@ let hasOpenedLetterInSession = false;
 let hasCelebratedAllChapters = false;
 const visitedChaptersInSession = new Set();
 
-function triggerBookCompletionConfetti() {
+function triggerBookFireworks() {
   if (typeof confetti !== "function") {
     if (typeof triggerHeartConfetti === "function") triggerHeartConfetti();
     return;
   }
 
-  const colors = ["#ec4899", "#f43f5e", "#f9a8d4", "#fbbf24", "#c084fc"];
+  const colors = ["#ec4899", "#f43f5e", "#f9a8d4", "#fbbf24", "#c084fc", "#38bdf8"];
 
+  // Đợt 1: Pháo hoa bắn lên từ 2 bên góc
   confetti({
-    particleCount: 75,
-    spread: 80,
-    origin: { x: 0.5, y: 0.6 },
+    particleCount: 65,
+    angle: 60,
+    spread: 65,
+    startVelocity: 52,
+    origin: { x: 0.08, y: 0.85 },
+    colors
+  });
+  confetti({
+    particleCount: 65,
+    angle: 120,
+    spread: 65,
+    startVelocity: 52,
+    origin: { x: 0.92, y: 0.85 },
     colors
   });
 
+  // Đợt 2: Pháo hoa nổ tung ở trung tâm phía trên
   setTimeout(() => {
     confetti({
-      particleCount: 45,
-      angle: 60,
-      spread: 60,
-      origin: { x: 0.15, y: 0.65 },
+      particleCount: 95,
+      spread: 110,
+      startVelocity: 42,
+      ticks: 260,
+      origin: { x: 0.5, y: 0.42 },
       colors
     });
-    confetti({
-      particleCount: 45,
-      angle: 120,
-      spread: 60,
-      origin: { x: 0.85, y: 0.65 },
-      colors
-    });
-  }, 220);
+  }, 260);
 
+  // Đợt 3: Hai chùm pháo hoa tầm cao nối tiếp
   setTimeout(() => {
     confetti({
-      particleCount: 55,
+      particleCount: 70,
       spread: 95,
-      origin: { x: 0.5, y: 0.55 },
+      startVelocity: 38,
+      ticks: 240,
+      origin: { x: 0.28, y: 0.48 },
       colors
     });
-  }, 460);
+    confetti({
+      particleCount: 70,
+      spread: 95,
+      startVelocity: 38,
+      ticks: 240,
+      origin: { x: 0.72, y: 0.48 },
+      colors
+    });
+  }, 550);
 }
 
 function getAdminChapterStats(chapterId) {
@@ -136,7 +153,7 @@ function getChapterBadgeText(chapter, isEdit) {
     return getAdminChapterStats(chapter.id);
   }
   if (visitedChaptersInSession.has(chapter.id)) {
-    return "Đã mở ✨";
+    return "Đã đọc ✨";
   }
   return `${chapter.mysteryLabel} 🔒`;
 }
@@ -212,7 +229,7 @@ function renderBookToc() {
     `;
   }).join("");
 
-  // Thanh trạng thái & chúc mừng hoàn thành 4/4 chương ở Mục Lục
+  // Thanh trạng thái & lời chúc hoàn thành 4/4 chương ở Mục Lục (không dùng nút bấm)
   let footerEl = document.getElementById("book-toc-completion-footer");
   if (!footerEl && grid.parentElement) {
     footerEl = document.createElement("div");
@@ -225,31 +242,22 @@ function renderBookToc() {
       footerEl.innerHTML = "";
     } else if (allExplored) {
       footerEl.innerHTML = `
-        <div class="mt-4 p-4 rounded-2xl bg-gradient-to-r from-pink-50 via-rose-50 to-amber-50 border border-pink-200 flex flex-wrap items-center justify-between gap-3 animate-pop-in">
-          <div class="flex items-center gap-2.5 min-w-0">
-            <span class="text-2xl shrink-0">🎉</span>
-            <div class="text-left">
-              <div class="text-xs sm:text-sm font-bold text-pink-700">
-                Chúc mừng em đã khám phá đủ ${totalChapters}/${totalChapters} chương!
-              </div>
-              <div class="text-[11px] text-gray-600">
-                Cảm ơn em vì đã đọc hết những tâm tư nhỏ anh dành riêng cho em ❤️
-              </div>
+        <div class="mt-4 p-4 rounded-2xl bg-gradient-to-r from-pink-50 via-rose-50 to-amber-50 border border-pink-200 flex items-center gap-3 animate-pop-in">
+          <span class="text-2xl shrink-0">🎆</span>
+          <div class="text-left">
+            <div class="text-xs sm:text-sm font-bold text-pink-700">
+              Chúc mừng em đã đọc trọn vẹn ${totalChapters}/${totalChapters} chương!
+            </div>
+            <div class="text-[11px] text-gray-600">
+              Cảm ơn em vì đã dành thời gian khám phá hết những tâm tư nhỏ anh viết riêng cho em ❤️
             </div>
           </div>
-          <button
-            type="button"
-            onclick="triggerBookCompletionConfetti()"
-            class="px-3.5 py-1.5 rounded-full bg-gradient-to-r from-pink-500 to-rose-500 text-white text-xs font-bold shadow-xs hover:opacity-95 transition shrink-0"
-          >
-            Bắn pháo giấy ✨
-          </button>
         </div>
       `;
     } else if (visitedCount > 0) {
       footerEl.innerHTML = `
         <div class="mt-4 text-center text-[11px] font-bold text-pink-500">
-          ✨ Em đã khám phá ${visitedCount}/${totalChapters} chương (mở hết cả ${totalChapters} chương sẽ có bất ngờ nhé!)
+          ✨ Em đã khám phá ${visitedCount}/${totalChapters} chương (đọc hết cả ${totalChapters} chương sẽ có bất ngờ nhé!)
         </div>
       `;
     } else {
@@ -261,7 +269,7 @@ function renderBookToc() {
   lucide.createIcons();
 }
 
-function renderChapterNavBars(chapterIdx, justCompletedAll = false) {
+function renderChapterNavBars(chapterIdx) {
   const currentCh = BOOK_CHAPTERS[chapterIdx];
   if (!currentCh) return;
 
@@ -269,32 +277,10 @@ function renderChapterNavBars(chapterIdx, justCompletedAll = false) {
   const nextCh = chapterIdx < BOOK_CHAPTERS.length - 1 ? BOOK_CHAPTERS[chapterIdx + 1] : null;
   const totalPages = BOOK_CHAPTERS.length;
 
-  const celebrationBannerHtml = justCompletedAll
-    ? `
-      <div class="mb-4 p-3.5 rounded-2xl bg-gradient-to-r from-pink-500 via-rose-500 to-amber-500 text-white shadow-md flex items-center justify-between gap-3 animate-pop-in">
-        <div class="flex items-center gap-2.5">
-          <span class="text-2xl shrink-0">🎉</span>
-          <div>
-            <div class="text-xs sm:text-sm font-bold">Chúc mừng em đã mở đủ ${totalPages}/${totalPages} chương!</div>
-            <div class="text-[11px] text-pink-50">Em đã khám phá trọn vẹn cả cuốn sách nhỏ của tụi mình rồi ❤️</div>
-          </div>
-        </div>
-        <button
-          type="button"
-          onclick="triggerBookCompletionConfetti()"
-          class="px-3 py-1 rounded-full bg-white/20 hover:bg-white/30 text-white text-[11px] font-bold shrink-0 transition"
-        >
-          Pháo giấy ✨
-        </button>
-      </div>
-    `
-    : "";
-
   // 1. Thanh điều hướng đầu trang sách
   const topBar = document.getElementById(`book-top-bar-${currentCh.id}`);
   if (topBar) {
     topBar.innerHTML = `
-      ${celebrationBannerHtml}
       <div class="flex flex-wrap items-center justify-between gap-2 mb-4 pb-3 border-b border-pink-100">
         <button
           type="button"
@@ -369,8 +355,8 @@ function renderChapterNavBars(chapterIdx, justCompletedAll = false) {
           class="flex-1 sm:flex-initial text-right px-4 py-2.5 rounded-2xl bg-gradient-to-r from-pink-500 to-rose-500 hover:opacity-95 text-white shadow-md transition flex items-center justify-end gap-2 min-w-0"
         >
           <div class="min-w-0">
-            <div class="text-[10px] font-bold uppercase text-pink-100">Trang cuối cuốn sách</div>
-            <div class="text-xs font-bold text-white truncate">Quay về Mục Lục 📖</div>
+            <div class="text-[10px] font-bold uppercase text-pink-100">Hoàn thành cuốn sách</div>
+            <div class="text-xs font-bold text-white truncate">Quay về Mục Lục 🎆</div>
           </div>
           <i data-lucide="book-open" class="w-4 h-4 shrink-0"></i>
         </button>
@@ -404,17 +390,6 @@ function openBookChapter(chapterId) {
   hasOpenedLetterInSession = true;
   visitedChaptersInSession.add(chapterId);
 
-  const isEdit = typeof isEditingAllowed === "function" && isEditingAllowed();
-  const justCompletedAll =
-    !isEdit &&
-    !hasCelebratedAllChapters &&
-    visitedChaptersInSession.size === BOOK_CHAPTERS.length;
-
-  if (justCompletedAll) {
-    hasCelebratedAllChapters = true;
-    triggerBookCompletionConfetti();
-  }
-
   const homeView = document.getElementById("book-home-view");
   if (homeView) homeView.classList.add("hidden");
 
@@ -426,7 +401,7 @@ function openBookChapter(chapterId) {
       el.classList.remove("animate-page-turn");
       void el.offsetWidth;
       el.classList.add("animate-page-turn");
-      renderChapterNavBars(idx, justCompletedAll);
+      renderChapterNavBars(idx);
     } else {
       el.classList.add("hidden");
     }
@@ -436,7 +411,8 @@ function openBookChapter(chapterId) {
   window.scrollTo({ top: 0, behavior: "smooth" });
 }
 
-function backToBookToc(scrollToToc = false) {
+function backToBookToc() {
+  const wasInsideChapter = currentBookView !== "HOME";
   currentBookView = "HOME";
 
   BOOK_CHAPTERS.forEach((ch) => {
@@ -453,23 +429,20 @@ function backToBookToc(scrollToToc = false) {
   }
 
   renderBookToc();
-
-  if (scrollToToc) {
-    const tocEl = document.getElementById("book-toc-section");
-    if (tocEl) {
-      tocEl.scrollIntoView({ behavior: "smooth", block: "start" });
-      return;
-    }
-  }
   window.scrollTo({ top: 0, behavior: "smooth" });
-}
 
-function revealBookTocFromLetter() {
-  hasOpenedLetterInSession = true;
-  renderBookToc();
-  const tocEl = document.getElementById("book-toc-section");
-  if (tocEl) {
-    tocEl.scrollIntoView({ behavior: "smooth", block: "nearest" });
+  // Tự động bắn pháo hoa ngay khi em đọc xong hết 4 chương và quay về Mục Lục
+  const isEdit = typeof isEditingAllowed === "function" && isEditingAllowed();
+  if (
+    wasInsideChapter &&
+    !isEdit &&
+    !hasCelebratedAllChapters &&
+    visitedChaptersInSession.size >= BOOK_CHAPTERS.length
+  ) {
+    hasCelebratedAllChapters = true;
+    setTimeout(() => {
+      triggerBookFireworks();
+    }, 320);
   }
 }
 
@@ -477,6 +450,7 @@ function revealBookTocFromLetter() {
 // TỰ ĐỘNG KẾT NỐI VỚI BỨC THƯ, DỮ LIỆU CLOUD & KHÓA SÁCH
 // =========================================================================
 (function initBookLifecycleHooks() {
+  // 1. Khi mở Bức Thư -> hiện Mục Lục nhẹ nhàng bên dưới, KHÔNG tự cuộn làm lệch bức thư
   const origToggleSecretLetter = window.toggleSecretLetter;
   if (typeof origToggleSecretLetter === "function") {
     window.toggleSecretLetter = function (...args) {
@@ -484,15 +458,9 @@ function revealBookTocFromLetter() {
       const willOpen = box && box.classList.contains("hidden");
       origToggleSecretLetter.apply(this, args);
 
-      if (willOpen) {
+      if (willOpen && !hasOpenedLetterInSession) {
         hasOpenedLetterInSession = true;
         renderBookToc();
-        setTimeout(() => {
-          const tocEl = document.getElementById("book-toc-section");
-          if (tocEl) {
-            tocEl.scrollIntoView({ behavior: "smooth", block: "nearest" });
-          }
-        }, 250);
       }
     };
   }
@@ -528,6 +496,9 @@ function revealBookTocFromLetter() {
       if (typeof isEditingAllowed === "function" && !isEditingAllowed()) {
         visitedChaptersInSession.clear();
         hasCelebratedAllChapters = false;
+        if (typeof hasCelebratedLetterOpen !== "undefined") {
+          hasCelebratedLetterOpen = false;
+        }
       }
       renderBookToc();
     };
@@ -538,12 +509,15 @@ function revealBookTocFromLetter() {
     window.lockGate = function (...args) {
       hasOpenedLetterInSession = false;
       hasCelebratedAllChapters = false;
+      if (typeof hasCelebratedLetterOpen !== "undefined") {
+        hasCelebratedLetterOpen = false;
+      }
       visitedChaptersInSession.clear();
       const letterBox = document.getElementById("secret-letter-content");
       const letterBtn = document.getElementById("btn-toggle-letter");
       if (letterBox) letterBox.classList.add("hidden");
       if (letterBtn) letterBtn.textContent = "Mở Phong Bì";
-      backToBookToc(false);
+      backToBookToc();
       origLockGate.apply(this, args);
     };
   }
