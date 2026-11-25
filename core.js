@@ -302,6 +302,7 @@ const DEFAULT_DATA = {
     sign: "— Thương em thật nhiều ❤️"
   },
   topics: DEFAULT_TOPICS,
+  pokemonCards: [],
   coupons: DEFAULT_COUPONS,
   memories: [
     {
@@ -390,6 +391,7 @@ function listenToCloudData() {
           profile: { ...DEFAULT_DATA.profile, ...(remote.profile || {}) },
           letter: { ...DEFAULT_DATA.letter, ...(remote.letter || {}) },
           topics: Array.isArray(remote.topics) ? remote.topics : DEFAULT_TOPICS,
+          pokemonCards: Array.isArray(remote.pokemonCards) ? remote.pokemonCards : [],
           coupons: Array.isArray(remote.coupons) ? remote.coupons : DEFAULT_COUPONS,
           memories: Array.isArray(remote.memories) ? remote.memories : DEFAULT_DATA.memories,
           playlist: Array.isArray(remote.playlist) ? remote.playlist : DEFAULT_PLAYLIST,
@@ -418,6 +420,7 @@ function loadLocalFallback() {
         ...parsed,
         profile: { ...DEFAULT_DATA.profile, ...(parsed.profile || {}) },
         topics: Array.isArray(parsed.topics) ? parsed.topics : DEFAULT_TOPICS,
+        pokemonCards: Array.isArray(parsed.pokemonCards) ? parsed.pokemonCards : [],
         coupons: Array.isArray(parsed.coupons) ? parsed.coupons : DEFAULT_COUPONS,
         playlist: Array.isArray(parsed.playlist) ? parsed.playlist : DEFAULT_PLAYLIST,
         notifications: Array.isArray(parsed.notifications) ? parsed.notifications : []
@@ -698,10 +701,12 @@ function refreshAllUI() {
   if (typeof renderProfile === "function") renderProfile();
   if (typeof renderLetter === "function") renderLetter();
   if (typeof renderTopicsSection === "function") renderTopicsSection();
+  if (typeof renderBinderSection === "function") renderBinderSection();
   if (typeof renderCouponsSection === "function") renderCouponsSection();
   if (typeof updateMysteryDeckStats === "function") updateMysteryDeckStats();
   if (typeof renderAdminManageList === "function") renderAdminManageList();
   if (typeof syncMusicPlaylistUI === "function") syncMusicPlaylistUI();
+  if (typeof renderBookToc === "function") renderBookToc();
   renderAdminNotifications();
   lucide.createIcons();
 }
