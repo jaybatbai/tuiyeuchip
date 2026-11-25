@@ -62,7 +62,50 @@ const BOOK_CHAPTERS = [
 
 let currentBookView = "HOME"; // "HOME" | "notebook" | "binder" | "coupons" | "memories"
 let hasOpenedLetterInSession = false;
+let hasCelebratedAllChapters = false;
 const visitedChaptersInSession = new Set();
+
+function triggerBookCompletionConfetti() {
+  if (typeof confetti !== "function") {
+    if (typeof triggerHeartConfetti === "function") triggerHeartConfetti();
+    return;
+  }
+
+  const colors = ["#ec4899", "#f43f5e", "#f9a8d4", "#fbbf24", "#c084fc"];
+
+  confetti({
+    particleCount: 75,
+    spread: 80,
+    origin: { x: 0.5, y: 0.6 },
+    colors
+  });
+
+  setTimeout(() => {
+    confetti({
+      particleCount: 45,
+      angle: 60,
+      spread: 60,
+      origin: { x: 0.15, y: 0.65 },
+      colors
+    });
+    confetti({
+      particleCount: 45,
+      angle: 120,
+      spread: 60,
+      origin: { x: 0.85, y: 0.65 },
+      colors
+    });
+  }, 220);
+
+  setTimeout(() => {
+    confetti({
+      particleCount: 55,
+      spread: 95,
+      origin: { x: 0.5, y: 0.55 },
+      colors
+    });
+  }, 460);
+}
 
 function getAdminChapterStats(chapterId) {
   if (typeof appData === "undefined" || !appData) return "";
@@ -120,6 +163,9 @@ function renderBookToc() {
   if (!grid) return;
 
   const isEdit = typeof isEditingAllowed === "function" && isEditingAllowed();
+  const totalChapters = BOOK_CHAPTERS.length;
+  const visitedCount = visitedChaptersInSession.size;
+  const allExplored = !isEdit && visitedCount >= totalChapters;
 
   grid.innerHTML = BOOK_CHAPTERS.map((ch) => {
     const badgeText = getChapterBadgeText(ch, isEdit);
@@ -166,11 +212,56 @@ function renderBookToc() {
     `;
   }).join("");
 
+  // Thanh trạng thái & chúc mừng hoàn thành 4/4 chương ở Mục Lục
+  let footerEl = document.getElementById("book-toc-completion-footer");
+  if (!footerEl && grid.parentElement) {
+    footerEl = document.createElement("div");
+    footerEl.id = "book-toc-completion-footer";
+    grid.parentElement.appendChild(footerEl);
+  }
+
+  if (footerEl) {
+    if (isEdit) {
+      footerEl.innerHTML = "";
+    } else if (allExplored) {
+      footerEl.innerHTML = `
+        <div class="mt-4 p-4 rounded-2xl bg-gradient-to-r from-pink-50 via-rose-50 to-amber-50 border border-pink-200 flex flex-wrap items-center justify-between gap-3 animate-pop-in">
+          <div class="flex items-center gap-2.5 min-w-0">
+            <span class="text-2xl shrink-0">🎉</span>
+            <div class="text-left">
+              <div class="text-xs sm:text-sm font-bold text-pink-700">
+                Chúc mừng em đã khám phá đủ ${totalChapters}/${totalChapters} chương!
+              </div>
+              <div class="text-[11px] text-gray-600">
+                Cảm ơn em vì đã đọc hết những tâm tư nhỏ anh dành riêng cho em ❤️
+              </div>
+            </div>
+          </div>
+          <button
+            type="button"
+            onclick="triggerBookCompletionConfetti()"
+            class="px-3.5 py-1.5 rounded-full bg-gradient-to-r from-pink-500 to-rose-500 text-white text-xs font-bold shadow-xs hover:opacity-95 transition shrink-0"
+          >
+            Bắn pháo giấy ✨
+          </button>
+        </div>
+      `;
+    } else if (visitedCount > 0) {
+      footerEl.innerHTML = `
+        <div class="mt-4 text-center text-[11px] font-bold text-pink-500">
+          ✨ Em đã khám phá ${visitedCount}/${totalChapters} chương (mở hết cả ${totalChapters} chương sẽ có bất ngờ nhé!)
+        </div>
+      `;
+    } else {
+      footerEl.innerHTML = "";
+    }
+  }
+
   updateBookTocVisibility();
   lucide.createIcons();
 }
 
-function renderChapterNavBars(chapterIdx) {
+function renderChapterNavBars(chapterIdx, justCompletedAll = false) {
   const currentCh = BOOK_CHAPTERS[chapterIdx];
   if (!currentCh) return;
 
@@ -178,10 +269,32 @@ function renderChapterNavBars(chapterIdx) {
   const nextCh = chapterIdx < BOOK_CHAPTERS.length - 1 ? BOOK_CHAPTERS[chapterIdx + 1] : null;
   const totalPages = BOOK_CHAPTERS.length;
 
+  const celebrationBannerHtml = justCompletedAll
+    ? `
+      <div class="mb-4 p-3.5 rounded-2xl bg-gradient-to-r from-pink-500 via-rose-500 to-amber-500 text-white shadow-md flex items-center justify-between gap-3 animate-pop-in">
+        <div class="flex items-center gap-2.5">
+          <span class="text-2xl shrink-0">🎉</span>
+          <div>
+            <div class="text-xs sm:text-sm font-bold">Chúc mừng em đã mở đủ ${totalPages}/${totalPages} chương!</div>
+            <div class="text-[11px] text-pink-50">Em đã khám phá trọn vẹn cả cuốn sách nhỏ của tụi mình rồi ❤️</div>
+          </div>
+        </div>
+        <button
+          type="button"
+          onclick="triggerBookCompletionConfetti()"
+          class="px-3 py-1 rounded-full bg-white/20 hover:bg-white/30 text-white text-[11px] font-bold shrink-0 transition"
+        >
+          Pháo giấy ✨
+        </button>
+      </div>
+    `
+    : "";
+
   // 1. Thanh điều hướng đầu trang sách
   const topBar = document.getElementById(`book-top-bar-${currentCh.id}`);
   if (topBar) {
     topBar.innerHTML = `
+      ${celebrationBannerHtml}
       <div class="flex flex-wrap items-center justify-between gap-2 mb-4 pb-3 border-b border-pink-100">
         <button
           type="button"
@@ -291,6 +404,17 @@ function openBookChapter(chapterId) {
   hasOpenedLetterInSession = true;
   visitedChaptersInSession.add(chapterId);
 
+  const isEdit = typeof isEditingAllowed === "function" && isEditingAllowed();
+  const justCompletedAll =
+    !isEdit &&
+    !hasCelebratedAllChapters &&
+    visitedChaptersInSession.size === BOOK_CHAPTERS.length;
+
+  if (justCompletedAll) {
+    hasCelebratedAllChapters = true;
+    triggerBookCompletionConfetti();
+  }
+
   const homeView = document.getElementById("book-home-view");
   if (homeView) homeView.classList.add("hidden");
 
@@ -302,7 +426,7 @@ function openBookChapter(chapterId) {
       el.classList.remove("animate-page-turn");
       void el.offsetWidth;
       el.classList.add("animate-page-turn");
-      renderChapterNavBars(idx);
+      renderChapterNavBars(idx, justCompletedAll);
     } else {
       el.classList.add("hidden");
     }
@@ -401,6 +525,10 @@ function revealBookTocFromLetter() {
   if (typeof origToggleAdminPreview === "function") {
     window.toggleAdminPreview = function (...args) {
       origToggleAdminPreview.apply(this, args);
+      if (typeof isEditingAllowed === "function" && !isEditingAllowed()) {
+        visitedChaptersInSession.clear();
+        hasCelebratedAllChapters = false;
+      }
       renderBookToc();
     };
   }
@@ -409,6 +537,7 @@ function revealBookTocFromLetter() {
   if (typeof origLockGate === "function") {
     window.lockGate = function (...args) {
       hasOpenedLetterInSession = false;
+      hasCelebratedAllChapters = false;
       visitedChaptersInSession.clear();
       const letterBox = document.getElementById("secret-letter-content");
       const letterBtn = document.getElementById("btn-toggle-letter");
